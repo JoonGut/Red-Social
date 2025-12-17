@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  
+<!-- favicon -->
+  <link rel="icon" type="image/png" href="../imagenes/logo.png"/>
+  <title>Carrito</title>
+  <link rel="stylesheet" href="../css/lista.css" type="text/css" />
+</head>
+<body>
+<nav>
+  <br><br><h1>Carrito de Compras</h1>
+  <a href="../index.html"><h5>Volver a comprar en la tienda</h5></a>
+</nav>
+
+<table border="1" id="tabla_carrito">
+  <thead>
+    <tr>
+      <th>Título</th>
+      <th>Autor</th>
+      <th>Categoría</th>
+      <th>Editoriales</th>
+      <th>ISBN</th>
+      <th>Precio Unidad (€)</th>
+      <th>Cantidad</th>
+      <th>Precio total libro</th>
+      
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="3"><strong>Total Carrito</strong></td>
+      <td id="total_carrito">0.00</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table><br>
+<p id="precio"><b>Precio total de todos los libros: </b><span id="precio_total">0.00</span>€</p><br><br><br>
+
+<a href="../html/compra.html"><button id="boton">Realizar la compra</button></a>
+<a href="../html/buscador.html"><button>Buscar libros</button></a>
+
+
+<div id="carrito-contenedor"></div>
+<h3 id="total-carrito"></h3>
+<div id="lista_carrito"></div>
+
+<script>
+let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+
+const tbody = document.querySelector("#tabla_carrito tbody");
+const precioTotal = document.getElementById("precio_total");
+
+// Función para renderizar carrito
+function mostrarCarrito() {
+  tbody.innerHTML = "";
+  carrito.forEach((item, index) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${item.titulo}</td>
+      <td>${item.autor}</td>
+      <td>${item.categoria}</td>
+      <td>${item.editorial}</td>
+      <td>${item.isbn}</td>
+      <td>${item.precio.toFixed(2)}</td>
+      <td><input type="number" min="1" value="${item.cantidad}" data-index="${index}" class="cantidad_input"></td>
+      <td class="subtotal">${(item.precio * item.cantidad).toFixed(2)}</td>
+      <td><button class="eliminar" data-index="${index}">Eliminar</button></td>
+    `;
+    tbody.appendChild(fila);
+  });
+
+  // Actualizar cantidad
+  tbody.querySelectorAll(".cantidad_input").forEach(input => {
+    input.addEventListener("change", () => {
+      const idx = input.dataset.index;
+      carrito[idx].cantidad = Math.max(1, parseInt(input.value) || 1);
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      mostrarCarrito();
+    });
+  });
+
+  // Botones eliminar
+  tbody.querySelectorAll(".eliminar").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = btn.dataset.index;
+      carrito.splice(idx, 1);
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      mostrarCarrito();
+    });
+  });
+
+  // Actualizar total
+  actualizarTotal();
+}
+
+function actualizarTotal() {
+  let total = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+  precioTotal.textContent = total.toFixed(2);
+}
+
+// Mostrar carrito al cargar
+mostrarCarrito();
+</script>
+<br><br><br><br>
+<footer>
+    <div id="contenedor-footer">
+      <div id="contenido-footer">
+        <h4>Phone</h4>
+        <p>+34 944 88 66 22</p>
+      </div>
+    <div id="contenido-footer">
+      <h4>Email</h4>
+      <p>info_libreria@libreria.com</p>
+    </div>
+    </div>
+    <p id="footer">© 2025 Librería Mundo de Letras. Todos los derechos reservados.</p>
+</footer>
+
+</body>
+</html>

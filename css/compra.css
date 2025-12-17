@@ -1,0 +1,204 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    padding: 20px;
+    box-sizing: border-box;
+    background: linear-gradient(to right,#214264, rgb(42, 69, 96));
+  }
+
+#metodosPago {
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+    background-color: white;
+    margin-top: 100px;
+  }
+
+#enlace{
+  position: relative;
+  top: -300px;
+  color: white;
+  margin-left: -150%;
+}
+
+#textovisa{
+  margin-left: 3%;
+}
+
+
+
+.metodo:hover{
+  background-color: #214264;
+  color: white;
+}
+
+#textopay{
+  margin-left: 2%;
+}
+
+#pay{
+  width: 80px;
+  height: 50px;
+}
+
+#visa{
+  width: 80px;
+  height: 50px;
+}
+
+  #metodosPago h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    margin-left: 10%;
+  }
+
+#metodo {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border 0.3s, background 0.3s;
+  }
+
+
+
+#contenido img {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+
+#contenido span {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  #botonPago {
+    width: 100%;
+    padding: 12px;
+    background-color: #3d3b3e;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition:  0.3s;
+  }
+
+  #botonPago:hover {
+    background: #214264;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .contenido {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .contenido img {
+      margin-bottom: 8px;
+    }
+
+    .contenido span {
+      font-size: 0.95rem;
+    }
+  }
+
+
+#pagos{
+  border-color: white;
+}
+
+
+
+#metodosPago {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+
+.tarjeta {
+  display: block;
+  width: 100%;
+  height: 116px;
+  perspective: 1000px;
+  cursor: pointer;
+  position: relative;
+}
+
+.tarjeta:hover{
+  background-color: #214264;
+}
+
+.tarjeta .frontal,
+.tarjeta .trasera {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 2px solid #ccc;
+  position: absolute;
+  backface-visibility: hidden;
+  transition: transform 0.6s;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.tarjeta .frontal {
+  background: white;
+}
+
+.frontal:hover{
+  background-color: #214264;
+  color: white;
+}
+
+.tarjeta .trasera {
+  background: #f2f2f2;
+  transform: rotateY(180deg);
+}
+
+input[type="radio"]:checked + .tarjeta .frontal {
+  transform: rotateY(180deg);
+}
+
+input[type="radio"]:checked + .tarjeta .trasera {
+  transform: rotateY(360deg);
+}
+
+.tarjeta img {
+  width: 90px;
+  margin-bottom: 8px;
+  margin-left: -75%;
+  position: relative;
+  top: 20px;
+}
+
+.tarjeta span {
+  white-space: nowrap;
+}
+
+#letra{
+  position: relative;
+  top: -40px;
+  margin-left: -30%;
+}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- favicon -->
+  <link rel="icon" type="image/png" href="imagenes/logo.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/estilo.css" type="text/css" />
+  <title>Libreria</title>
+</head>
+<body>
+  <nav id="menu">
+
+    <div class="dropdown">
+            <button class="menu-btn">☰</button>
+            <div class="dropdown-content">
+                <a href="index.html">Inicio</a>
+                <a href="html/login.html">Iniciar sesión</a>
+                <a href="html/formulario.html">Registrate</a>
+            </div>
+
+    <div id="color">
+    <div id="menu-links">
+      
+        <a id="enlace" href="index.html">Inicio</a>
+        <a id="enlace2" href="html/login.html">Iniciar Sesión</a>
+        <a id="enlace3" href="html/formulario.html">Registrate</a>
+        <a id="enlace4" href="#contenedor-footer">Contacto</a><br><br>
+        <div id="icono_carro">
+        <a href="html/lista.html"><img id="carro" src="imagenes/carro.png"><span id="cuenta_carro">0</span></a>
+        </div>
+        
+</div>
+      <img id="logo" class="logo" src="imagenes/logo.png" alt="Logo de la Librería"><br>
+
+      
+      
+</div>
+<br><br><br><br><br><br><br>
+    <div id="titulo">
+      <h1>Librería Mundo de Letras</h1>
+      <h2>Bienvenido a nuestra librería</h2><br>
+    </div>
+    
+  </nav>
+  <br><br>
+
+  <div class="slider">
+
+  <!-- Radios para seleccionar la imagen -->
+  <input type="radio" name="slide" id="slide1" checked>
+  <input type="radio" name="slide" id="slide2">
+  
+
+  <!-- Contenedor de imágenes -->
+  <div class="slides">
+    <div class="slide s1"><img src="imagenes/imagen1.jpg" alt="Imagen 1"></div>
+    <div class="slide s2"><img src="imagenes/imagen2.png" alt="Imagen 2"></div>
+    
+  </div>
+
+  <!-- Flechas -->
+  <div class="arrows">
+    <label for="slide1" class="prev">&#10094;</label>
+    <label for="slide2" class="next">&#10095;</label>
+    
+    <label for="slide2" class="prev">&#10094;</label>
+    <label for="slide1" class="prev">&#10096;</label>
+
+    
+    
+  </div>
+
+</div>
+  
+  <div id="novedades">
+    <h3>Novedades</h3>
+      <div id="titulo1">
+        <img id="aventura" src="imagenes/aventura.webp" />
+        <b><p>Grandes Aventuras</p></b>
+        <p>Acompaña al explorador con un viaje lleno de misterios, mapas antiguos y peligros inesperados mientras busca un tesoro legendario</p><br>
+        <button id="boton_enviar" type="button" name="ver mas">Ver más</button>
+      </div>
+
+      <div id="titulo2">
+        <img id="romance" src="imagenes/amor.jpg" />
+        <b><p>Historias de Amor</p></b>
+        <p>Sumérgete en relatos apasionados que exploran las complejidades del amor, desde encuentros fortuitos hasta amores prohibidos que desafían todas las expectativas</p>
+        <button id="boton_enviar" type="button" name="ver mas">Ver más</button>
+      </div>
+
+      <div id="titulo3">
+        <img id="fantasia" src="imagenes/fantasia.jpg" />
+        <b><p>Mundos de Fantasía</p></b>
+        <p>Adéntrate en reinos mágicos habitados por criaturas fantásticas, héroes valientes y hechizos poderosos que te transportarán a aventuras inolvidables</p><br>
+        <button id="boton_enviar" type="button" name="ver mas">Ver más</button>
+      </div>
+  </div>
+
+  <div id="libros">
+    <h3>Recomendamos</h3>
+    <div id="titulo4">
+        <img id="imagen" src="imagenes/imagen4.jpg"/>
+        <b><p id="principioss">Las tinieblas y el alba</p></b>
+        <b><p id="autor">Ken Follett</p></b>
+        <b><p id="categoria">Aventura</p></b><br>
+        <p id="segundo">Un joven constructor, una noble valiente y un monje idealista luchan contra traiciones, violencia y ambición desmedida para construir un futuro lleno de esperanza y justicia.</p>
+        <b><p id="isbn">ISBN:978-1-23-456789-8</p></b><br>
+        <b><p id="editorial">Editorial: Grupo SM</p></b>
+        <b><p id="ter">Precio: 19,65€</p></b>
+        <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+
+    <div id="titulo5">
+      <img id="imagen" src="imagenes/imagen5.jpg" />
+      <b><p id="principio">Tierra de sangre</p></b>
+      <b><p id="autor">Marta Lujan</p></b>
+        <b><p id="categoria">Aventura</p></b>
+      <p id="segundos">Dos reinos enfrentados por odio y poder. Una profecía oscura, luchas por la supervivencia, alianzas inesperadas y un conflicto que decidirá el destino de ambos mundos.</p>
+      <b><p id="isbn">ISBN:968-1-23-476789-7</p></b><br>
+      <b><p id="editorial">Editorial:Grupo SM</p></b><br>
+      <b><p id="tercero">Precio:13,56€</p></b>
+      <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+
+    <div id="titulo6">
+      <img id="imagen" src="imagenes/imagen6.jpg" />
+      <b><p id="principio">Nieve en marte</p></b>
+      <b><p id="autor">Pablo Tebar </p></b>
+        <b><p id="categoria">Aventura</p></b>
+      <p id="segundos">En un futuro oscuro, un experto llega a Marte mientras la Tierra se derrumba, enfrentando misterios, conspiraciones y secretos que amenazan a la humanidad.</p>
+      <b><p id="isbn">ISBN:918-1-23-456789-7</p></b><br>
+      <b><p id="editorial">Editorial: Planeta</p></b>
+      <b><p>Precio:16,35€</p></b><br>
+      <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+
+    <div id="titulo4">
+        <img id="imagen" src="imagenes/imagen10.jpg"/>
+        <b><p id="principio">Leyes de fuego</p></b>
+        <b><p id="autor">Segio Milan</p></b>
+        <b><p id="categoria">Terror</p></b>
+        <p id="segundos">Óliver Segarra vive bajo la apariencia de una vida perfecta, pero un secreto oculto desde su infancia lo persigue: la muerte de su hermana.</p><br>
+        <b><p id="isbns">ISBN:948-1-23-456789-7</p></b>
+        <b><p id="editorial">Editorial: Planeta</p></b><br>
+        <b><p id="terceros">Precio:10,65€</p></b>
+        <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+  </div><br>
+
+  <div id="libros">
+
+    <div id="titulo4">
+        <img id="imagenes" src="imagenes/imagen7.webp"/>
+        <b><p id="principios">Fires every where</p></b>
+        <b><p id="autor">Carlos perez</p></b>
+        <b><p id="categoria">Thriller</p></b><br>
+        <p id="segundo">Un barrio perfecto, familias ejemplares, hasta que llega una madre y su hija, despertando secretos, tensiones y decisiones que encenderán pequeños fuegos capaces de cambiarlo todo.</p>
+        <b><p id="isbn">ISBN:998-1-23-456789-7</p></b><br>
+        <b><p id="editorial">Editorial: HarperCollins</p></b>
+        <b><p id="tercero">Precio:19,76€</p></b>
+        <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+
+    <div id="titulo5">
+      <img id="imagenes" src="imagenes/imagen8.jpg" />
+      <b><p id="principioso">Los hombres del norte</p></b>
+      <b><p id="autors">John Haywood</p></b>
+        <b><p id="categoria">Aventura</p></b><br>
+      <p id="segundo">Una historia fascinante de vikingos: saqueos, exploraciones y aventuras que forjaron y destruyeron pueblos en toda Europa y más allá.</p>
+      <br><b><p id="isbn">ISBN:974-1-29-456789-7</p></b><br>
+      <b><p id="editorial">Editorial: HarperCollins</p></b>
+      <b><p id="tercero">Precio: 14,25€</p></b>
+      <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+
+    <div id="titulo6">
+      <img id="imagenes" src="imagenes/imagen9.jpg" />
+      <b><p id="principioss">Cuando las estrellas dejen de brillar</p></b>
+      <b><p id="autor">Galin H</p></b>
+        <b><p id="categoria">Aventura</p></b>
+      <p id="segundo">Un trágico incendio marcó sus vidas para siempre. Años después, Ryan y Emma se reencuentran en el orfanato donde crecieron, y juntos lucharán por sanar sus heridas.</p>
+      <br><b><p id="isbns">ISBN:938-1-23-456789-7</p></b>
+      <b><p id="editorial">Editorial: HarperCollins</p></b>
+      <b><p id="tercero">Precio: 17,87€</p></b>
+      <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+
+    <div id="titulo4">
+        <img id="imagenes_narnia" src="imagenes/imagen11.jpg"/>
+        <b><p id="principios">Narnia</p></b>
+        <b><p id="autor">Clive Lewis</p></b>
+        <b><p id="categoria">Fantasia</p></b>
+        <p id="segun">Un armario mágico lleva a cuatro hermanos a Narnia, un mundo lleno de aventuras, criaturas fantásticas y batallas entre el bien y el mal, donde descubrirán coraje, amistad y destino.</p>
+        <br><b><p id="isbn">ISBN:918-1-58-456789-7</p></b><br>
+        <b><p id="editorial">Editorial: Penguin Random</p></b>
+        <b><p id="tercero">Precio: 16,35€</p></b>
+        <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
+    </div>
+  </div>
+
+  <script>
+const botones = document.querySelectorAll('#boton_comprar');
+const contadorCarro = document.getElementById('cuenta_carro');
+let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+contadorCarro.textContent = carrito.length;
+
+botones.forEach(boton => {
+  boton.dataset.agregado = 'false';
+
+  boton.addEventListener('click', () => {
+    const contenedor = boton.parentElement;
+
+    const titulo = contenedor.querySelector('p#principioss, p#principio, p#principios, p#principioso')?.textContent || "Libro sin título";
+    const precioTexto = Array.from(contenedor.querySelectorAll('p, b p')).find(p => p.textContent.includes("Precio"));
+    const precio = precioTexto ? parseFloat(precioTexto.textContent.replace("Precio:", "").replace("€","").replace(",",".").trim()) : 0;
+    const autor = contenedor.querySelector('p#autor, p#autors')?.textContent || "Desconocido";
+    const categoria = contenedor.querySelector('p#aventura, p#categoria')?.textContent || "General";
+    const isbn = contenedor.querySelector('p#isbn, p#isbns')?.textContent.replace("ISBN:", "").trim() || "0000000000";
+    const editorial = contenedor.querySelector('p#editorial')?.textContent.replace("Editorial:", "").trim() || "Desconocida";
+
+
+    if(boton.dataset.agregado === 'false') {
+      carrito.push({titulo, precio, autor, categoria,  editorial, isbn, cantidad:1});
+      boton.dataset.agregado = 'true';
+      boton.textContent = 'Quitar';
+    } else {
+      carrito = carrito.filter(item => item.titulo !== titulo);
+      boton.dataset.agregado = 'false';
+      boton.textContent = 'Comprar';
+    }
+
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+    contadorCarro.textContent = carrito.length;
+  });
+});
+
+</script>
+
+  
+<br><br><br><br>
+
+  <footer>
+    <div id="contenedor-footer">
+      <div id="contenido-footer">
+        <h4>Phone</h4>
+        <p>+34 944 88 66 22</p>
+      </div>
+    <div id="contenido-footer">
+      <h4>Email</h4>
+      <p>info_libreria@libreria.com</p>
+    </div>
+    </div>
+    <p id="footer">© 2025 Librería Mundo de Letras. Todos los derechos reservados.</p>
+  </footer>
+
+</body>
+</html>

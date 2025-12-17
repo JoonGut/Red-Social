@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../imagenes/logo.png"/>
+    <link rel="stylesheet" href="../css/compra.css">
+    <title>Metodo Pago</title>
+</head>
+<body>
+  <a href="../html/lista.html"><h2 id="enlace">Volver al carrito</h2></a>
+  <div id="metodosPago">
+    <h2>Selecciona un método de pago</h2>
+
+    <input type="radio" name="pago" id="visa" hidden>
+  <label class="tarjeta" for="visa">
+    <span class="frontal">
+      <img src="../imagenes/visa.png" alt="Visa">
+      <span id="letra">Visa</span>
+    </span>
+    <span class="trasera">
+      <input type="text" placeholder="Introduce tu cuenta">
+    </span>
+  </label>
+
+  <!-- Tarjeta PayPal -->
+  <input type="radio" name="pago" id="paypal" hidden>
+  <label class="tarjeta" for="paypal">
+    <span class="frontal">
+      <img src="../imagenes/PayPal.png" alt="PayPal">
+      <span id="letra">PayPal</span>
+    </span>
+    <span class="trasera">
+      <input type="text" placeholder="Introduce tu cuenta">
+    </span>
+  </label>
+
+  <!-- Tarjeta Google Pay -->
+  <input type="radio" name="pago" id="google" hidden>
+  <label class="tarjeta" for="google">
+    <span class="frontal">
+      <img src="../imagenes/pay.png" alt="Google Pay">
+      <span id="letra">Google Pay</span>
+    </span>
+    <span class="trasera">
+      <input type="text" placeholder="Introduce tu cuenta">
+    </span>
+  </label>
+    <button id="botonPago">Pagar</button>
+  </div>
+
+  <script>
+document.getElementById("botonPago").addEventListener("click", function () {
+
+    // Detectar cuál método está seleccionado
+    const metodo = document.querySelector('input[name="pago"]:checked');
+
+    if (!metodo) {
+        alert("Por favor selecciona un método de pago");
+        return;
+    }
+
+    // Mostrar mensaje con el nombre
+    alert("Has seleccionado: " + metodo.id + ":" + " El pedido ha sido realizado con éxito");
+    
+});
+</script>
+
+</body>
+</html>

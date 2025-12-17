@@ -1,0 +1,106 @@
+
+
+nav{
+    background-color:  #214264;
+    height: 150px;
+    margin-top: -2%;
+    margin-left: -5%;
+}
+
+h1{
+    color: white;
+    position: relative;
+    top: 50px;
+    text-align: center;
+    margin-left: 10%;
+}
+
+#formulario{
+    margin-left: 40%;
+}
+
+#resultados{
+    margin-left: 40%;
+}
+
+h5{
+    color: white;
+    margin-left: 10%;
+    position: relative;
+    top: 40px;
+}
+
+button{
+    background-color: rgb(53, 71, 178);
+    color: white;
+    padding: 0.6rem 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover{
+    background-color: rgb(33, 51, 158);
+    transform: scale(1.1);
+}
+
+
+footer{
+    background: linear-gradient(to right,#214264, rgb(42, 69, 96));
+    padding: 60px 0 30px 0;
+    margin: auto;
+    overflow: hidden;
+    margin-left: -10%;
+    margin-right: 0%;
+    position: relative;
+    top: 4px;
+}
+
+#contenedor-footer{
+    display: flex;
+    width: 90%;
+    justify-content: space-evenly;
+    margin: auto;
+    padding-bottom: 50px;
+    border-bottom: 1px solid #ccc;
+}
+
+#contenido-footer{
+    text-align: center;
+    margin-left: 15%;
+}
+
+#contenido-footer > p{
+    color: #fff;
+}
+
+#contenido-footer h4{
+    color: black;
+    background: linear-gradient(to right,#ffffff, rgb(255, 255, 255));
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+
+#content-foo p{
+    color: #ccc;
+}
+
+#texto-final{
+    text-align: center;
+    font-size: 24px;
+    margin: 20px 0 0 0;
+    color: #9e9797;
+}
+
+iframe {
+    height: 230px;
+    width: 230px;
+}
+
+#footer{
+    text-align: center;
+    color: white;
+    height: 10%;
+    margin-left: 12%;
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="stylesheet" href="../css/estilo_login.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="../imagenes/logo.png"> 
+    <script src="../js/login.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="menu" id="_items">
+                <div class="nav_logo"> <img class="logo" src="../imagenes/logo.png"></div>
+                <div class="nav_items">
+                    <nav id="menu">
+                        <a id="enlace" href="../index.html">Inicio</a>
+                        <a id="enlace2" href="../html/login.html">Iniciar Sesión</a>
+                        <a id="enlace4" href="#contenedor-footer">Contacto</a><br><br><br>
+                </div>
+            </div>
+        <div class="dropdown">
+            <button class="menu-btn">☰</button>
+            <div class="dropdown-content">
+                <a href="../index.html">Inicio</a>
+            </div>
+        </div>
+        </nav>
+        
+        
+    </header>
+    <nav id="fondo">
+    <br>
+    <div class="formulario">
+        <h1 class="titulo">INICIO DE SESIÓN</h1><br>
+        <div class="d-flex justify-content-center mb-3">
+            <img src="../imagenes/logo2.png" class="avatar" alt="Avatar">
+        </div>
+        <form method="post" action="../index.html">
+            <div class="username">
+                <input type="text" name="usuario" required>
+                <label>Usuario</label>
+            </div>
+            <div class="username">
+                <input type="password" name="password" required>
+                <label>Contraseña</label>
+            </div>
+            <input type="submit" value="Iniciar" >
+            <div class="registrarse">
+                <p id="res">¿Aún no te has registrado?</p> <a id="registrarse" href="formulario.html">Regístrate</a>
+            </div>
+        </form>
+    </div>
+    </nav>
+    <footer>
+    <div id="contenedor-footer">
+            <div id="contenido-footer">
+                <h4>Phone</h4>
+                <p>+34 944 88 66 22</p>
+            </div>
+            <div id="contenido-footer">
+                <h4>Email</h4>
+                <p>info_libreria@libreria.com</p>
+            </div>
+            
+        </div>
+        <p id="footer">© 2025 Librería Mundo de Letras. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>
