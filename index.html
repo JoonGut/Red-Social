@@ -137,57 +137,6 @@
     </div>
 
     <div id="titulo4">
-        <img id="imagen" src="imagenes/imagen10.jpg"/>
-        <b><p id="principio">Leyes de fuego</p></b>
-        <b><p id="autor">Segio Milan</p></b>
-        <b><p id="categoria">Terror</p></b>
-        <p id="segundos">Óliver Segarra vive bajo la apariencia de una vida perfecta, pero un secreto oculto desde su infancia lo persigue: la muerte de su hermana.</p><br>
-        <b><p id="isbns">ISBN:948-1-23-456789-7</p></b>
-        <b><p id="editorial">Editorial: Planeta</p></b><br>
-        <b><p id="terceros">Precio:10,65€</p></b>
-        <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
-    </div>
-  </div><br>
-
-  <div id="libros">
-
-    <div id="titulo4">
-        <img id="imagenes" src="imagenes/imagen7.webp"/>
-        <b><p id="principios">Fires every where</p></b>
-        <b><p id="autor">Carlos perez</p></b>
-        <b><p id="categoria">Thriller</p></b><br>
-        <p id="segundo">Un barrio perfecto, familias ejemplares, hasta que llega una madre y su hija, despertando secretos, tensiones y decisiones que encenderán pequeños fuegos capaces de cambiarlo todo.</p>
-        <b><p id="isbn">ISBN:998-1-23-456789-7</p></b><br>
-        <b><p id="editorial">Editorial: HarperCollins</p></b>
-        <b><p id="tercero">Precio:19,76€</p></b>
-        <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
-    </div>
-
-    <div id="titulo5">
-      <img id="imagenes" src="imagenes/imagen8.jpg" />
-      <b><p id="principioso">Los hombres del norte</p></b>
-      <b><p id="autors">John Haywood</p></b>
-        <b><p id="categoria">Aventura</p></b><br>
-      <p id="segundo">Una historia fascinante de vikingos: saqueos, exploraciones y aventuras que forjaron y destruyeron pueblos en toda Europa y más allá.</p>
-      <br><b><p id="isbn">ISBN:974-1-29-456789-7</p></b><br>
-      <b><p id="editorial">Editorial: HarperCollins</p></b>
-      <b><p id="tercero">Precio: 14,25€</p></b>
-      <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
-    </div>
-
-    <div id="titulo6">
-      <img id="imagenes" src="imagenes/imagen9.jpg" />
-      <b><p id="principioss">Cuando las estrellas dejen de brillar</p></b>
-      <b><p id="autor">Galin H</p></b>
-        <b><p id="categoria">Aventura</p></b>
-      <p id="segundo">Un trágico incendio marcó sus vidas para siempre. Años después, Ryan y Emma se reencuentran en el orfanato donde crecieron, y juntos lucharán por sanar sus heridas.</p>
-      <br><b><p id="isbns">ISBN:938-1-23-456789-7</p></b>
-      <b><p id="editorial">Editorial: HarperCollins</p></b>
-      <b><p id="tercero">Precio: 17,87€</p></b>
-      <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
-    </div>
-
-    <div id="titulo4">
         <img id="imagenes_narnia" src="imagenes/imagen11.jpg"/>
         <b><p id="principios">Narnia</p></b>
         <b><p id="autor">Clive Lewis</p></b>
@@ -198,47 +147,9 @@
         <b><p id="tercero">Precio: 16,35€</p></b>
         <button id="boton_comprar" type="button" name="ver mas">Comprar</button>
     </div>
-  </div>
+  </div><br>
 
-  <script>
-const botones = document.querySelectorAll('#boton_comprar');
-const contadorCarro = document.getElementById('cuenta_carro');
-let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
-contadorCarro.textContent = carrito.length;
-
-botones.forEach(boton => {
-  boton.dataset.agregado = 'false';
-
-  boton.addEventListener('click', () => {
-    const contenedor = boton.parentElement;
-
-    const titulo = contenedor.querySelector('p#principioss, p#principio, p#principios, p#principioso')?.textContent || "Libro sin título";
-    const precioTexto = Array.from(contenedor.querySelectorAll('p, b p')).find(p => p.textContent.includes("Precio"));
-    const precio = precioTexto ? parseFloat(precioTexto.textContent.replace("Precio:", "").replace("€","").replace(",",".").trim()) : 0;
-    const autor = contenedor.querySelector('p#autor, p#autors')?.textContent || "Desconocido";
-    const categoria = contenedor.querySelector('p#aventura, p#categoria')?.textContent || "General";
-    const isbn = contenedor.querySelector('p#isbn, p#isbns')?.textContent.replace("ISBN:", "").trim() || "0000000000";
-    const editorial = contenedor.querySelector('p#editorial')?.textContent.replace("Editorial:", "").trim() || "Desconocida";
-
-
-    if(boton.dataset.agregado === 'false') {
-      carrito.push({titulo, precio, autor, categoria,  editorial, isbn, cantidad:1});
-      boton.dataset.agregado = 'true';
-      boton.textContent = 'Quitar';
-    } else {
-      carrito = carrito.filter(item => item.titulo !== titulo);
-      boton.dataset.agregado = 'false';
-      boton.textContent = 'Comprar';
-    }
-
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    contadorCarro.textContent = carrito.length;
-  });
-});
-
-</script>
-
-  
+  <script src="js/carrito.js"></script>  
 <br><br><br><br>
 
   <footer>

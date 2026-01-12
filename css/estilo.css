@@ -140,12 +140,12 @@ h3{
 
 #libros{
   display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 1.5rem;
-    max-width: 1200px;
-    margin: 0rem auto 0 auto;
-    margin-left: 11%;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0rem auto 0 auto;
+  margin-left: 11%;
     
 }
 
