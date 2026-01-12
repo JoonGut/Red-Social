@@ -1,3 +1,11 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 .cabecera-perfil {
   position: relative;
   border-bottom: 1px solid #cfd9de;
@@ -127,5 +135,54 @@
 
 .menu-item.activo {
   font-weight: 600;
+  color: #1da1f2;
+}
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+.publicacion {
+  padding: 1rem;
+  border-bottom: 1px solid #cfd9de;
+}
+
+.publicacion h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.publicacion p {
+  font-size: 0.95rem;
+}
+.panel {
+  background: #ffffff;
+  border: 1px solid #cfd9de;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel h2 {
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.panel ul {
+  list-style: none;
+}
+
+.panel li {
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.panel p {
+  font-size: 0.9rem;
+  padding: 0.3rem 0;
+  cursor: pointer;
+}
+
+.panel p:hover,
+.panel li:hover {
   color: #1da1f2;
 }
