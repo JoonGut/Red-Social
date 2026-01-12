@@ -1,0 +1,131 @@
+.cabecera-perfil {
+  position: relative;
+  border-bottom: 1px solid #cfd9de;
+}
+
+
+.banner {
+  position: relative;
+  z-index: 1;
+  height: 140px;
+  background: linear-gradient(135deg, #1da1f2, #1a91da);
+}
+
+.volver {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.volver:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.info-perfil {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 1rem;
+  margin-top: -48px;
+}
+
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 4px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.boton-editar {
+  background: transparent;
+  color: #1da1f2;
+  border: 1px solid #1da1f2;
+  padding: 0.4rem 0.9rem;
+}
+
+.boton-editar:hover {
+  background: #e8f5fd;
+}
+
+.datos-perfil {
+  padding: 1rem;
+}
+
+.datos-perfil h2 {
+  font-size: 1.1rem;
+}
+
+.nombre-real {
+  color: #536471;
+  font-size: 0.9rem;
+}
+
+.bio {
+  margin: 0.6rem 0;
+  font-size: 0.95rem;
+}
+
+.meta {
+  font-size: 0.85rem;
+  color: #536471;
+}
+
+
+.estadisticas {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.estadisticas span {
+  cursor: pointer;
+}
+
+.estadisticas span:hover {
+  text-decoration: underline;
+}
+.barra-lateral {
+  width: 220px;
+  padding: 1.5rem;
+  border-right: 1px solid #cfd9de;
+  background: #7C7C7C;
+}
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.menu-item {
+  text-decoration: none;
+  color: #0f1419;
+  font-size: 1.05rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #e8f5fd;
+}
+
+.menu-item:hover {
+  background: #d0baa2;
+}
+
+.menu-item.activo {
+  font-weight: 600;
+  color: #1da1f2;
+}
