@@ -5,7 +5,7 @@ session_start();
 require __DIR__ . '/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../html/login.html');
+    header('Location: ../login.html');
     exit;
 }
 
@@ -13,7 +13,7 @@ $login = trim($_POST['usuario'] ?? '');
 $contraseña  = $_POST['password'] ?? '';
 
 if ($login === '' || $contraseña === '') {
-    header('Location: ../html/login.html?error=1');
+    header('Location: ../login.html?error=1');
     exit;
 }
 
@@ -31,13 +31,13 @@ $result = $stmt->get_result();
 $usuario = $result->fetch_assoc();
 
 if (!$usuario) {
-    header('Location: ../html/login.html?error=1');
+    header('Location: ../login.html?error=1');
     exit;
 }
 
 // Contraseña en texto plano (como tienes ahora)
 if ($contraseña !== $usuario['password']) {
-    header('Location: ../html/login.html?error=1');
+    header('Location: ../login.html?error=1');
     exit;
 }
 
