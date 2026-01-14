@@ -45,5 +45,5 @@ $_SESSION['usuario']   = $usuario['usuario'];
 $_SESSION['email']     = $usuario['email'];
 $_SESSION['id_rol']    = (int)$usuario['id_rol'];
 
-header('Location: ../html/index.html');
+header('Location: index.php');
 exit;

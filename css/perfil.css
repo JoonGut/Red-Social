@@ -186,3 +186,20 @@
 .panel li:hover {
   color: #1da1f2;
 }
+.acciones-perfil {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.boton-cerrar-sesion {
+  padding: 0.5rem 1rem;
+  background: #e0245e;
+  color: white;
+  text-decoration: none;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.boton-cerrar-sesion:hover {
+  background: #c81e50;
+}
