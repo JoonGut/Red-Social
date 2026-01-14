@@ -70,6 +70,7 @@ session_start();
   </div>
 
   <?php include __DIR__ . '/modal_publicar.php'; ?>
+  <?php include __DIR__ . '/modal_cerrar_sesion.php'; ?>
 
   <script>
     const cssMap = {

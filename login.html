@@ -15,6 +15,9 @@
     <h1 class="titulo">Inicia sesión</h1>
       <p class="subtitulo">Bienvenido de nuevo</p>
 
+    <div id="mensaje-exito" style="color: green; margin-bottom: 10px;"></div>
+    <div id="mensaje-error" style="color: red; margin-bottom: 10px;"></div>
+
     <form class="formulario-registro" action="php/login.php" method="POST" novalidate>
   <div class="campo">
     <label for="usuario">Usuario o correo</label>
@@ -49,5 +52,18 @@
       <a href="html/ReiniciarContraseña.html">¿Olvidaste tu contraseña?</a>
     </div>
   </div>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    const mensajeExito = document.getElementById('mensaje-exito');
+    const mensajeError = document.getElementById('mensaje-error');
+    if (success === '1') {
+      mensajeExito.textContent = 'Registro exitoso. Ahora puedes iniciar sesión.';
+    }
+    if (error === '1') {
+      mensajeError.textContent = 'Usuario o contraseña incorrectos.';
+    }
+  </script>
 </body>
 </html>
