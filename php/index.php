@@ -78,6 +78,8 @@ session_start();
       perfil: '../css/perfil.css'
     };
 
+    let currentPage = null;
+
     document.addEventListener('DOMContentLoaded', function() {
       const menuItems = document.querySelectorAll('.menu-item[data-page]');
       
@@ -91,6 +93,7 @@ session_start();
     });
 
     function loadPage(page) {
+      currentPage = page;
       fetch(`../html/${page}.html`)
         .then(response => response.text())
         .then(html => {
@@ -132,6 +135,23 @@ session_start();
         document.head.appendChild(link);
       }
     }
+
+    setInterval(() => {
+      if (currentPage) {
+        fetch(`../html/${currentPage}.html`)
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newMain = doc.querySelector('.contenido-principal');
+            const currentMain = document.querySelector('.contenido-principal');
+            if (newMain && newMain.innerHTML !== currentMain.innerHTML) {
+              loadPage(currentPage);
+            }
+          })
+          .catch(error => console.error('Error checking for updates:', error));
+      }
+    }, 30000);
   </script>
 </body>
 </html>
