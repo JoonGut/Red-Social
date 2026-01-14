@@ -164,3 +164,88 @@ body {
 .panel li:hover {
   color: #1da1f2;
 }
+/* === MODAL OVERLAY (tipo Twitter/X) === */
+.modal-overlay{
+  position: fixed;      /* CLAVE: para que flote encima */
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: none;        /* CLAVE: para que NO se vea siempre */
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 16px;
+  z-index: 9999;
+}
+
+.modal-overlay.show{
+  display: flex;        /* solo se ve cuando tiene .show */
+}
+
+.modal{
+  width: min(650px, 100%);
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+
+.modal-header{
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+.modal-title{
+  margin: 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+.modal-close{
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+  font-size: 18px;
+}
+
+.modal-close:hover{
+  background: rgba(0,0,0,.06);
+}
+
+.modal-body{
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.modal-body textarea{
+  width: 100%;
+  min-height: 120px;
+  resize: none;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
+}
+
+.modal-footer{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+/* Asegura que el overlay siempre queda por encima del layout */
+.modal-overlay{
+  top: 0;
+  left: 0;
+}
+
+/* Evita que el modal herede estilos raros del layout */
+.modal *{
+  box-sizing: border-box;
+}
+
