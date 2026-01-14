@@ -9,6 +9,7 @@ session_start();
   <title>Inicio · Cloudia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="../css/modal.css">
   <link rel="icon" href="favicon.ico">
 </head>
 
@@ -68,7 +69,6 @@ session_start();
     </aside>
   </div>
 
-  <!-- ✅ Modal en otro archivo (pero aparece encima) -->
   <?php include __DIR__ . '/modal_publicar.php'; ?>
 
 </body>
