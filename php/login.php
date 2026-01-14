@@ -17,7 +17,6 @@ if ($login === '' || $contraseña === '') {
     exit;
 }
 
-// Buscar por usuario o email
 $sql = "SELECT id_usuario, usuario, email, password, id_rol
         FROM usuario
         WHERE usuario = ? OR email = ?
@@ -35,13 +34,11 @@ if (!$usuario) {
     exit;
 }
 
-// Contraseña en texto plano (como tienes ahora)
 if ($contraseña !== $usuario['password']) {
     header('Location: ../login.html?error=1');
     exit;
 }
 
-// Login correcto
 session_regenerate_id(true);
 $_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
 $_SESSION['usuario']   = $usuario['usuario'];

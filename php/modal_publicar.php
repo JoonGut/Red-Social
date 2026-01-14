@@ -1,4 +1,3 @@
-<!-- MODAL NUEVA PUBLICACIÓN -->
 <div id="modalOverlay" class="modal-overlay" style="display:none;" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
     <div class="modal-header">
