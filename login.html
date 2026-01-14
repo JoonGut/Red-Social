@@ -5,7 +5,6 @@
   <title>Iniciar sesión · NombreRedSocial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="css/styles.css" />
-  <script src="js/validacion_login.js" defer></script>
 </head>
 <body>
   <div class="tarjeta-registro">
@@ -16,19 +15,34 @@
     <h1 class="titulo">Inicia sesión</h1>
       <p class="subtitulo">Bienvenido de nuevo</p>
 
-    <form class="formulario-registro">
-      <div class="campo">
-        <label for="usuario">Usuario</label>
-        <input type="text" id="usuario" name="usuario" placeholder="@usuario" /><span class="error-msg"></span><br>
-      </div>
+    <form class="formulario-registro" action="php/login.php" method="POST" novalidate>
+  <div class="campo">
+    <label for="usuario">Usuario o correo</label>
+    <input
+      type="text"
+      id="usuario"
+      name="usuario"
+      placeholder="@usuario o correo"
+      required
+    />
+  </div>
 
-      <div class="campo">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password" placeholder="••••••••" /><span class="error-msg"></span><br>
-      </div>
+  <div class="campo">
+    <label for="password">Contraseña</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="••••••••"
+      required
+    />
+ 
+  </div>
 
-      <button type="submit" class="boton-registrarse">Entrar</button>
-    </form>
+  <button type="submit" class="boton-registrarse">
+    Entrar
+  </button>
+</form>
 
     <div class="texto-footer">
       ¿No tienes cuenta? <a href="html/registro.html">Regístrate</a><br />
