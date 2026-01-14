@@ -38,14 +38,12 @@ session_start();
 
       <section class="feed">
         <article class="publicacion">
-          <h3>@usuario1</h3>
-          <p>Este es un ejemplo de publicación en la página de inicio.</p>
+          <section class="feed">
+            <?php include __DIR__ . '/feedPublicaciones.php'; ?>
+          </section>
         </article>
 
-        <article class="publicacion">
-          <h3>@usuario2</h3>
-          <p>Otra publicación. Breve, directa y con opinión fuerte.</p>
-        </article>
+        
       </section>
     </main>
 
