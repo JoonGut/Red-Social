@@ -20,9 +20,9 @@ session_start();
       </div>
       <nav class="menu">
         <a href="index.php" class="menu-item activo">Inicio</a>
-        <a href="explorar.html" class="menu-item">Explorar</a>
-        <a href="Chat.html" class="menu-item">Mensajes</a>
-        <a href="perfil.html" class="menu-item">Perfil</a>
+        <a href="#" class="menu-item" data-page="explorar">Explorar</a>
+        <a href="#" class="menu-item" data-page="chat">Mensajes</a>
+        <a href="#" class="menu-item" data-page="perfil">Perfil</a>
       </nav>
     </aside>
 
@@ -68,8 +68,69 @@ session_start();
     </aside>
   </div>
 
-  <!-- ✅ Modal en otro archivo (pero aparece encima) -->
   <?php include __DIR__ . '/modal_publicar.php'; ?>
 
+  <script>
+    const cssMap = {
+      explorar: '../css/explorar.css',
+      chat: '../css/chat.css',
+      perfil: '../css/perfil.css'
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuItems = document.querySelectorAll('.menu-item[data-page]');
+      
+      menuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = this.getAttribute('data-page');
+          loadPage(page);
+        });
+      });
+    });
+
+    function loadPage(page) {
+      fetch(`../html/${page}.html`)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newMain = doc.querySelector('.contenido-principal');
+          
+          if (newMain) {
+            const currentMain = document.querySelector('.contenido-principal');
+            currentMain.innerHTML = newMain.innerHTML;
+            
+            const title = doc.querySelector('title');
+            if (title) {
+              document.title = title.textContent;
+            }
+            
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
+            document.querySelector(`[data-page="${page}"]`).classList.add('activo');
+            
+            loadPageCSS(page);
+          }
+        })
+        .catch(error => console.error('Error loading page:', error));
+    }
+
+    function loadPageCSS(page) {
+
+      const existingLink = document.querySelector('link[data-page-css]');
+      if (existingLink) {
+        existingLink.remove();
+      }
+    
+      const cssHref = cssMap[page];
+      if (cssHref) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = cssHref;
+        link.setAttribute('data-page-css', page);
+        document.head.appendChild(link);
+      }
+    }
+  </script>
 </body>
 </html>
