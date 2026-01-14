@@ -56,7 +56,7 @@ if (!empty($_FILES['imagen']['name'])) {
     $extension = $permitidos[$mime];
     $nombreImagen = uniqid('pub_', true) . '.' . $extension;
 
-    $rutaDestino = __DIR__ . '/../uploads/' . $nombreImagen;
+    $rutaDestino = __DIR__ . '/../multimedia/' . $nombreImagen;
 
     if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
         header('Location: index.php?error=imagen_guardar');
