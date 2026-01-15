@@ -173,12 +173,16 @@ body {
   object-fit: cover;
   margin-top: 10px;
 }
-.publicacion {
+.publicaciones {
+   padding: 1rem;
+  border-bottom: 1px solid #cfd9de;
   cursor: pointer;
+  border-radius: 5px;
+  box-shadow: #0f1419 0 1px 1px 0px;
+}
+.publicaciones:hover{
+  background: rgba(0,0,0,.03);
+  transform: scale(1.02);
 }
 
-.publicacion:focus {
-  outline: 2px solid currentColor;
-  outline-offset: 4px;
-}
   

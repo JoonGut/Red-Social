@@ -33,7 +33,7 @@ while ($row = $result->fetch_assoc()):
 
   $imgUrl = $imagen ? "../multimedia/" . rawurlencode($imagen) : null;
 ?>  
-  <article class="publicacion"
+  <article class="publicaciones"
   data-usuario="<?= htmlspecialchars($usuario, ENT_QUOTES) ?>"
   data-fecha="<?= htmlspecialchars($fecha ?? '', ENT_QUOTES) ?>"
   data-ubicacion="<?= htmlspecialchars($ubicacion ?? '', ENT_QUOTES) ?>"
@@ -64,5 +64,5 @@ while ($row = $result->fetch_assoc()):
     <p><em><?= htmlspecialchars($pie) ?></em></p>
   <?php endif; ?>
 </article>
-      
+
 <?php endwhile; ?>
