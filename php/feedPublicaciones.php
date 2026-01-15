@@ -34,6 +34,7 @@ while ($row = $result->fetch_assoc()):
   $imgUrl = $imagen ? "../multimedia/" . rawurlencode($imagen) : null;
 ?>  
   <article class="publicaciones"
+  data-id="<?= (int)$row['id_publicacion'] ?>"
   data-usuario="<?= htmlspecialchars($usuario, ENT_QUOTES) ?>"
   data-fecha="<?= htmlspecialchars($fecha ?? '', ENT_QUOTES) ?>"
   data-ubicacion="<?= htmlspecialchars($ubicacion ?? '', ENT_QUOTES) ?>"

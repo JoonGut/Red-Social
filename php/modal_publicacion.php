@@ -17,6 +17,7 @@
       </div>
 
       <p id="mp-pie" style="display:none;"></p>
+              <button type="button" id="borrarPublicacion" class="boton-eliminar" >Eliminar publicación</button>
     </div>
   </div>
 </div>
@@ -36,6 +37,9 @@ function openPostModal(article) {
   const texto = article.dataset.texto || '';
   const img = article.dataset.img || '';
   const pie = article.dataset.pie || '';
+
+  const postId = article.dataset.id;
+document.getElementById('borrarPublicacion').dataset.id = postId;
 
   document.getElementById('mp-titulo').textContent = usuario;
 
@@ -88,6 +92,31 @@ document.addEventListener('click', (e) => {
 // ESC para cerrar
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePostModal();
+});
+document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
+  const btn = document.getElementById('borrarPublicacion');
+  const postId = btn.dataset.id;
+
+  if (!postId) return;
+
+  if (!confirm('¿Seguro que quieres eliminar esta publicación?')) return;
+
+  fetch('../php/eliminar_publicacion.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `id=${encodeURIComponent(postId)}`
+  })
+  .then(res => res.text())
+  .then(res => {
+    if (res === 'ok') {
+      // quitar publicación del feed
+      document.querySelector(`article.publicacion[data-id="${postId}"]`)?.remove();
+      closePostModal();
+    } else {
+      alert('Error al eliminar');
+    }
+  })
+  .catch(() => alert('Error de conexión'));
 });
 
 </script>
