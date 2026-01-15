@@ -93,13 +93,13 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePostModal();
 });
+
 document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
   const btn = document.getElementById('borrarPublicacion');
   const postId = btn.dataset.id;
 
   if (!postId) return;
 
-  if (!confirm('¿Seguro que quieres eliminar esta publicación?')) return;
 
   fetch('../php/eliminar_publicacion.php', {
     method: 'POST',
@@ -109,7 +109,6 @@ document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
   .then(res => res.text())
   .then(res => {
     if (res === 'ok') {
-      // quitar publicación del feed
       document.querySelector(`article.publicacion[data-id="${postId}"]`)?.remove();
       closePostModal();
     } else {
