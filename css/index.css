@@ -173,3 +173,12 @@ body {
   object-fit: cover;
   margin-top: 10px;
 }
+.publicacion {
+  cursor: pointer;
+}
+
+.publicacion:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+  

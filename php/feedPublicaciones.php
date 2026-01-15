@@ -31,29 +31,38 @@ while ($row = $result->fetch_assoc()):
   $fecha     = $row['fecha_publicacion'] ?? '';
   $imagen    = $row['imagen'] ?? null;
 
-  $imgUrl = $imagen ? "../uploads/" . rawurlencode($imagen) : null;
-?>
-  <article class="publicacion">
-    <h3><?= htmlspecialchars($usuario) ?></h3>
+  $imgUrl = $imagen ? "../multimedia/" . rawurlencode($imagen) : null;
+?>  
+  <article class="publicacion"
+  data-usuario="<?= htmlspecialchars($usuario, ENT_QUOTES) ?>"
+  data-fecha="<?= htmlspecialchars($fecha ?? '', ENT_QUOTES) ?>"
+  data-ubicacion="<?= htmlspecialchars($ubicacion ?? '', ENT_QUOTES) ?>"
+  data-texto="<?= htmlspecialchars($texto ?? '', ENT_QUOTES) ?>"
+  data-img="<?= htmlspecialchars($imgUrl ?? '', ENT_QUOTES) ?>"
+  data-pie="<?= htmlspecialchars($pie ?? '', ENT_QUOTES) ?>"
+  tabindex="0"
+>
+  <h3><?= htmlspecialchars($usuario) ?></h3>
 
-    <?php if ($fecha): ?>
-      <small><?= htmlspecialchars($fecha) ?></small>
-    <?php endif; ?>
+  <?php if ($fecha): ?>
+    <small><?= htmlspecialchars($fecha) ?></small>
+  <?php endif; ?>
 
-    <?php if ($ubicacion !== ''): ?>
-      <p><strong>📍</strong> <?= htmlspecialchars($ubicacion) ?></p>
-    <?php endif; ?>
+  <?php if ($ubicacion !== ''): ?>
+    <p><strong>📍</strong> <?= htmlspecialchars($ubicacion) ?></p>
+  <?php endif; ?>
 
-    <p><?= nl2br(htmlspecialchars($texto)) ?></p>
+  <p><?= nl2br(htmlspecialchars($texto)) ?></p>
 
-    <?php if ($imgUrl): ?>
-      <div class="publicacion-imagen">
-        <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Imagen de la publicación">
-      </div>
-    <?php endif; ?>
+  <?php if ($imgUrl): ?>
+    <div class="publicacion-imagen">
+      <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Imagen de la publicación">
+    </div>
+  <?php endif; ?>
 
-    <?php if ($pie !== ''): ?>
-      <p><em><?= htmlspecialchars($pie) ?></em></p>
-    <?php endif; ?>
-  </article>
+  <?php if ($pie !== ''): ?>
+    <p><em><?= htmlspecialchars($pie) ?></em></p>
+  <?php endif; ?>
+</article>
+      
 <?php endwhile; ?>
