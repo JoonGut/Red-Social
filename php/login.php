@@ -45,6 +45,8 @@ $_SESSION['usuario']    = $usuario['usuario'];
 $_SESSION['nombre']     = $usuario['nombre'];   
 $_SESSION['email']      = $usuario['email'];
 $_SESSION['id_rol']     = (int)$usuario['id_rol'];
+$_SESSION['foto_perfil'] = $fila['foto_perfil'];
+$_SESSION['biografia'] = $fila['biografia'];
 
 header('Location: index.php');
 exit;

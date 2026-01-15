@@ -1,11 +1,13 @@
+/* =========================
+   NeonNest SIMPLE — Modal
+   (sustituye tu bloque actual)
+   ========================= */
+
 /* ===== Overlay ===== */
-.modal-overlay {
+.modal-overlay{
   position: fixed;
   inset: 0;
-  background: linear-gradient(
-    rgba(0,0,0,.55),
-    rgba(0,0,0,.65)
-  );
+  background: rgba(0,0,0,.65);
   display: none;
   align-items: center;
   justify-content: center;
@@ -13,125 +15,128 @@
   padding: 20px;
 }
 
-.modal-overlay.abierto {
+.modal-overlay.abierto{
   display: flex;
 }
 
 /* ===== Modal ===== */
-.modal {
+.modal{
   width: min(540px, 100%);
   max-height: 90vh;
-  background: #ffffff;
-  border-radius: 22px;
-  box-shadow: 
-    0 25px 60px rgba(0,0,0,.35),
-    0 0 0 4px rgba(79,70,229,.08);
+  background: #12172a;                 /* card oscura */
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.45);
   overflow: hidden;
 
   display: flex;
   flex-direction: column;
 
-  animation: modalPop .35s cubic-bezier(.2,.9,.3,1);
+  /* animación simple */
+  animation: modalIn .18s ease-out;
 }
 
-/* ===== Animación divertida ===== */
-@keyframes modalPop {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scale(.92);
-  }
-  70% {
-    transform: translateY(-4px) scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes modalIn{
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== Header ===== */
-.modal-header {
+.modal-header{
   display: grid;
   grid-template-columns: 42px 1fr 42px;
   align-items: center;
-  padding: 16px 18px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
+  padding: 14px 16px;
+  background: #151b31;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.92);
 }
 
-.modal-header h2 {
+.modal-header h2{
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   text-align: center;
-  font-weight: 600;
-  letter-spacing: .3px;
+  font-weight: 650;
 }
 
 /* ===== Botón cerrar ===== */
-#cerrarModalEditarPerfil {
+#cerrarModalEditarPerfil{
   width: 36px;
   height: 36px;
-  border: none;
-  background: rgba(255,255,255,.15);
-  color: white;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0e1324;
+  color: rgba(255,255,255,.9);
   cursor: pointer;
-  border-radius: 50%;
-  font-size: 22px;
+  border-radius: 999px;
+  font-size: 20px;
   line-height: 1;
 }
 
-#cerrarModalEditarPerfil:hover {
-  background: rgba(255,255,255,.25);
+#cerrarModal:hover{
+  border-color: rgba(124,92,255,.25);  /* morado neon simple */
+}
+#cerrarModal{
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0e1324;
+  color: rgba(255,255,255,.9);
+  cursor: pointer;
+  border-radius: 999px;
+  font-size: 20px;
+  line-height: 1;
 }
 
+#cerrarModal:hover{
+  border-color: rgba(124,92,255,.25);  /* morado neon simple */
+}
 /* ===== Body ===== */
-.modal-body {
-  padding: 18px;
+.modal-body{
+  padding: 16px;
   display: grid;
-  gap: 14px;
-  background: #fafafa;
+  gap: 12px;
+  background: #12172a;
 }
 
 /* ===== Labels ===== */
-.modal-body label {
+.modal-body label{
   display: grid;
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: rgba(255,255,255,.75);
 }
 
 /* ===== Inputs ===== */
 .modal-body input,
-.modal-body textarea {
+.modal-body textarea{
   width: 100%;
-  padding: 11px 14px;
+  padding: 11px 12px;
   border-radius: 14px;
-  border: 2px solid transparent;
-  background: white;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0e1324;
+  color: rgba(255,255,255,.92);
   font-size: 14px;
   resize: none;
   outline: none;
-  box-shadow: 0 0 0 1px #e5e7eb;
-  transition: 
-    box-shadow .2s ease,
-    border .2s ease,
-    transform .15s ease;
 }
 
-.modal-body textarea {
+.modal-body textarea{
   min-height: 90px;
 }
 
+.modal-body input::placeholder,
+.modal-body textarea::placeholder{
+  color: rgba(255,255,255,.45);
+}
+
 .modal-body input:focus,
-.modal-body textarea:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124,58,237,.25);
-  transform: scale(1.01);
+.modal-body textarea:focus{
+  border-color: rgba(124,92,255,.40);
 }
 
 /* ===== Footer ===== */
-.modal-footer {
+.modal-footer{
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -139,41 +144,39 @@
 }
 
 /* ===== Botones ===== */
-.boton-cancelar {
-  padding: 10px 16px;
+.boton-cancelar{
+  padding: 10px 14px;
   background: transparent;
-  border: 2px dashed #d1d5db;
+  border: 1px solid rgba(255,255,255,.10);
   border-radius: 14px;
   cursor: pointer;
   font-size: 14px;
-  color: #374151;
-  transition: all .2s ease;
+  color: rgba(255,255,255,.80);
 }
 
-.boton-cancelar:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+.boton-cancelar:hover{
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.04);
 }
 
-.boton-registrarse {
-  padding: 12px 18px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+/* OJO: si ya tienes .boton-registrarse global, esto SOLO ajusta dentro del modal */
+.modal .boton-registrarse{
+  padding: 12px 16px;
+  background: #7c5cff;
   color: white;
   border: none;
   border-radius: 14px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 8px 20px rgba(124,58,237,.35);
-  transition: transform .15s ease, box-shadow .2s ease;
+  font-weight: 700;
+  width: auto;
 }
 
-.boton-registrarse:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(124,58,237,.45);
+.modal .boton-registrarse:hover{
+  filter: brightness(1.05);
 }
 
 /* ===== Bloquear scroll fondo ===== */
-body.modal-open {
+body.modal-open{
   overflow: hidden;
 }

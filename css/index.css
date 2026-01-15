@@ -1,4 +1,31 @@
-* {
+/* =========================
+   NeonNest — CSS SIMPLE (completo)
+   Reemplaza TODO tu index.css por este
+   ========================= */
+
+/* ---- Variables sencillas ---- */
+:root{
+  --bg: #0b0f1a;
+  --card: #12172a;
+  --card2:#0e1324;
+
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.65);
+
+  --border: rgba(255,255,255,.08);
+
+  --accent: #7c5cff;  /* neon purple */
+  --accent2:#00d4ff;  /* neon cyan (solo detalles) */
+  --ok: #2ee59d;
+
+  --shadow: 0 6px 14px rgba(0,0,0,.35);
+
+  --r1: 18px;
+  --r2: 14px;
+}
+
+/* ---- Reset básico ---- */
+*{
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -6,183 +33,605 @@
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-body {
-  background: #f5f8fa;
-  color: #0f1419;
-}
-
-
-.contenedor-inicio {
-  display: flex;
+body{
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
 }
 
+/* =========================
+   Layout general
+   ========================= */
+.contenedor-inicio{
+  display: grid;
+  grid-template-columns: 240px minmax(520px, 1fr) 300px;
+  gap: 16px;
 
-.barra-lateral {
-  width: 220px;
-  padding: 1.5rem;
-  border-right: 1px solid #cfd9de;
-  background: #7C7C7C;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100vh;
 }
 
-.logo-red {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #1da1f2;
-}
+/* =========================
+   Barra lateral
+   ========================= */
+.barra-lateral{
+  padding: 16px;
+  border-radius: var(--r1);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 
-.menu {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
-.menu-item {
-  text-decoration: none;
-  color: #0f1419;
-  font-size: 1.05rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  background: #e8f5fd;
-}
-
-.menu-item:hover {
-  background: #d0baa2;
-}
-
-.menu-item.activo {
-  font-weight: 600;
-  color: #1da1f2;
-}
-
-
-.contenido-principal {
-  flex: 1;
-  max-width: 600px;
-  margin: 0 auto;
-  background: #ffffff;
-  border-left: 5px solid #cfd9de;
-  border-right: 5px solid #cfd9de;
-}
-
-
-.cabecera {
-  padding: 1rem;
-  border-bottom: 1px solid #cfd9de;
-}
-
-.cabecera h1 {
-  font-size: 1.3rem;
-}
-
-
-.crear-publicacion {
-  padding: 1rem;
-  border-bottom: 1px solid #cfd9de;
+/* Logo */
+.logo-red{
   display: flex;
-  gap: 0.8rem;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
 
-.crear-publicacion textarea {
-  flex: 1;
-  border: none;
-  resize: none;
+.logo-mark{
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  font-size: 22px;
+}
+
+.logo-copy strong{
+  display: block;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.logo-copy small{
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Menú */
+.menu{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 2px;
+}
+
+.menu-item{
+  text-decoration: none;
+  color: var(--text);
   font-size: 1rem;
-  outline: none;
+
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid transparent;
 }
 
-.boton-registrarse {
-  background: #1da1f2;
+.menu-item:hover{
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.06);
+}
+
+.menu-item.activo{
+  background: rgba(124,92,255,.18);
+  border-color: rgba(124,92,255,.25);
+  font-weight: 650;
+}
+
+/* Puntito activo simple */
+.menu-item.activo::before{
+  content:"";
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius: 999px;
+  margin-right: 10px;
+  background: var(--ok);
+  vertical-align: middle;
+}
+
+/* CTA sidebar */
+.sidebar-cta{
+  margin-top: 12px;
+}
+
+.sidebar-tip{
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.sidebar-footer{
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+/* Botón principal */
+.boton-registrarse{
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: 999px;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
+  padding: 0.72rem 1rem;
+  font-weight: 700;
   cursor: pointer;
+  width: 100%;
 }
 
-.boton-registrarse:hover {
-  background: #1a91da;
+.boton-registrarse:hover{
+  filter: brightness(1.05);
 }
 
-
-.feed {
+/* =========================
+   Contenido principal
+   ========================= */
+.contenido-principal{
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  background: transparent;
+  border: none;
 }
 
-.publicacion {
-  padding: 1rem;
-  border-bottom: 1px solid #cfd9de;
+/* Cabecera */
+.cabecera{
+  padding: 14px 16px;
+  border-radius: var(--r1);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.publicacion h3 {
-  font-size: 0.95rem;
-  margin-bottom: 0.3rem;
+.cabecera h1{
+  font-size: 18px;
 }
 
-.publicacion p {
-  font-size: 0.95rem;
+.cabecera-sub{
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.barra-derecha {
-  width: 280px;
-  padding: 1rem;
-  background: #7C7C7C;
+.buscador{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
 }
 
-
-.panel {
-  background: #ffffff;
-  border: 1px solid #cfd9de;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+.buscador input{
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  width: 180px;
 }
 
-.panel h2 {
-  font-size: 1rem;
-  margin-bottom: 0.6rem;
+.buscador input::placeholder{
+  color: rgba(255,255,255,.55);
 }
 
-.panel ul {
-  list-style: none;
+/* Crear publicación */
+.crear-publicacion{
+  padding: 14px;
+  border-radius: var(--r1);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
-.panel li {
-  padding: 0.3rem 0;
-  font-size: 0.9rem;
+/* Composer simple */
+.composer{
+  display: grid;
+  grid-template-columns: 48px 1fr 140px;
+  gap: 12px;
+  align-items: center;
 }
 
-.panel p {
-  font-size: 0.9rem;
-  padding: 0.3rem 0;
+.avatar{
+  width: 46px;
+  height: 46px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+
+/* Botón que parece input */
+.composer-input{
+  text-align: left;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: rgba(255,255,255,.82);
   cursor: pointer;
 }
 
-.panel p:hover,
-.panel li:hover {
-  color: #1da1f2;
+.composer-input:hover{
+  border-color: rgba(124,92,255,.25);
 }
-.publicacion-imagen img {
+
+/* =========================
+   Feed / publicaciones
+   ========================= */
+.feed{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Si tu feed usa .publicacion y/o .publicaciones */
+.publicacion,
+.publicaciones{
+  padding: 14px;
+  border-radius: var(--r1);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.publicacion:hover,
+.publicaciones:hover{
+  background: rgba(255,255,255,.04);
+  border-color: rgba(0,212,255,.18);
+}
+
+.publicacion h3{
+  font-size: 0.98rem;
+  margin-bottom: 6px;
+}
+
+.publicacion p{
+  font-size: 0.96rem;
+  color: rgba(255,255,255,.86);
+  line-height: 1.4;
+}
+
+/* Imagen de publicación */
+.publicacion-imagen img{
   max-width: 100%;
-  border-radius: 12px;
+  border-radius: 14px;
   display: block;
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  height: auto;
   object-fit: cover;
   margin-top: 10px;
-}
-.publicaciones {
-   padding: 1rem;
-  border-bottom: 1px solid #cfd9de;
-  cursor: pointer;
-  border-radius: 5px;
-  box-shadow: #0f1419 0 1px 1px 0px;
-}
-.publicaciones:hover{
-  background: rgba(0,0,0,.03);
-  transform: scale(1.02);
+  border: 1px solid var(--border);
 }
 
-  
+/* =========================
+   Barra derecha
+   ========================= */
+.barra-derecha{
+  padding: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r1);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.panel h2{
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.panel ul{
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel li,
+.panel p{
+  font-size: 0.92rem;
+  color: rgba(255,255,255,.84);
+}
+
+.panel li:hover,
+.panel p:hover{
+  color: var(--accent2);
+}
+
+/* Tags */
+.tag{
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #1a1f36;
+}
+
+/* Sugerencias estilo follow (por si lo usas) */
+.follow-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+}
+
+.follow-row:hover{
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.06);
+}
+
+.mini-avatar{
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+
+.follow-txt strong{ display:block; font-size: 13px; }
+.follow-txt small{ display:block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.btn-mini{
+  margin-left: auto;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.btn-mini:hover{
+  border-color: rgba(0,212,255,.18);
+}
+
+/* =========================
+   PERFIL (por tu perfil.php)
+   ========================= */
+.cabecera-perfil{
+  border-radius: var(--r1);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.cabecera-perfil .banner{
+  min-height: 120px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: #151b31;
+  border-bottom: 1px solid var(--border);
+}
+
+.volver{
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 650;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+}
+
+.volver:hover{
+  filter: brightness(1.05);
+  border-color: rgba(0,212,255,.18);
+}
+
+.info-perfil{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px 14px;
+  margin-top: -18px;
+}
+
+.info-perfil .avatar{
+  width: 74px;
+  height: 74px;
+  border-radius: 26px;
+  font-size: 28px;
+}
+
+/* Editar perfil como botón secundario */
+.boton-editar{
+  width: auto;
+  padding: 10px 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+
+.boton-editar:hover{
+  border-color: rgba(124,92,255,.25);
+}
+
+/* Cerrar sesión estilo link botón */
+.boton-cerrar-sesion{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 12px 16px 16px;
+  padding: 10px 12px;
+  border-radius: 999px;
+
+  text-decoration: none;
+  color: rgba(255,255,255,.86);
+  border: 1px solid var(--border);
+  background: var(--card2);
+}
+
+.boton-cerrar-sesion:hover{
+  border-color: rgba(255,120,120,.22);
+  color: rgba(255,220,220,.95);
+}
+
+/* Datos perfil */
+.datos-perfil{
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r1);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.datos-perfil h2{
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.nombre-real{
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.estadisticas{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.estadisticas span{
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  text-align: center;
+  color: rgba(255,255,255,.86);
+}
+
+.estadisticas strong{
+  display: block;
+  margin-top: 6px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 1100px){
+  .contenedor-inicio{
+    grid-template-columns: 240px 1fr;
+  }
+  .barra-derecha{
+    display: none;
+  }
+}
+
+@media (max-width: 820px){
+  .contenedor-inicio{
+    grid-template-columns: 1fr;
+  }
+
+  .buscador input{
+    width: 140px;
+  }
+
+  .composer{
+    grid-template-columns: 48px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .composer .boton-registrarse{
+    grid-column: 1 / -1;
+  }
+
+  .estadisticas{
+    grid-template-columns: 1fr;
+  }
+
+  .info-perfil{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .boton-editar{
+    width: 100%;
+  }
+}
+/* Avatar clicable + imagen redonda */
+.avatar-click{
+  cursor: pointer;
+  position: relative;
+}
+
+.avatar-click img{
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* circulo real (ahora avatar es redondo) */
+.info-perfil .avatar{
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* mini bloque con bio debajo del avatar */
+.perfil-mini{
+  flex: 1;
+  min-width: 0;
+}
+
+.bio-perfil{
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.3;
+  max-width: 320px;
+  word-break: break-word;
+}
+.input-file-oculto{
+  position:absolute;
+  left:-9999px;
+  width:1px;
+  height:1px;
+  opacity:0;
+}
