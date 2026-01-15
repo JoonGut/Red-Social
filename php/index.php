@@ -70,7 +70,9 @@ session_start();
   <?php include __DIR__ . '/modal_publicar.php'; ?>
   <?php include __DIR__ . '/modal_cerrar_sesion.php'; ?>
   <?php include __DIR__ . '/modal_publicacion.php'; ?>
-  
+  <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
+
+
 
   <script>
     const cssMap = {
