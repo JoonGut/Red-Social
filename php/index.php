@@ -97,8 +97,12 @@ session_start();
 
     function loadPage(page) {
       currentPage = page;
-      fetch(`../html/${page}.html`)
-        .then(response => response.text())
+      fetch(`../php/${page}.php`)
+        .then(response => {
+          if (!response.ok) throw new Error('PHP not found');
+          return response.text();
+        })
+        .catch(() => fetch(`../html/${page}.html`).then(r => r.text()))
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
@@ -141,8 +145,12 @@ session_start();
 
     setInterval(() => {
       if (currentPage) {
-        fetch(`../html/${currentPage}.html`)
-          .then(response => response.text())
+        fetch(`../php/${currentPage}.php`)
+          .then(response => {
+            if (!response.ok) throw new Error('PHP not found');
+            return response.text();
+          })
+          .catch(() => fetch(`../html/${currentPage}.html`).then(r => r.text()))
           .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
