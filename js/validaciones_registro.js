@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+/*
+    document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.querySelector('form');
     if (!form) return;
@@ -41,27 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /*function validaDNI(val) {
-        if (!val){
-            return 'El DNI es obligatorio.';
-        } 
-        val = val.trim().toUpperCase();
-        let letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
-        if (!/^\d{7,8}[A-Z]$/.test(val)) {
-            return 'Formato de DNI inválido.';
-        }
-        let numberPart = val.substring(0, val.length - 1);
-        let number = parseInt(numberPart, 10);
-        let expected = letters[number % 23];
-        let letter = val.charAt(val.length - 1);
-        if (expected !== letter) {
-            return 'Letra del DNI incorrecta.';
-        }
-    }*/
    
 
 
-    function validaPassword(val) {
+   function validaPassword(val) {
         if (!val){
             return 'La contraseña es obligatoria.';
         }else{
@@ -136,13 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((msg = validaEmail(campos.email.value))) {
             setError(campos.email, msg); valido = false; 
         }
-        // Bloquear envío si hay errores
         if (!valido){
             e.preventDefault();
-            alert('Hay errores en el formulario. Por favor, revíselo.');
         }else{
             alert('Formulario enviado correctamente.');
         }
     });
 
-});
+});*/

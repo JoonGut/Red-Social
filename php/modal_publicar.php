@@ -18,7 +18,7 @@
       </div>
 
       <div class="modal-row">
-        <input type="file" name="imagen" accept="image/*">
+        <input type="file" name="imagen" accept="image/jpeg,image/png,image/webp">
       </div>
 
       <div class="modal-footer">

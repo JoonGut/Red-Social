@@ -2,6 +2,8 @@
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: ../html/login.html');
@@ -54,7 +56,7 @@ if (!empty($_FILES['imagen']['name'])) {
     $extension = $permitidos[$mime];
     $nombreImagen = uniqid('pub_', true) . '.' . $extension;
 
-    $rutaDestino = __DIR__ . '/../uploads/' . $nombreImagen;
+    $rutaDestino = __DIR__ . '/../multimedia/' . $nombreImagen;
 
     if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
         header('Location: index.php?error=imagen_guardar');
@@ -62,21 +64,27 @@ if (!empty($_FILES['imagen']['name'])) {
     }
 }
 
-$sql = "INSERT INTO publicacion 
-        (id_usuario, imagen, fecha_publicacion, ubicacion, pie_foto, texto)
-        VALUES (?, ?, CURDATE(), ?, ?, ?)";
+try {
+    $sql = "INSERT INTO publicacion 
+            (id_usuario, imagen, fecha_publicacion, ubicacion, pie_foto, texto)
+            VALUES (?, ?, NOW(), ?, ?, ?)";
 
-$stmt = $mysqli->prepare($sql);
-$stmt->bind_param(
-    'issss',
-    $id_usuario,
-    $nombreImagen,
-    $ubicacion,
-    $pie_foto,
-    $texto
-);
+    $stmt = $mysqli->prepare($sql);
 
-$stmt->execute();
+    $stmt->bind_param('issss',
+        $id_usuario,
+        $nombreImagen,
+        $ubicacion,
+        $pie_foto,
+        $texto
+    );
+
+    $stmt->execute();
+
+} catch (mysqli_sql_exception $e) {
+    header('Location: index.php?error=sql&msg=' . urlencode($e->getMessage()));
+    exit;
+}
 
 header('Location: index.php');
 exit;

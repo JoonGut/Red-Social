@@ -164,3 +164,12 @@ body {
 .panel li:hover {
   color: #1da1f2;
 }
+.publicacion-imagen img {
+  max-width: 100%;
+  border-radius: 12px;
+  display: block;
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  margin-top: 10px;
+}
