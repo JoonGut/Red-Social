@@ -1,127 +1,179 @@
-
-
+/* ===== Overlay ===== */
 .modal-overlay {
-  display: none;               
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 999999;
+  background: linear-gradient(
+    rgba(0,0,0,.55),
+    rgba(0,0,0,.65)
+  );
+  display: none;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  z-index: 999999;
+  padding: 20px;
 }
 
 .modal-overlay.abierto {
   display: flex;
 }
 
-
-
+/* ===== Modal ===== */
 .modal {
-  width: min(650px, 100%);
-  max-height: 88vh;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+  width: min(540px, 100%);
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 
+    0 25px 60px rgba(0,0,0,.35),
+    0 0 0 4px rgba(79,70,229,.08);
   overflow: hidden;
 
   display: flex;
   flex-direction: column;
+
+  animation: modalPop .35s cubic-bezier(.2,.9,.3,1);
 }
 
+/* ===== Animación divertida ===== */
+@keyframes modalPop {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(.92);
+  }
+  70% {
+    transform: translateY(-4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
-
+/* ===== Header ===== */
 .modal-header {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 42px 1fr 42px;
   align-items: center;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(0,0,0,.08);
-  flex: 0 0 auto;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 18px;
   text-align: center;
+  font-weight: 600;
+  letter-spacing: .3px;
 }
 
-#cerrarModalPublicacion {
+/* ===== Botón cerrar ===== */
+#cerrarModalEditarPerfil {
   width: 36px;
   height: 36px;
-  border: 0;
-  background: transparent;
+  border: none;
+  background: rgba(255,255,255,.15);
+  color: white;
   cursor: pointer;
-  border-radius: 999px;
-  font-size: 20px;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
 }
 
-#cerrarModalPublicacion:hover {
-  background: rgba(0,0,0,.06);
+#cerrarModalEditarPerfil:hover {
+  background: rgba(255,255,255,.25);
 }
 
-
-
+/* ===== Body ===== */
 .modal-body {
-  padding: 14px;
-  overflow-y: auto;
-  flex: 1 1 auto;
-
+  padding: 18px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  background: #fafafa;
 }
 
-
-
-#mp-texto,
-#mp-pie,
-#mp-ubicacion {
-  overflow-wrap: anywhere;
-  word-break: break-word;
+/* ===== Labels ===== */
+.modal-body label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
 }
 
-#mp-texto {
-  font-size: 1rem;
-  line-height: 1.45;
-}
-
-#mp-pie {
-  opacity: .8;
-  font-style: italic;
-}
-
-#mp-fecha {
-  opacity: .7;
-  font-size: .9rem;
-}
-
-
-
-#mp-imagen-wrap {
-  display: block;
-}
-
-#mp-imagen {
+/* ===== Inputs ===== */
+.modal-body input,
+.modal-body textarea {
   width: 100%;
-  max-width: 100%;
-  height: auto;
-
-  max-height: 45vh;      
-  object-fit: contain;   
-  display: block;
-
-  border-radius: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background: white;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  box-shadow: 0 0 0 1px #e5e7eb;
+  transition: 
+    box-shadow .2s ease,
+    border .2s ease,
+    transform .15s ease;
 }
 
-
-.modal p {
-  margin: 0;
+.modal-body textarea {
+  min-height: 90px;
 }
 
-.modal small {
-  display: block;
+.modal-body input:focus,
+.modal-body textarea:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,.25);
+  transform: scale(1.01);
 }
 
+/* ===== Footer ===== */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+/* ===== Botones ===== */
+.boton-cancelar {
+  padding: 10px 16px;
+  background: transparent;
+  border: 2px dashed #d1d5db;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: all .2s ease;
+}
+
+.boton-cancelar:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.boton-registrarse {
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(124,58,237,.35);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+
+.boton-registrarse:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(124,58,237,.45);
+}
+
+/* ===== Bloquear scroll fondo ===== */
 body.modal-open {
   overflow: hidden;
 }

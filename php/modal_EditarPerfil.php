@@ -30,10 +30,10 @@
   </div>
 </div>
 
-
 <script>
   function openEditarPerfil() {
     const modal = document.getElementById('modalEditarPerfil');
+    if (!modal) return;
     modal.classList.add('abierto');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
@@ -41,18 +41,25 @@
 
   function closeEditarPerfil() {
     const modal = document.getElementById('modalEditarPerfil');
+    if (!modal) return;
     modal.classList.remove('abierto');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
   }
 
-  document.getElementById('botonEditarPerfil')?.addEventListener('click', openEditarPerfil);
-
+  // ✅ sirve aunque el botón se inserte después por innerHTML
   document.addEventListener('click', (e) => {
-    if (e.target.id === 'cerrarModalEditarPerfil' || e.target.id === 'cancelarEditarPerfil') {
-      closeEditarPerfil();
+    if (e.target && e.target.id === 'botonEditarPerfil') {
+      openEditarPerfil();
+      return;
     }
-    if (e.target.id === 'modalEditarPerfil') {
+
+    if (
+      e.target &&
+      (e.target.id === 'cerrarModalEditarPerfil' ||
+       e.target.id === 'cancelarEditarPerfil' ||
+       e.target.id === 'modalEditarPerfil')
+    ) {
       closeEditarPerfil();
     }
   });

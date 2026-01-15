@@ -17,7 +17,7 @@ if ($login === '' || $contraseña === '') {
     exit;
 }
 
-$sql = "SELECT id_usuario, usuario, email, password, id_rol
+$sql = "SELECT id_usuario, usuario, nombre, email, password, id_rol
         FROM usuario
         WHERE usuario = ? OR email = ?
         LIMIT 1";
@@ -41,9 +41,10 @@ if ($contraseña !== $usuario['password']) {
 
 session_regenerate_id(true);
 $_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
-$_SESSION['usuario']   = $usuario['usuario'];
-$_SESSION['email']     = $usuario['email'];
-$_SESSION['id_rol']    = (int)$usuario['id_rol'];
+$_SESSION['usuario']    = $usuario['usuario'];
+$_SESSION['nombre']     = $usuario['nombre'];   
+$_SESSION['email']      = $usuario['email'];
+$_SESSION['id_rol']     = (int)$usuario['id_rol'];
 
 header('Location: index.php');
 exit;
