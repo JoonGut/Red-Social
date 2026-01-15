@@ -76,7 +76,7 @@ function closePostModal() {
 
 // Click en cualquier publicación
 document.addEventListener('click', (e) => {
-  const article = e.target.closest('article.publicacion');
+  const article = e.target.closest('article.publicaciones');
   if (article) openPostModal(article);
 
   // Cerrar si click en fondo o botón cerrar
