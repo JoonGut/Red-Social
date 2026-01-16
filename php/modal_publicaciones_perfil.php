@@ -23,6 +23,11 @@
 
         <!-- Pie de foto debajo -->
         <p id="p-pie" class="post-caption"></p>
+        <div class="post-actions">
+          <button type="button" id="borrarPublicacion" class="btn-danger">
+            Eliminar publicación
+          </button>
+        </div>
       </article>
     </div>
   </div>
@@ -107,4 +112,27 @@
     if (e.key === 'Escape') closePerfilPostModal();
   });
 })();
+  document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
+    const btn = document.getElementById('borrarPublicacion');
+    const postId = btn?.dataset?.id;
+    if (!postId) return;
+
+    fetch('../php/eliminar_publicacion.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `id=${encodeURIComponent(postId)}`
+      })
+      .then(res => res.text())
+      .then(res => {
+        if (res === 'ok') {
+          document.querySelector(`article.publicaciones[data-id="${postId}"]`)?.remove();
+          closePostModal();
+        } else {
+          alert('Error al eliminar');
+        }
+      })
+      .catch(() => alert('Error de conexión'));
+  });
 </script>

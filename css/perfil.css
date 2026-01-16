@@ -1,0 +1,103 @@
+/* El index.css usa un grid de 3 columnas. En perfil queremos 1 sola columna centrada */
+.contenedor-inicio.layout-solo-main{
+  display: grid;
+  grid-template-columns: minmax(320px, 980px);
+  justify-content: center;
+  gap: 24px;
+}
+
+/* Si por lo que sea hay barra derecha en perfil, la escondemos */
+.layout-solo-main .barra-derecha{
+  display: none !important;
+}
+
+/* Que el main use todo el ancho disponible */
+.layout-solo-main .contenido-principal{
+  width: 100%;
+}
+
+/* Ajustes visuales del header del perfil */
+.cabecera-perfil{
+  width: 100%;
+}
+
+.cabecera-perfil .banner{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 18px 18px 10px;
+}
+
+/* Avatar + bio + botones en una fila bonita (y que baje en móvil) */
+.info-perfil{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  flex-wrap: wrap;
+}
+
+/* Tarjetas stats en fila */
+.estadisticas{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 10px;
+}
+
+.estadisticas span{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+/* Grid de publicaciones más consistente */
+.grid-publicaciones{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.grid-item img{
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+@media (max-width: 520px){
+  .estadisticas{
+    grid-template-columns: 1fr;
+  }
+}
+/* Contenedor del avatar */
+.avatar{
+  width: 96px;           /* ajusta tamaño */
+  height: 96px;
+  border-radius: 999px;  /* círculo */
+  overflow: hidden;      /* recorta la imagen */
+  display: grid;
+  place-items: center;
+}
+
+/* La imagen dentro del avatar */
+.avatar img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* rellena recortando, NO estira */
+  object-position: center;
+  display: block;
+}
+.acciones-perfil{
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.boton-secundario{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+}

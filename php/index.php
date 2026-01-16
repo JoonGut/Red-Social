@@ -203,6 +203,44 @@ session_start();
       }
     }
 
+function replaceMainFromHtml(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const newMain = doc.querySelector('.contenido-principal');
+  if (!newMain) return false;
+
+  const currentMain = document.querySelector('.contenido-principal');
+  currentMain.innerHTML = newMain.innerHTML;
+
+  const title = doc.querySelector('title');
+  if (title) document.title = title.textContent;
+
+  return true;
+}
+window.loadUserProfile = function(username) {
+  if (!username) return;
+
+  currentPage = null; // para que tu setInterval no intente refrescar "perfil"
+  fetch(`../php/perfil_usuario.php?u=${encodeURIComponent(username)}`)
+    .then(r => {
+      if (!r.ok) throw new Error('Perfil no encontrado');
+      return r.text();
+    })
+    .then(html => {
+      const ok = replaceMainFromHtml(html);
+      if (!ok) return;
+
+      // opcional: marcar "Perfil" como activo en el menú
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
+      const perfilBtn = document.querySelector(`[data-page="perfil"]`);
+      if (perfilBtn) perfilBtn.classList.add('activo');
+
+      // history para volver con el botón atrás
+      history.pushState({ type: 'user', u: username }, '', `?u=${encodeURIComponent(username)}`);
+    })
+    .catch(err => console.error(err));
+};
+
     setInterval(() => {
       if (currentPage) {
         fetch(`../php/${currentPage}.php`)
@@ -254,6 +292,84 @@ document.addEventListener('change', async function (e) {
     input.value = '';
   }
 });
+window.addEventListener('popstate', (e) => {
+  const st = e.state;
+  if (st && st.type === 'user' && st.u) {
+    window.loadUserProfile(st.u);
+    return;
+  }
+
+  // si vuelves a "home" sin state, recarga el index normal
+  // (o si prefieres, podrías re-pintar Inicio)
+  if (!st) {
+    window.location.href = 'index.php';
+  }
+});
+
+</script>
+
+<script>
+document.addEventListener('click', async (e) => {
+  const btnSeguir = e.target.closest('#btnSeguir');
+  if (btnSeguir) {
+    e.preventDefault();
+
+    const id = btnSeguir.dataset.id;
+    const sigo = btnSeguir.dataset.sigo === '1';
+    const contador = document.getElementById('nSeguidores');
+
+    const url = sigo
+      ? '../php/dejar_seguir_usuario.php'
+      : '../php/seguir_usuario.php';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id_usuario=${encodeURIComponent(id)}`
+      });
+
+      const txt = (await res.text()).trim();
+
+      if (txt === 'no-login') {
+        alert('Tienes que iniciar sesión');
+        return;
+      }
+      if (txt !== 'ok') {
+        alert('Error al procesar');
+        return;
+      }
+
+      // 🔁 Toggle botón
+      btnSeguir.dataset.sigo = sigo ? '0' : '1';
+      btnSeguir.textContent = sigo ? 'Seguir' : 'Dejar de seguir';
+
+      // 🔢 Actualizar contador en UI
+      if (contador) {
+        let n = parseInt(contador.textContent, 10) || 0;
+        contador.textContent = sigo ? Math.max(0, n - 1) : n + 1;
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión');
+    }
+    return;
+  }
+
+  // CHAT
+  const btnChat = e.target.closest('#btnChat');
+  if (btnChat) {
+    e.preventDefault();
+    const user = btnChat.dataset.user;
+    if (!user) return;
+
+    if (typeof loadPage === 'function') {
+      sessionStorage.setItem('chatUser', user);
+      loadPage('chat');
+    }
+  }
+}, true);
 </script>
 
 
