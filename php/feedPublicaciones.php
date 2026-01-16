@@ -24,7 +24,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 while ($row = $result->fetch_assoc()):
-  $username  = (string)($row['usuario'] ?? '');   // SIN @
+  $username  = (string)($row['usuario'] ?? '');
   $texto     = $row['texto'] ?? '';
   $ubicacion = $row['ubicacion'] ?? '';
   $pie       = $row['pie_foto'] ?? '';
@@ -33,42 +33,42 @@ while ($row = $result->fetch_assoc()):
 
   $imgUrl = $imagen ? "../multimedia/" . rawurlencode($imagen) : null;
 ?>
-<article class="publicaciones"
-  data-id="<?= (int)$row['id_publicacion'] ?>"
-  data-usuario="<?= htmlspecialchars($username, ENT_QUOTES) ?>"
-  data-fecha="<?= htmlspecialchars($fecha ?? '', ENT_QUOTES) ?>"
-  data-ubicacion="<?= htmlspecialchars($ubicacion ?? '', ENT_QUOTES) ?>"
-  data-texto="<?= htmlspecialchars($texto ?? '', ENT_QUOTES) ?>"
-  data-img="<?= htmlspecialchars($imgUrl ?? '', ENT_QUOTES) ?>"
-  data-pie="<?= htmlspecialchars($pie ?? '', ENT_QUOTES) ?>"
-  tabindex="0"
->
-  <h3>
-    <a class="user-link"
-       href="../php/perfil_usuario.php?u=<?= urlencode($username) ?>">
-      @<?= htmlspecialchars($username) ?>
-    </a>
-  </h3>
+  <article class="publicaciones"
+    data-id="<?= (int)$row['id_publicacion'] ?>"
+    data-usuario="<?= htmlspecialchars($username, ENT_QUOTES) ?>"
+    data-fecha="<?= htmlspecialchars($fecha ?? '', ENT_QUOTES) ?>"
+    data-ubicacion="<?= htmlspecialchars($ubicacion ?? '', ENT_QUOTES) ?>"
+    data-texto="<?= htmlspecialchars($texto ?? '', ENT_QUOTES) ?>"
+    data-img="<?= htmlspecialchars($imgUrl ?? '', ENT_QUOTES) ?>"
+    data-pie="<?= htmlspecialchars($pie ?? '', ENT_QUOTES) ?>"
+    tabindex="0"
+  >
+    <h3>
+      <a
+        href="#"
+        class="user-link"
+        data-user="<?= htmlspecialchars($username, ENT_QUOTES) ?>"
+      >@<?= htmlspecialchars($username) ?></a>
+    </h3>
 
-  <?php if ($fecha): ?>
-    <small><?= htmlspecialchars($fecha) ?></small>
-  <?php endif; ?>
+    <?php if ($fecha): ?>
+      <small><?= htmlspecialchars($fecha) ?></small>
+    <?php endif; ?>
 
-  <?php if ($ubicacion !== ''): ?>
-    <p><strong>📍</strong> <?= htmlspecialchars($ubicacion) ?></p>
-  <?php endif; ?>
+    <?php if ($ubicacion !== ''): ?>
+      <p><strong>📍</strong> <?= htmlspecialchars($ubicacion) ?></p>
+    <?php endif; ?>
 
-  <p><?= nl2br(htmlspecialchars($texto)) ?></p>
+    <p><?= nl2br(htmlspecialchars($texto)) ?></p>
 
-  <?php if ($imgUrl): ?>
-    <div class="publicacion-imagen">
-      <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Imagen de la publicación">
-    </div>
-  <?php endif; ?>
+    <?php if ($imgUrl): ?>
+      <div class="publicacion-imagen">
+        <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Imagen de la publicación">
+      </div>
+    <?php endif; ?>
 
-  <?php if ($pie !== ''): ?>
-    <p><em><?= htmlspecialchars($pie) ?></em></p>
-  <?php endif; ?>
-</article>
+    <?php if ($pie !== ''): ?>
+      <p><em><?= htmlspecialchars($pie) ?></em></p>
+    <?php endif; ?>
+  </article>
 <?php endwhile; ?>
-

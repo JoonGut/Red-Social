@@ -14,21 +14,16 @@
     <div class="modal-body">
       <article class="post-modal">
 
-        <!-- Texto (arriba, como Twitter) -->
         <p id="m-texto" class="post-text"></p>
 
-        <!-- Ubicación opcional -->
         <div id="m-ubicacion" class="post-location" style="display:none;"></div>
 
-        <!-- Imagen -->
         <div class="post-media" id="m-img-wrap" style="display:none;">
           <img id="m-img" alt="Imagen publicación">
         </div>
 
-        <!-- Pie de foto (caption) -->
         <p id="m-pie" class="post-caption"></p>
 
-        <!-- Acciones -->
         <div class="post-actions">
           <button type="button" id="borrarPublicacion" class="btn-danger">
             Eliminar publicación
@@ -149,16 +144,19 @@
 
   // Click en publicación del feed (article.publicaciones)
   document.addEventListener('click', (e) => {
-    const article = e.target.closest('article.publicaciones');
-    if (article) {
-      openPostModal(article);
-      return;
-    }
+  if (e.target.closest('a.user-link')) return;
 
-    if (e.target.id === 'modalPublicacion' || e.target.id === 'cerrarModal') {
-      closePostModal();
-    }
-  }, true);
+  const article = e.target.closest('article.publicaciones');
+  if (article) {
+    openPostModal(article);
+    return;
+  }
+
+  if (e.target.id === 'modalPublicacion' || e.target.id === 'cerrarModal') {
+    closePostModal();
+  }
+}, true);
+
 
   // ESC
   document.addEventListener('keydown', (e) => {

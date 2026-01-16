@@ -26,14 +26,12 @@ require __DIR__ . '/db.php';
           <a href="index.php" class="volver">← Volver</a>
         </div>
         <?php
-        // foto por defecto si no hay
         $foto = $_SESSION['foto_perfil'] ?? '';
         $fotoUrl = ($foto !== '') ? '../multimedia/' . $foto : '';
         $bioActual = $_SESSION['biografia'] ?? '';
         ?>
 
         <div class="info-perfil">
-          <!-- Avatar clicable -->
           <form id="formFotoPerfil" class="avatar-form" method="POST" action="subirFotoPerfil.php" enctype="multipart/form-data">
             <label class="avatar avatar-click" for="inputFotoPerfil" title="Cambiar foto">
               <?php if ($fotoUrl): ?>
@@ -99,7 +97,6 @@ require __DIR__ . '/db.php';
           </span>
         </div>
         <?php
-        // Publicaciones del usuario (ajusta nombres de columnas a tu BD)
         $idUsuario = (int)($_SESSION['id_usuario'] ?? 0);
 
         $stmt = $mysqli->prepare("
@@ -190,13 +187,10 @@ require __DIR__ . '/db.php';
             return;
           }
 
-          // ✅ actualizar imagen en pantalla sin recargar
           const img = form.querySelector('label.avatar img');
           if (img) {
-            // cache-bust para que el navegador no muestre la antigua
             img.src = data.foto_url + '?t=' + Date.now();
           } else {
-            // si antes no había img, lo creamos
             const label = form.querySelector('label.avatar');
             if (label) {
               label.innerHTML = `<img src="${data.foto_url}?t=${Date.now()}" alt="Foto de perfil">`;

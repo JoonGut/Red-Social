@@ -17,7 +17,6 @@ if ($idUsuario <= 0 || $idUsuario === $idSeguidor) {
   exit;
 }
 
-// evitar duplicados
 $stmt = $mysqli->prepare("
   SELECT 1 FROM seguidores 
   WHERE id_usuario = ? AND id_seguidor = ?

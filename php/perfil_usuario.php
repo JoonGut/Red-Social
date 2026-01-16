@@ -7,14 +7,12 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $u = trim((string)($_GET['u'] ?? ''));
 
-// Username válido (ajusta si tu app permite otros caracteres)
 if ($u === '' || !preg_match('/^[a-zA-Z0-9_]{3,30}$/', $u)) {
   http_response_code(400);
   echo "<!doctype html><html><head><title>Perfil</title></head><body><main class='contenido-principal'><p>Usuario inválido.</p></main></body></html>";
   exit;
 }
 
-// 1) Datos del usuario objetivo
 $stmt = $mysqli->prepare("
   SELECT id_usuario, usuario, nombre, biografia, foto_perfil
   FROM usuario
@@ -43,7 +41,6 @@ if ($foto !== '') {
   $fotoUrl = '../multimedia/' . rawurlencode($foto);
 }
 
-// 2) Stats
 $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
 $stmt->bind_param('i', $idPerfil);
 $stmt->execute();
@@ -62,7 +59,6 @@ $stmt->execute();
 $publicaciones = (int)$stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
-// 3) Publicaciones del usuario objetivo
 $stmt = $mysqli->prepare("
   SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion
   FROM publicacion
@@ -74,7 +70,6 @@ $stmt->execute();
 $pubs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// 4) ¿Yo lo sigo?
 $yo = (int)($_SESSION['id_usuario'] ?? 0);
 $sigo = false;
 
@@ -95,7 +90,6 @@ if ($yo > 0 && $yo !== $idPerfil) {
 </head>
 
 <body>
-  <!-- IMPORTANTE: dejamos .contenido-principal para que tu AJAX lo reemplace -->
   <main class="contenido-principal">
 
     <section class="cabecera-perfil">

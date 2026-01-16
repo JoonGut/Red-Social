@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
-/* Recoger y limpiar */
 $nombre = trim((string)($_POST['nombre'] ?? ''));
 $bio    = trim((string)($_POST['bio'] ?? ''));
 
@@ -28,7 +27,6 @@ if ($nombre === '') {
   exit;
 }
 
-/* Limitar longitudes (tu DB es varchar(250), pero tú usas 60/240 y está ok) */
 $nombre = mb_substr($nombre, 0, 60);
 $bio    = mb_substr($bio, 0, 240);
 
@@ -42,7 +40,6 @@ if (!$stmt) {
   exit;
 }
 
-/* ✅ bind_param correcto: 2 strings + 1 int = "ssi" */
 $stmt->bind_param('ssi', $nombre, $bio, $idUsuario);
 
 if (!$stmt->execute()) {
@@ -54,11 +51,9 @@ if (!$stmt->execute()) {
 
 $stmt->close();
 
-/* ✅ Actualizar sesión con el nombre correcto */
 $_SESSION['nombre'] = $nombre;
 $_SESSION['biografia'] = $bio;
 
-/* ✅ Respuesta para fetch */
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode(['ok' => true]);
 exit;

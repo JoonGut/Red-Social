@@ -74,7 +74,6 @@ session_start();
       </section>
 
       <section class="feed">
-        <!-- Tu feed real -->
         <?php include __DIR__ . '/feedPublicaciones.php'; ?>
       </section>
     </main>
@@ -148,6 +147,19 @@ session_start();
     };
 
     let currentPage = null;
+  document.addEventListener('click', (e) => {
+  const userLink = e.target.closest('a.user-link');
+  if (userLink) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const u = userLink.dataset.user || '';
+    if (u && typeof window.loadUserProfile === 'function') {
+      window.loadUserProfile(u);
+    }
+    return;
+  }
+}, true);
 
     document.addEventListener('DOMContentLoaded', function() {
       const menuItems = document.querySelectorAll('.menu-item[data-page]');
@@ -220,7 +232,7 @@ function replaceMainFromHtml(html) {
 window.loadUserProfile = function(username) {
   if (!username) return;
 
-  currentPage = null; // para que tu setInterval no intente refrescar "perfil"
+  currentPage = null; 
   fetch(`../php/perfil_usuario.php?u=${encodeURIComponent(username)}`)
     .then(r => {
       if (!r.ok) throw new Error('Perfil no encontrado');
@@ -230,12 +242,10 @@ window.loadUserProfile = function(username) {
       const ok = replaceMainFromHtml(html);
       if (!ok) return;
 
-      // opcional: marcar "Perfil" como activo en el menú
       document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
       const perfilBtn = document.querySelector(`[data-page="perfil"]`);
       if (perfilBtn) perfilBtn.classList.add('activo');
 
-      // history para volver con el botón atrás
       history.pushState({ type: 'user', u: username }, '', `?u=${encodeURIComponent(username)}`);
     })
     .catch(err => console.error(err));
@@ -299,8 +309,7 @@ window.addEventListener('popstate', (e) => {
     return;
   }
 
-  // si vuelves a "home" sin state, recarga el index normal
-  // (o si prefieres, podrías re-pintar Inicio)
+  
   if (!st) {
     window.location.href = 'index.php';
   }
@@ -340,11 +349,10 @@ document.addEventListener('click', async (e) => {
         return;
       }
 
-      // 🔁 Toggle botón
       btnSeguir.dataset.sigo = sigo ? '0' : '1';
       btnSeguir.textContent = sigo ? 'Seguir' : 'Dejar de seguir';
 
-      // 🔢 Actualizar contador en UI
+     
       if (contador) {
         let n = parseInt(contador.textContent, 10) || 0;
         contador.textContent = sigo ? Math.max(0, n - 1) : n + 1;
@@ -357,7 +365,7 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
-  // CHAT
+  
   const btnChat = e.target.closest('#btnChat');
   if (btnChat) {
     e.preventDefault();

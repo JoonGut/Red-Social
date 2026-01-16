@@ -13,15 +13,12 @@
 
     <div class="modal-body">
       <article class="post-modal">
-        <!-- Texto arriba -->
         <p id="p-desc" class="post-text"></p>
 
-        <!-- Imagen -->
         <div class="post-media" id="p-img-wrap" style="display:none;">
           <img id="p-img" alt="Imagen publicación">
         </div>
 
-        <!-- Pie de foto debajo -->
         <p id="p-pie" class="post-caption"></p>
         <div class="post-actions">
           <button type="button" id="borrarPublicacion" class="btn-danger">
@@ -50,13 +47,11 @@
     const descEl = document.getElementById('p-desc');
     const fechaEl = document.getElementById('p-fecha');
 
-    // Texto arriba
     if (descEl) {
       descEl.textContent = desc;
       descEl.style.display = desc ? '' : 'none';
     }
 
-    // Imagen
     if (imgWrap && img) {
       if (imgUrl) {
         imgWrap.style.display = '';
@@ -67,13 +62,11 @@
       }
     }
 
-    // Pie
     if (pieEl) {
       pieEl.textContent = pie;
       pieEl.style.display = pie ? '' : 'none';
     }
 
-    // Fecha
     if (fechaEl) {
       if (fecha) { fechaEl.style.display = ''; fechaEl.textContent = fecha; }
       else { fechaEl.style.display = 'none'; fechaEl.textContent = ''; }
@@ -92,7 +85,6 @@
     document.body.classList.remove('modal-open');
   }
 
-  // Listener global (sirve aunque el perfil se cargue por fetch)
   document.addEventListener('click', (e) => {
     const target = e.target;
     if (!target || !target.closest) return;

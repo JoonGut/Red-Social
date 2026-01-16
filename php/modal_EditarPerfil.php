@@ -1,6 +1,5 @@
 <?php
-// modal_EditarPerfil.php
-// Asegúrate de que session_start() ya se haya hecho antes (en perfil.php)
+
 $nombreActual = $_SESSION['nombre'] ?? '';
 $bioActual = $_SESSION['biografia'] ?? '';
 ?>
@@ -91,7 +90,7 @@ $bioActual = $_SESSION['biografia'] ?? '';
     if (!form) return;
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // ✅ evita cambio de página
+      e.preventDefault(); 
 
       try {
         const res = await fetch(form.action, {
@@ -106,13 +105,11 @@ $bioActual = $_SESSION['biografia'] ?? '';
           return;
         }
 
-        // ✅ opcional: actualizar texto en la página sin recargar
         const nombreEl = document.getElementById('perfilNombre');
         const bioEl = document.getElementById('perfilBio');
         if (nombreEl && data.nombre) nombreEl.textContent = data.nombre;
         if (bioEl && data.biografia !== undefined) bioEl.textContent = data.biografia;
 
-        // ✅ cerrar modal
         closeEditarPerfil();
 
       } catch (err) {
