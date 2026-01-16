@@ -1,9 +1,10 @@
 /* =========================
-   NeonNest SIMPLE — Modal
-   (sustituye tu bloque actual)
+   NeonNest — MODAL.css (Post style tipo Twitter/X)
+   - Unifica modal feed + perfil
+   - Texto arriba, media abajo, caption debajo
    ========================= */
 
-/* ===== Overlay ===== */
+/* Overlay */
 .modal-overlay{
   position: fixed;
   inset: 0;
@@ -15,168 +16,360 @@
   padding: 20px;
 }
 
-.modal-overlay.abierto{
-  display: flex;
-}
+.modal-overlay.abierto{ display:flex; }
 
-/* ===== Modal ===== */
+/* Modal base */
 .modal{
-  width: min(540px, 100%);
+  width: min(640px, 100%);
   max-height: 90vh;
-  background: #12172a;                 /* card oscura */
+  background: #12172a;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 18px;
-  box-shadow: 0 10px 26px rgba(0,0,0,.45);
+  box-shadow: 0 18px 40px rgba(0,0,0,.55);
   overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-
-  /* animación simple */
+  display:flex;
+  flex-direction:column;
   animation: modalIn .18s ease-out;
 }
 
 @keyframes modalIn{
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity:0; transform: translateY(12px); }
+  to { opacity:1; transform: translateY(0); }
 }
 
-/* ===== Header ===== */
+/* Header */
 .modal-header{
-  display: grid;
-  grid-template-columns: 42px 1fr 42px;
-  align-items: center;
-  padding: 14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 12px 14px;
   background: #151b31;
   border-bottom: 1px solid rgba(255,255,255,.08);
   color: rgba(255,255,255,.92);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.modal-header h2{
-  margin: 0;
-  font-size: 16px;
-  text-align: center;
-  font-weight: 650;
+.modal-header-post{
+  padding: 10px 12px;
 }
 
-/* ===== Botón cerrar ===== */
-#cerrarModalEditarPerfil{
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: #0e1324;
-  color: rgba(255,255,255,.9);
-  cursor: pointer;
+/* Close btn */
+.btn-close{
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
-  font-size: 20px;
-  line-height: 1;
-}
-
-#cerrarModal:hover{
-  border-color: rgba(124,92,255,.25);  /* morado neon simple */
-}
-#cerrarModal{
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: #0e1324;
-  color: rgba(255,255,255,.9);
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.92);
   cursor: pointer;
-  border-radius: 999px;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: all .15s ease;
 }
 
-#cerrarModal:hover{
-  border-color: rgba(124,92,255,.25);  /* morado neon simple */
+.btn-close:hover{
+  background: rgba(255,120,120,.18);
+  border-color: rgba(255,120,120,.28);
+  color: #fff;
+  transform: scale(1.06);
 }
-/* ===== Body ===== */
+
+/* Body */
 .modal-body{
-  padding: 16px;
+  padding: 12px;
+  background: #12172a;
+  overflow-y: auto;
+}
+
+/* ===== Post header (tipo Twitter) ===== */
+.post-head{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.post-head-txt{
+  display:flex;
+  flex-direction:column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.post-user{
+  font-weight: 800;
+  font-size: 15px;
+  color: rgba(255,255,255,.96);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-meta{
+  font-size: 12px;
+  color: rgba(255,255,255,.60);
+}
+
+/* ===== Post layout ===== */
+.post-modal{
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  padding: 14px;
   display: grid;
   gap: 12px;
-  background: #12172a;
 }
 
-/* ===== Labels ===== */
-.modal-body label{
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255,255,255,.75);
-}
-
-/* ===== Inputs ===== */
-.modal-body input,
-.modal-body textarea{
-  width: 100%;
-  padding: 11px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: #0e1324;
+/* Texto arriba */
+.post-text{
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
   color: rgba(255,255,255,.92);
+  white-space: pre-line;
+}
+
+/* Ubicación */
+.post-location{
+  font-size: 13px;
+  color: rgba(255,255,255,.72);
+}
+
+/* Media */
+.post-media{
+  width: 100%;
+  max-height: 62vh;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.post-media img{
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+  object-fit: contain;
+  display:block;
+}
+
+/* Caption (pie de foto) */
+.post-caption{
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  color: rgba(255,255,255,.80);
   font-size: 14px;
+  line-height: 1.35;
+  font-style: italic;
+}
+
+/* Si vacío, no ocupa espacio */
+.post-caption:empty{ display:none; }
+.post-text:empty{ display:none; }
+
+/* Actions */
+.post-actions{
+  display:flex;
+  justify-content:flex-end;
+  padding-top: 4px;
+}
+
+.btn-danger{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,120,120,.25);
+  background: rgba(255,120,120,.10);
+  color: rgba(255,255,255,.92);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.btn-danger:hover{
+  background: rgba(255,120,120,.18);
+  border-color: rgba(255,120,120,.35);
+}
+
+/* Bloquear scroll fondo */
+body.modal-open{ overflow:hidden; }
+/* =========================
+   NeonNest — MODAL.css (Post style tipo Twitter/X)
+   - Unifica modal feed + perfil
+   - Texto arriba, media abajo, caption debajo
+   ========================= */
+
+/* Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75); /* Un poco más oscuro para enfoque */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  padding: 20px;
+  backdrop-filter: blur(4px); /* Efecto cristal moderno */
+}
+
+/* Modal base */
+.modal {
+  width: min(600px, 100%);
+  max-height: 90vh;
+  background: #12172a;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalIn .2s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(15px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #151b31;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+/* Close btn (X) */
+.modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,.6);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color .2s;
+  padding: 5px;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+.modal-spacer { flex: 1; }
+
+/* Body & Form */
+.modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+/* Textarea (¿Qué está pasando?) */
+#textoPub {
+  width: 100%;
+  min-height: 120px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 19px; /* Tamaño tipo Twitter */
   resize: none;
+  outline: none;
+  padding: 0;
+}
+
+#textoPub::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+/* Inputs de Ubicación y Pie de foto */
+.modal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-row input[type="text"] {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  transition: all .2s;
+}
+
+.modal-row input[type="text"]:focus {
+  background: rgba(255,255,255,0.08);
+  border-color: #00acee; /* Azul acento */
   outline: none;
 }
 
-.modal-body textarea{
-  min-height: 90px;
+/* File Upload Button */
+.custom-file-upload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: #00acee;
+  background: rgba(0, 172, 238, 0.1);
+  cursor: pointer;
+  transition: background .2s;
 }
 
-.modal-body input::placeholder,
-.modal-body textarea::placeholder{
-  color: rgba(255,255,255,.45);
+.custom-file-upload:hover {
+  background: rgba(0, 172, 238, 0.2);
 }
 
-.modal-body input:focus,
-.modal-body textarea:focus{
-  border-color: rgba(124,92,255,.40);
-}
-
-/* ===== Footer ===== */
-.modal-footer{
+/* Footer & Contador */
+.modal-footer {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 8px;
-}
-
-/* ===== Botones ===== */
-.boton-cancelar{
-  padding: 10px 14px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 14px;
-  color: rgba(255,255,255,.80);
-}
-
-.boton-cancelar:hover{
-  border-color: rgba(255,255,255,.18);
-  background: rgba(255,255,255,.04);
-}
-
-/* OJO: si ya tienes .boton-registrarse global, esto SOLO ajusta dentro del modal */
-.modal .boton-registrarse{
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
   padding: 12px 16px;
-  background: #7c5cff;
-  color: white;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+#contador {
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+}
+
+/* Publicar Button (Estilo NeonNest) */
+.boton-registrarse {
+  background: #00acee;
+  color: #fff;
   border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  font-size: 14px;
+  padding: 8px 20px;
+  border-radius: 999px;
   font-weight: 700;
-  width: auto;
+  font-size: 15px;
+  cursor: pointer;
+  transition: opacity .2s, transform .1s;
 }
 
-.modal .boton-registrarse:hover{
-  filter: brightness(1.05);
+.boton-registrarse:hover {
+  opacity: 0.9;
 }
 
-/* ===== Bloquear scroll fondo ===== */
-body.modal-open{
-  overflow: hidden;
+.boton-registrarse:active {
+  transform: scale(0.96);
 }
+
+/* Bloquear scroll fondo */
+body.modal-open { overflow: hidden; }

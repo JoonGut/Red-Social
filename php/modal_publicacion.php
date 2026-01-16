@@ -1,28 +1,47 @@
 <div id="modalPublicacion" class="modal-overlay" aria-hidden="true">
-  <div class="modal modal-confirm" role="dialog" aria-modal="true" aria-labelledby="mp-titulo">
-    <div class="modal-header">
-      <div></div>
-      <h2 id="mp-titulo"></h2>
-      <button type="button" id="cerrarModalPublicacion">×</button>
+  <div class="modal modal-post">
+    <div class="modal-header modal-header-post">
+      <div class="post-head">
+        <div class="post-head-txt">
+          <div id="m-user" class="post-user">@usuario</div>
+          <div id="m-fecha" class="post-meta"></div>
+        </div>
+      </div>
+
+      <button id="cerrarModal" type="button" class="btn-close" aria-label="Cerrar">×</button>
     </div>
 
     <div class="modal-body">
-      <small id="mp-fecha" style="display:none;"></small>
-      <p id="mp-ubicacion" style="display:none;"></p>
+      <article class="post-modal">
 
-      <p id="mp-texto"></p>
+        <!-- Texto (arriba, como Twitter) -->
+        <p id="m-texto" class="post-text"></p>
 
-      <div id="mp-imagen-wrap" style="display:none;">
-        <img id="mp-imagen" alt="Imagen de la publicación" />
-      </div>
+        <!-- Ubicación opcional -->
+        <div id="m-ubicacion" class="post-location" style="display:none;"></div>
 
-      <p id="mp-pie" style="display:none;"></p>
-              <button type="button" id="borrarPublicacion" class="boton-eliminar" >Eliminar publicación</button>
+        <!-- Imagen -->
+        <div class="post-media" id="m-img-wrap" style="display:none;">
+          <img id="m-img" alt="Imagen publicación">
+        </div>
+
+        <!-- Pie de foto (caption) -->
+        <p id="m-pie" class="post-caption"></p>
+
+        <!-- Acciones -->
+        <div class="post-actions">
+          <button type="button" id="borrarPublicacion" class="btn-danger">
+            Eliminar publicación
+          </button>
+        </div>
+
+      </article>
     </div>
   </div>
 </div>
+
 <script>
-    function escapeHtml(str) {
+function escapeHtml(str) {
   return (str ?? '').replace(/[&<>"']/g, m => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[m]));
@@ -30,6 +49,7 @@
 
 function openPostModal(article) {
   const modal = document.getElementById('modalPublicacion');
+  if (!modal) return;
 
   const usuario = article.dataset.usuario || '';
   const fecha = article.dataset.fecha || '';
@@ -37,69 +57,97 @@ function openPostModal(article) {
   const texto = article.dataset.texto || '';
   const img = article.dataset.img || '';
   const pie = article.dataset.pie || '';
+  const postId = article.dataset.id || '';
 
-  const postId = article.dataset.id;
-document.getElementById('borrarPublicacion').dataset.id = postId;
+  // Header: usuario + fecha
+  const userEl = document.getElementById('m-user');
+  if (userEl) userEl.textContent = usuario ? `@${usuario}` : '@usuario';
 
-  document.getElementById('mp-titulo').textContent = usuario;
-
-  const fechaEl = document.getElementById('mp-fecha');
-  if (fecha) { fechaEl.style.display = ''; fechaEl.textContent = fecha; }
-  else { fechaEl.style.display = 'none'; }
-
-  const ubiEl = document.getElementById('mp-ubicacion');
-  if (ubicacion) { ubiEl.style.display = ''; ubiEl.innerHTML = `<strong>📍</strong> ${escapeHtml(ubicacion)}`; }
-  else { ubiEl.style.display = 'none'; }
-
-  // Texto con saltos de línea
-  document.getElementById('mp-texto').innerHTML = escapeHtml(texto).replace(/\n/g, '<br>');
-
-  const imgWrap = document.getElementById('mp-imagen-wrap');
-  const imgEl = document.getElementById('mp-imagen');
-  if (img) {
-    imgWrap.style.display = '';
-    imgEl.src = img;
-  } else {
-    imgWrap.style.display = 'none';
-    imgEl.removeAttribute('src');
+  const fechaEl = document.getElementById('m-fecha');
+  if (fechaEl) {
+    fechaEl.textContent = fecha || '';
+    fechaEl.style.display = fecha ? '' : 'none';
   }
 
-  const pieEl = document.getElementById('mp-pie');
-  if (pie) { pieEl.style.display = ''; pieEl.innerHTML = `<em>${escapeHtml(pie)}</em>`; }
-  else { pieEl.style.display = 'none'; }
+  // Texto (arriba)
+  const textoEl = document.getElementById('m-texto');
+  if (textoEl) {
+    textoEl.innerHTML = escapeHtml(texto).replace(/\n/g, '<br>');
+    textoEl.style.display = texto ? '' : 'none';
+  }
+
+  // Ubicación
+  const ubiEl = document.getElementById('m-ubicacion');
+  if (ubiEl) {
+    if (ubicacion) {
+      ubiEl.style.display = '';
+      ubiEl.innerHTML = `📍 ${escapeHtml(ubicacion)}`;
+    } else {
+      ubiEl.style.display = 'none';
+      ubiEl.textContent = '';
+    }
+  }
+
+  // Imagen
+  const imgWrap = document.getElementById('m-img-wrap');
+  const imgEl = document.getElementById('m-img');
+  if (imgWrap && imgEl) {
+    if (img) {
+      imgWrap.style.display = '';
+      imgEl.src = img + (img.includes('?') ? '&' : '?') + 't=' + Date.now();
+    } else {
+      imgWrap.style.display = 'none';
+      imgEl.removeAttribute('src');
+    }
+  }
+
+  // Pie de foto (debajo de la imagen)
+  const pieEl = document.getElementById('m-pie');
+  if (pieEl) {
+    pieEl.textContent = pie || '';
+    pieEl.style.display = pie ? '' : 'none';
+  }
+
+  // Borrar
+  const borrarBtn = document.getElementById('borrarPublicacion');
+  if (borrarBtn) borrarBtn.dataset.id = postId;
 
   modal.classList.add('abierto');
   modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
 }
 
 function closePostModal() {
   const modal = document.getElementById('modalPublicacion');
+  if (!modal) return;
   modal.classList.remove('abierto');
   modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
 }
 
-// Click en cualquier publicación
+// Click en publicación del feed (article.publicaciones)
 document.addEventListener('click', (e) => {
   const article = e.target.closest('article.publicaciones');
-  if (article) openPostModal(article);
+  if (article) {
+    openPostModal(article);
+    return;
+  }
 
-  // Cerrar si click en fondo o botón cerrar
-  if (e.target.id === 'modalPublicacion' || e.target.id === 'cerrarModalPublicacion') {
+  if (e.target.id === 'modalPublicacion' || e.target.id === 'cerrarModal') {
     closePostModal();
   }
-});
+}, true);
 
-// ESC para cerrar
+// ESC
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePostModal();
 });
 
+// eliminar
 document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
   const btn = document.getElementById('borrarPublicacion');
-  const postId = btn.dataset.id;
-
+  const postId = btn?.dataset?.id;
   if (!postId) return;
-
 
   fetch('../php/eliminar_publicacion.php', {
     method: 'POST',
@@ -109,7 +157,7 @@ document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
   .then(res => res.text())
   .then(res => {
     if (res === 'ok') {
-      document.querySelector(`article.publicacion[data-id="${postId}"]`)?.remove();
+      document.querySelector(`article.publicaciones[data-id="${postId}"]`)?.remove();
       closePostModal();
     } else {
       alert('Error al eliminar');
@@ -117,6 +165,4 @@ document.getElementById('borrarPublicacion')?.addEventListener('click', () => {
   })
   .catch(() => alert('Error de conexión'));
 });
-
 </script>
-

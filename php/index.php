@@ -131,9 +131,10 @@ session_start();
   <?php include __DIR__ . '/modal_cerrar_sesion.php'; ?>
   <?php include __DIR__ . '/modal_publicacion.php'; ?>
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
+  <?php include __DIR__ . '/modal_publicaciones_perfil.php'; ?>
+
 
   <script>
-    // Mantiene funcionalidades: abre tu modal con el mismo botón real.
     document.addEventListener('DOMContentLoaded', () => {
       const mainBtn = document.getElementById('abrirModal');
       const q1 = document.getElementById('abrirModalQuick');
@@ -224,21 +225,37 @@ session_start();
     }, 30000);
   </script>
   <script>
-/*
-  Delegación de eventos para subida de foto de perfil.
-  Funciona aunque perfil.php se cargue por fetch (SPA).
-*/
-document.addEventListener('change', function (e) {
-  if (e.target && e.target.id === 'inputFotoPerfil') {
-    const input = e.target;
-    const form = input.closest('form');
+document.addEventListener('submit', function (e) {
+  const form = e.target;
+  if (form && form.id === 'formFotoPerfil') {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
 
-    if (form && input.files && input.files.length > 0) {
-      form.submit();
-    }
+document.addEventListener('change', async function (e) {
+  if (!e.target || e.target.id !== 'inputFotoPerfil') return;
+
+  const input = e.target;
+  const form = input.closest('form');
+  if (!form || !input.files || input.files.length === 0) return;
+
+  try {
+    const res = await fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form)
+    });
+
+    
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    input.value = '';
   }
 });
 </script>
+
 
 </body>
 </html>

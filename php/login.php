@@ -17,7 +17,7 @@ if ($login === '' || $contraseña === '') {
     exit;
 }
 
-$sql = "SELECT id_usuario, usuario, nombre, email, password, id_rol
+$sql = "SELECT `id_usuario`, `usuario`, `nombre`, `email`, `password`, `id_rol`,`foto_perfil`, `biografia`
         FROM usuario
         WHERE usuario = ? OR email = ?
         LIMIT 1";
@@ -45,8 +45,8 @@ $_SESSION['usuario']    = $usuario['usuario'];
 $_SESSION['nombre']     = $usuario['nombre'];   
 $_SESSION['email']      = $usuario['email'];
 $_SESSION['id_rol']     = (int)$usuario['id_rol'];
-$_SESSION['foto_perfil'] = $fila['foto_perfil'];
-$_SESSION['biografia'] = $fila['biografia'];
+$_SESSION['foto_perfil'] = $usuario['foto_perfil'];
+$_SESSION['biografia'] = $usuario['biografia'];
 
 header('Location: index.php');
 exit;

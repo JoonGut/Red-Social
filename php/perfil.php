@@ -98,6 +98,61 @@ require __DIR__ . '/db.php';
 
           </span>
         </div>
+        <?php
+        // Publicaciones del usuario (ajusta nombres de columnas a tu BD)
+        $idUsuario = (int)($_SESSION['id_usuario'] ?? 0);
+
+        $stmt = $mysqli->prepare("
+  SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion
+  FROM publicacion
+  WHERE id_usuario = ?
+  ORDER BY fecha_publicacion DESC, id_publicacion DESC
+");
+        $stmt->bind_param('i', $idUsuario);
+        $stmt->execute();
+        $pubs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        ?>
+
+        <section class="mis-publicaciones">
+          <h3 class="titulo-seccion">Publicaciones</h3>
+
+          <div class="grid-publicaciones">
+            <?php foreach ($pubs as $p):
+              $idp = (int)$p['id_publicacion'];
+              $img = trim((string)($p['imagen'] ?? ''));
+              $txt = (string)($p['texto'] ?? '');
+              $pie = (string)($p['pie_foto'] ?? '');
+
+              $imgUrl = $img !== '' ? '../multimedia/' . $img : '';
+              $textoModal = trim($pie . "\n" . $txt);
+            ?>
+              <button
+                type="button"
+                class="grid-item"
+                data-id="<?php echo $idp; ?>"
+                data-img="<?php echo htmlspecialchars($imgUrl); ?>"
+                data-pie="<?php echo htmlspecialchars($pie); ?>"
+                data-desc="<?php echo htmlspecialchars($txt); ?>"
+                data-fecha="<?php echo htmlspecialchars($p['fecha_publicacion'] ?? ''); ?>">
+
+                <?php if ($imgUrl): ?>
+                  <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Publicación <?php echo $idp; ?>">
+                <?php else: ?>
+                  <div class="grid-item-texto">
+                    <?php if (trim($pie) !== ''): ?>
+                      <div class="grid-txt-pie"><?php echo htmlspecialchars($pie); ?></div>
+                      <div class="grid-txt-desc"><?php echo htmlspecialchars($txt); ?></div>
+                    <?php else: ?>
+                      <div class="grid-txt-desc"><?php echo htmlspecialchars($txt); ?></div>
+                    <?php endif; ?>
+                  </div>
+                <?php endif; ?>
+              </button>
+            <?php endforeach; ?>
+          </div>
+        </section>
+
       </section>
 
 
@@ -114,19 +169,49 @@ require __DIR__ . '/db.php';
   </div>
 
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
-                <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('inputFotoPerfil');
-    const form = document.getElementById('formFotoPerfil');
-    if (input && form) {
-      input.addEventListener('change', () => {
-        if (input.files && input.files.length > 0) {
-          form.submit(); // sube la foto
+  <?php include __DIR__ . '/modal_publicaciones_perfil.php'; ?>
+
+  <script>
+    document.addEventListener('change', async (e) => {
+      if (e.target && e.target.id === 'inputFotoPerfil') {
+        const input = e.target;
+        const form = input.closest('form');
+        if (!form || !input.files || input.files.length === 0) return;
+
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form)
+          });
+          const data = await res.json();
+
+          if (!data.ok) {
+            alert(data.error || 'Error al subir foto');
+            return;
+          }
+
+          // ✅ actualizar imagen en pantalla sin recargar
+          const img = form.querySelector('label.avatar img');
+          if (img) {
+            // cache-bust para que el navegador no muestre la antigua
+            img.src = data.foto_url + '?t=' + Date.now();
+          } else {
+            // si antes no había img, lo creamos
+            const label = form.querySelector('label.avatar');
+            if (label) {
+              label.innerHTML = `<img src="${data.foto_url}?t=${Date.now()}" alt="Foto de perfil">`;
+            }
+          }
+
+        } catch (err) {
+          console.error(err);
+          alert('Error de red');
         }
-      });
-    }
-  });
-</script>
+      }
+    });
+  </script>
+
+
 
 </body>
 
