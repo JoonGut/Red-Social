@@ -26,6 +26,7 @@
     lastId: 0,
     chats: [],
     pollTimer: null,
+    historyLoaded: false,
   };
 
   async function fetchJson(url, options) {
@@ -163,17 +164,29 @@
     const box = $("chatMessages");
     if (!box) return;
 
-   
     const existingMsg = document.getElementById("msg-" + m.id_mensaje);
     if (existingMsg) return;
-    // ------------------
-
-    const div = document.createElement("div");
-
-    div.id = "msg-" + m.id_mensaje;
 
     const myId = Number(window.__MY_ID__ || 0);
-    div.className = "msg" + (Number(m.id_usuario) === myId ? " me" : "");
+    const isMe = Number(m.id_usuario) === myId;
+
+    if (!isMe && state.historyLoaded) {
+      
+      const chatName = $("chatTopName") ? $("chatTopName").textContent : "Nuevo mensaje";
+      
+      if (Notification.permission === "granted") {
+         new Notification(chatName, {
+           body: m.texto,
+           icon: "../multimedia/file.svg" 
+         });
+      }
+    }
+    // -----------------------------
+
+    const div = document.createElement("div");
+    div.id = "msg-" + m.id_mensaje; 
+
+    div.className = "msg" + (isMe ? " me" : "");
     div.textContent = String(m.texto || "");
 
     const meta = document.createElement("div");
@@ -225,6 +238,7 @@
     if (cid <= 0) return;
 
     state.chatId = cid;
+    state.historyLoaded = false; 
 
     const hidden = $("chatId");
     if (hidden) hidden.value = String(cid);
@@ -232,7 +246,9 @@
     setTopbar(payload.other || {});
     showView(true);
     clearMessages();
-    await loadMessages(0);
+    await loadMessages(0); 
+
+    state.historyLoaded = true; 
 
     renderChatList(state.chats);
 
@@ -323,7 +339,14 @@
 
   window.__chatInit = async function () {
     showView(false);
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
 
+    if (state.pollTimer) {
+      clearInterval(state.pollTimer);
+      state.pollTimer = null;
+    }
     if (state.pollTimer) {
       clearInterval(state.pollTimer);
       state.pollTimer = null;
