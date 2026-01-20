@@ -29,6 +29,11 @@ if ($stmt->get_result()->num_rows === 0) {
     INSERT INTO seguidores (id_usuario, id_seguidor)
     VALUES (?, ?)
   ");
+  if ($stmt->affected_rows > 0) {
+    $stmtNoti = $mysqli->prepare("INSERT INTO notificaciones (id_usuario, id_actor, tipo, texto_extra) VALUES (?, ?, 'seguir', 'Te ha empezado a seguir')");
+    $stmtNoti->bind_param('ii', $idUsuario, $idSeguidor); // $idUsuario es el que recibe, $idSeguidor es el que sigue
+    $stmtNoti->execute();
+}
   $stmt->bind_param('ii', $idUsuario, $idSeguidor);
   $stmt->execute();
 }

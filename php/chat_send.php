@@ -42,7 +42,19 @@ $stmt->bind_param('sii', $texto, $yo, $idChat);
 $stmt->execute();
 $newId = (int)$stmt->insert_id;
 $stmt->close();
+$stmtDest = $mysqli->prepare("SELECT id_usuario FROM pertenece_chat WHERE id_chat = ? AND id_usuario != ? LIMIT 1");
+$stmtDest->bind_param('ii', $idChat, $yo);
+$stmtDest->execute();
+$dest = $stmtDest->get_result()->fetch_assoc();
 
+if ($dest) {
+    $idDestino = $dest['id_usuario'];
+    $resumen = mb_strlen($texto) > 20 ? mb_substr($texto, 0, 20) . '...' : $texto;
+    
+    $stmtNoti = $mysqli->prepare("INSERT INTO notificaciones (id_usuario, id_actor, tipo, referencia_id, texto_extra) VALUES (?, ?, 'mensaje', ?, ?)");
+    $stmtNoti->bind_param('iiis', $idDestino, $yo, $idChat, $resumen);
+    $stmtNoti->execute();
+}
 $stmt = $mysqli->prepare("SELECT creado_en FROM enviar_mensaje WHERE id_mensaje = ? LIMIT 1");
 $stmt->bind_param('i', $newId);
 $stmt->execute();

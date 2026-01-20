@@ -229,3 +229,24 @@
   }
   .msg{ max-width: 85%; }
 }
+/* Ticks de estado de mensaje */
+.msg-ticks {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 0.8rem;
+  color: #888; /* Gris por defecto (enviado) */
+}
+
+/* Doble tick azul (leído) */
+.msg-ticks.leido {
+  color: #00bcd4; /* Azul NeonNest */
+  font-weight: bold;
+}
+
+/* Ajuste para alinear hora y ticks */
+.msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}

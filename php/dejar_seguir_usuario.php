@@ -16,6 +16,11 @@ $stmt = $mysqli->prepare("
   DELETE FROM seguidores
   WHERE id_usuario = ? AND id_seguidor = ?
 ");
+if ($stmt->affected_rows > 0) {
+    $stmtNoti = $mysqli->prepare("INSERT INTO notificaciones (id_usuario, id_actor, tipo, texto_extra) VALUES (?, ?, 'dejar_seguir', 'Te ha dejado de seguir')");
+    $stmtNoti->bind_param('ii', $idUsuario, $idSeguidor);
+    $stmtNoti->execute();
+}
 $stmt->bind_param('ii', $idUsuario, $idSeguidor);
 $stmt->execute();
 

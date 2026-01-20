@@ -2,62 +2,80 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Iniciar sesión · NombreRedSocial</title>
+  <title>Iniciar sesión · NeonNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/index.css" />
 </head>
-<body>
-  <div class="tarjeta-registro">
-    <div class="logo-red">
-      <span>🐦</span>
+<body style="display: grid; place-items: center; min-height: 100vh;">
+
+  <div class="panel" style="width: 100%; max-width: 380px; text-align: center;">
+    
+    <div class="logo-red" style="justify-content: center; margin-bottom: 20px; border-bottom: none;">
+      <div class="logo-mark">
+        <img src="multimedia/file.svg" alt="Logo" style="width: 24px; height: 24px;">
+      </div>
+      <div class="logo-copy" style="text-align: left;">
+        <strong>NeonNest</strong>
+        <small>Bienvenido</small>
+      </div>
     </div>
 
-    <h1 class="titulo">Inicia sesión</h1>
-      <p class="subtitulo">Bienvenido de nuevo</p>
+    <h2 style="margin-bottom: 20px;">Inicia sesión</h2>
 
-    <div id="mensaje-exito" style="color: green; margin-bottom: 10px;"></div>
-    <div id="mensaje-error" style="color: red; margin-bottom: 10px;"></div>
+    <div id="mensaje-exito" style="color: var(--ok); margin-bottom: 10px; font-size: 14px;"></div>
+    <div id="mensaje-error" style="color: #ff4757; margin-bottom: 10px; font-size: 14px;"></div>
 
     <form class="formulario-registro" action="php/login.php" method="POST" novalidate>
-  <div class="campo">
-    <label for="usuario">Usuario o correo</label>
-    <input
-      type="text"
-      id="usuario"
-      name="usuario"
-      placeholder="@usuario o correo"
-      required
-    />
-  </div>
+      
+      <div style="margin-bottom: 16px; text-align: left;">
+        <label for="usuario" style="color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; margin-left: 4px;">
+          Usuario o correo
+        </label>
+        <input
+          type="text"
+          id="usuario"
+          name="usuario"
+          class="composer-input"
+          placeholder="@usuario"
+          style="cursor: text;" 
+          required
+        />
+      </div>
 
-  <div class="campo">
-    <label for="password">Contraseña</label>
-    <input
-      type="password"
-      id="password"
-      name="password"
-      placeholder="••••••••"
-      required
-    />
- 
-  </div>
+      <div style="margin-bottom: 20px; text-align: left;">
+        <label for="password" style="color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; margin-left: 4px;">
+          Contraseña
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="composer-input"
+          placeholder="••••••••"
+          style="cursor: text;"
+          required
+        />
+      </div>
 
-  <button type="submit" class="boton-registrarse">
-    Entrar
-  </button>
-</form>
+      <button type="submit" class="boton-registrarse">
+        Entrar
+      </button>
+    </form>
 
-    <div class="texto-footer">
-      ¿No tienes cuenta? <a href="html/registro.html">Regístrate</a><br />
-      <a href="html/ReiniciarContraseña.html">¿Olvidaste tu contraseña?</a>
+    <div style="margin-top: 24px; font-size: 13px; color: var(--muted); line-height: 1.6;">
+      ¿No tienes cuenta? 
+      <a href="html/registro.html" style="color: var(--accent2); text-decoration: none;">Regístrate</a><br />
+      <a href="html/ReiniciarContraseña.html" style="color: var(--muted); text-decoration: none;">¿Olvidaste tu contraseña?</a>
     </div>
   </div>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('success');
     const error = urlParams.get('error');
     const mensajeExito = document.getElementById('mensaje-exito');
     const mensajeError = document.getElementById('mensaje-error');
+
     if (success === '1') {
       mensajeExito.textContent = 'Registro exitoso. Ahora puedes iniciar sesión.';
     }

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 session_start();
 ?>
@@ -28,7 +27,21 @@ session_start();
         <div class="logo-copy">
           <strong>NeonNest</strong>
           <small>Corporation</small>
+          
         </div>
+        <div class="noti-container">
+              <button id="btnNoti" class="btn-noti">
+                🔔
+                <span id="badgeNoti" class="badge-noti" style="display:none">0</span>
+              </button>
+
+              <div id="listaNoti" class="dropdown-noti" style="display:none">
+                <div class="dropdown-header">Notificaciones</div>
+                <div id="contenidoNoti" class="dropdown-content">
+                  <p class="noti-empty">No hay novedades.</p>
+                </div>
+              </div>
+            </div>
       </div>
 
       <nav class="menu">
@@ -60,6 +73,13 @@ session_start();
             <span class="buscador-ico">🔎</span>
             <input type="search" placeholder="Buscar..." />
           </label>
+          <div class="cabecera-right">
+            <label class="buscador">...</label>
+
+            
+          </div>
+
+          <div id="toastContainer" class="toast-container"></div>
         </div>
       </header>
 
@@ -196,7 +216,7 @@ session_start();
                   console.log("Iniciando chat...");
                   window.__chatInit();
                 }
-              }, 50); 
+              }, 50);
             }
 
             const title = doc.querySelector('title');
@@ -407,7 +427,7 @@ session_start();
   </script>
 
   <script src="../js/chat.js"></script>
-
+  <script src="../js/notificaciones.js"></script>
 </body>
 
 </html>
