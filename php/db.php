@@ -14,6 +14,9 @@ if ($mysqli->connect_errno) {
 
 $mysqli->set_charset('utf8mb4');
 /*
+
+
+
 <?php
 $host = '127.0.0.1';
 $db   = 'bd_social';

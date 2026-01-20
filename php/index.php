@@ -379,79 +379,91 @@ require __DIR__ . '/db.php';
     });
   </script>
 
-  <script>
+<script>
     document.addEventListener('click', async (e) => {
-      // CAMBIO: Buscamos por la clase 'btn-accion-seguir' O el ID antiguo 'btnSeguir' para compatibilidad
+      // Detectar clic en el botón (funciona para el sidebar y el perfil)
       const btnSeguir = e.target.closest('.btn-accion-seguir, #btnSeguir');
       
       if (btnSeguir) {
         e.preventDefault();
-        e.stopPropagation(); // Evitar que abra el perfil si el botón está dentro del enlace
+        e.stopPropagation();
 
         const id = btnSeguir.dataset.id;
-        const sigo = btnSeguir.dataset.sigo === '1'; // 1 = siguiendo, 0 = no siguiendo
+        const sigo = btnSeguir.dataset.sigo === '1'; 
         
-        // Si tienes un contador en el perfil visualizado actualmente
-        const contador = document.getElementById('nSeguidores'); 
+        // Validar que tenemos ID antes de hacer nada
+        if (!id) {
+            console.error("Error: El botón no tiene data-id");
+            return;
+        }
 
-        const url = sigo ?
-          '../php/dejar_seguir_usuario.php' :
-          '../php/seguir_usuario.php';
+        // Definir URL
+        const url = sigo ? 'dejar_seguir_usuario.php' : 'seguir_usuario.php';
 
-        // Feedback visual inmediato (Optimistic UI)
+        // Feedback visual (loading)
         const textoOriginal = btnSeguir.textContent;
         btnSeguir.textContent = '...';
         btnSeguir.disabled = true;
 
         try {
+          // FORMATO SEGURO DE ENVÍO DE DATOS
+          const params = new URLSearchParams();
+          params.append('id_usuario', id);
+
           const res = await fetch(url, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `id_usuario=${encodeURIComponent(id)}`
+            body: params // Fetch asigna automáticamente el Content-Type correcto
           });
 
           const txt = (await res.text()).trim();
+          console.log('Respuesta Servidor:', txt); // MIRA AQUÍ EN LA CONSOLA (F12)
 
-          if (txt === 'no-login') {
-            alert('Tienes que iniciar sesión');
-            btnSeguir.textContent = textoOriginal;
-            btnSeguir.disabled = false;
-            return;
-          }
-          
-          if (txt === 'ok') {
-             // ÉXITO: Cambiar estado del botón
+          // Comprobamos si la respuesta EMPIEZA por ok (porque ahora el PHP devuelve info extra)
+          if (txt.startsWith('ok')) {
+             
              const nuevoEstado = !sigo;
              btnSeguir.dataset.sigo = nuevoEstado ? '1' : '0';
              
-             // Actualizar texto según dónde esté el botón
+             // Actualizar texto del botón
              if (btnSeguir.classList.contains('btn-mini')) {
-                 // Estilo barra lateral
+                 // Estilo Sidebar
                  btnSeguir.textContent = nuevoEstado ? 'Siguiendo' : 'Seguir';
-                 // Opcional: Si ya sigues, quizás quieras ocultar la fila o dejarla como "Siguiendo"
-                 if(nuevoEstado) btnSeguir.style.opacity = '0.7'; 
+                 if(nuevoEstado) {
+                    btnSeguir.style.opacity = '0.7'; 
+                    btnSeguir.style.background = 'transparent';
+                    btnSeguir.style.border = '1px solid currentColor';
+                 } else {
+                    btnSeguir.style.opacity = '1';
+                    btnSeguir.style.background = '';
+                    btnSeguir.style.border = '';
+                 }
              } else {
-                 // Estilo perfil principal
+                 // Estilo Perfil Grande
                  btnSeguir.textContent = nuevoEstado ? 'Dejar de seguir' : 'Seguir';
              }
 
-             // Actualizar contador solo si estamos viendo el perfil de ese usuario
-             // Verificamos si el botón clickeado pertenece al perfil principal visualizado
+             // Actualizar contador
+             const contador = document.getElementById('nSeguidores');
              if (contador && !btnSeguir.classList.contains('btn-mini')) {
                let n = parseInt(contador.textContent, 10) || 0;
                contador.textContent = nuevoEstado ? n + 1 : Math.max(0, n - 1);
              }
+
+             // ALERTA TEMPORAL PARA QUE VEAS QUE FUNCIONA (Bórrala luego)
+             console.log("ÉXITO: " + txt);
+
+          } else if (txt === 'no-login') {
+            alert('Debes iniciar sesión');
+            btnSeguir.textContent = textoOriginal;
           } else {
-             console.error('Respuesta servidor:', txt);
-             alert('Error al procesar la solicitud');
-             btnSeguir.textContent = textoOriginal;
+            // Si hay error, lo mostramos
+            console.error('Error PHP:', txt);
+            alert('Error: ' + txt); 
+            btnSeguir.textContent = textoOriginal;
           }
 
         } catch (err) {
-          console.error(err);
-          alert('Error de conexión');
+          console.error('Error Fetch:', err);
           btnSeguir.textContent = textoOriginal;
         } finally {
             btnSeguir.disabled = false;
@@ -459,24 +471,17 @@ require __DIR__ . '/db.php';
         return;
       }
 
-
+      // ... Resto del código del chat ...
       const btnChat = e.target.closest('#btnChat');
       if (btnChat) {
-        e.preventDefault();
-        const user = btnChat.dataset.user;
-        if (!user) return;
-
-        sessionStorage.setItem('chatUser', user);
-        history.pushState({
-          type: 'chatUser',
-          u: user
-        }, '', `?chatUser=${encodeURIComponent(user)}`);
-        console.log("[perfil] click Chat -> user =", user);
-        console.log("[perfil] guardando sessionStorage chatUser =", user);
-        loadPage('chat');
-        return;
+         // ... tu código de chat ...
+         e.preventDefault();
+         const user = btnChat.dataset.user;
+         if (!user) return;
+         sessionStorage.setItem('chatUser', user);
+         history.pushState({ type: 'chatUser', u: user }, '', `?chatUser=${encodeURIComponent(user)}`);
+         loadPage('chat');
       }
-
     }, true);
   </script>
   <script>

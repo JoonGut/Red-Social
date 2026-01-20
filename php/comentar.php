@@ -21,46 +21,43 @@ if ($idPub <= 0 || $texto === '') {
     exit;
 }
 
-// 1. Insertar el comentario
-$stmt = $mysqli->prepare("INSERT INTO comentarios (id_publicacion, id_usuario, texto, id_padre) VALUES (?, ?, ?, ?)");
+// 1. Insertar en INTERACCION
+$stmt = $mysqli->prepare("INSERT INTO interaccion (id_publicacion, id_usuario, comentario, id_padre, tipo_interaccion) VALUES (?, ?, ?, ?, 'COMENTARIO')");
 $stmt->bind_param('iisi', $idPub, $yo, $texto, $idPadre);
 $stmt->execute();
 $newId = $stmt->insert_id;
 $stmt->close();
 
-// 2. Obtener datos para devolver al JS (nombre, foto, fecha)
+// 2. Datos para el Frontend
 $stmt = $mysqli->prepare("SELECT usuario, nombre, foto_perfil FROM usuario WHERE id_usuario = ?");
 $stmt->bind_param('i', $yo);
 $stmt->execute();
 $userData = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// 3. GENERAR NOTIFICACIÓN (Si no es mi propia publicación/comentario)
-// Primero averiguamos de quién es la publicación o el comentario padre
+// 3. NOTIFICACIÓN (Ajustada a tu tabla 'notificaciones')
 $idDestino = 0;
 $tipoNoti = 'comentario';
 
+// Buscar dueño
 if ($idPadre) {
-    // Si es respuesta, notificamos al dueño del comentario original
-    $q = $mysqli->prepare("SELECT id_usuario FROM comentarios WHERE id_comentario = ?");
+    $q = $mysqli->prepare("SELECT id_usuario FROM interaccion WHERE id_interaccion = ?");
     $q->bind_param('i', $idPadre);
     $q->execute();
-    $res = $q->get_result()->fetch_assoc();
-    if ($res) $idDestino = (int)$res['id_usuario'];
+    if ($res = $q->get_result()->fetch_assoc()) $idDestino = (int)$res['id_usuario'];
     $q->close();
 } else {
-    // Si es comentario normal, notificamos al dueño del post
     $q = $mysqli->prepare("SELECT id_usuario FROM publicacion WHERE id_publicacion = ?");
     $q->bind_param('i', $idPub);
     $q->execute();
-    $res = $q->get_result()->fetch_assoc();
-    if ($res) $idDestino = (int)$res['id_usuario'];
+    if ($res = $q->get_result()->fetch_assoc()) $idDestino = (int)$res['id_usuario'];
     $q->close();
 }
 
-// Solo notificar si no soy yo mismo
+// Insertar notificación SIN pasar fecha (MySQL usa creado_en automático)
 if ($idDestino > 0 && $idDestino !== $yo) {
     $resumen = mb_strlen($texto) > 30 ? mb_substr($texto, 0, 30) . '...' : $texto;
+    
     $stmtN = $mysqli->prepare("INSERT INTO notificaciones (id_usuario, id_actor, tipo, referencia_id, texto_extra) VALUES (?, ?, ?, ?, ?)");
     $stmtN->bind_param('iiisi', $idDestino, $yo, $tipoNoti, $idPub, $resumen);
     $stmtN->execute();
@@ -73,3 +70,4 @@ echo json_encode([
     'texto' => $texto,
     'creado_en' => date('Y-m-d H:i:s')
 ]);
+?>
