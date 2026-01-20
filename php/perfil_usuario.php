@@ -116,7 +116,7 @@ if ($yo > 0 && $yo !== $idPerfil) {
                     <div class="acciones-perfil">
                         <button
                             id="btnSeguir"
-                            class="boton-registrarse"
+                            class="boton-registrarse btn-accion-seguir"
                             data-id="<?php echo $idPerfil; ?>"
                             data-sigo="<?php echo $sigo ? '1' : '0'; ?>"
                             type="button">

@@ -1,6 +1,8 @@
 <?php
+
 declare(strict_types=1);
 session_start();
+require __DIR__ . '/db.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -27,21 +29,21 @@ session_start();
         <div class="logo-copy">
           <strong>NeonNest</strong>
           <small>Corporation</small>
-          
+
         </div>
         <div class="noti-container">
-              <button id="btnNoti" class="btn-noti">
-                🔔
-                <span id="badgeNoti" class="badge-noti" style="display:none">0</span>
-              </button>
+          <button id="btnNoti" class="btn-noti">
+            🔔
+            <span id="badgeNoti" class="badge-noti" style="display:none">0</span>
+          </button>
 
-              <div id="listaNoti" class="dropdown-noti" style="display:none">
-                <div class="dropdown-header">Notificaciones</div>
-                <div id="contenidoNoti" class="dropdown-content">
-                  <p class="noti-empty">No hay novedades.</p>
-                </div>
-              </div>
+          <div id="listaNoti" class="dropdown-noti" style="display:none">
+            <div class="dropdown-header">Notificaciones</div>
+            <div id="contenidoNoti" class="dropdown-content">
+              <p class="noti-empty">No hay novedades.</p>
             </div>
+          </div>
+        </div>
       </div>
 
       <nav class="menu">
@@ -76,7 +78,7 @@ session_start();
           <div class="cabecera-right">
             <label class="buscador">...</label>
 
-            
+
           </div>
 
           <div id="toastContainer" class="toast-container"></div>
@@ -114,32 +116,63 @@ session_start();
       <section class="panel">
         <h2>🤝 A quién seguir</h2>
 
-        <div class="follow-row">
-          <div class="mini-avatar">A</div>
-          <div class="follow-txt">
-            <strong>@usuario3</strong>
-            <small>Diseño</small>
-          </div>
-          <button class="btn-mini" type="button">Seguir</button>
-        </div>
+        <?php
+        $miId = (int)($_SESSION['id_usuario'] ?? 0);
 
-        <div class="follow-row">
-          <div class="mini-avatar">B</div>
-          <div class="follow-txt">
-            <strong>@usuario4</strong>
-            <small>Tech</small>
-          </div>
-          <button class="btn-mini" type="button">Seguir</button>
-        </div>
+        // Consulta: 3 usuarios aleatorios que NO soy yo y que NO sigo actualmente
+        $sqlSugerencias = "
+            SELECT id_usuario, usuario, foto_perfil 
+            FROM usuario 
+            WHERE id_usuario != ? 
+            AND id_usuario NOT IN (SELECT id_usuario FROM seguidores WHERE id_seguidor = ?)
+            ORDER BY RAND() 
+            LIMIT 3
+        ";
 
-        <div class="follow-row">
-          <div class="mini-avatar">C</div>
-          <div class="follow-txt">
-            <strong>@usuario5</strong>
-            <small>Creativo</small>
-          </div>
-          <button class="btn-mini" type="button">Seguir</button>
-        </div>
+        $stmtSug = $mysqli->prepare($sqlSugerencias);
+        if ($stmtSug) {
+          $stmtSug->bind_param('ii', $miId, $miId);
+          $stmtSug->execute();
+          $resSug = $stmtSug->get_result();
+
+          if ($resSug->num_rows > 0) {
+            while ($sug = $resSug->fetch_assoc()) {
+              $sugId = (int)$sug['id_usuario'];
+              $sugUser = htmlspecialchars($sug['usuario']);
+              $sugFoto = $sug['foto_perfil'] ? '../multimedia/' . rawurlencode($sug['foto_perfil']) : '';
+
+              // Inicial de avatar si no tiene foto
+              $inicial = strtoupper(substr($sugUser, 0, 1));
+        ?>
+              <div class="follow-row">
+                <a href="#" class="user-link" data-user="<?php echo $sugUser; ?>" style="display:flex; align-items:center; text-decoration:none; color:inherit; flex:1;">
+                  <?php if ($sugFoto): ?>
+                    <img src="<?php echo $sugFoto; ?>" alt="Avatar" class="mini-avatar" style="object-fit:cover;">
+                  <?php else: ?>
+                    <div class="mini-avatar"><?php echo $inicial; ?></div>
+                  <?php endif; ?>
+
+                  <div class="follow-txt">
+                    <strong>@<?php echo $sugUser; ?></strong>
+                    <small>Sugerencia</small>
+                  </div>
+                </a>
+
+                <button class="btn-mini btn-accion-seguir"
+                  type="button"
+                  data-id="<?php echo $sugId; ?>"
+                  data-sigo="0">
+                  Seguir
+                </button>
+              </div>
+        <?php
+            }
+          } else {
+            echo '<p style="padding:10px; color:#aaa; font-size:0.9rem;">¡Estás al día! No hay nuevas sugerencias.</p>';
+          }
+          $stmtSug->close();
+        }
+        ?>
       </section>
 
       <section class="panel panel-footer">
@@ -348,17 +381,27 @@ session_start();
 
   <script>
     document.addEventListener('click', async (e) => {
-      const btnSeguir = e.target.closest('#btnSeguir');
+      // CAMBIO: Buscamos por la clase 'btn-accion-seguir' O el ID antiguo 'btnSeguir' para compatibilidad
+      const btnSeguir = e.target.closest('.btn-accion-seguir, #btnSeguir');
+      
       if (btnSeguir) {
         e.preventDefault();
+        e.stopPropagation(); // Evitar que abra el perfil si el botón está dentro del enlace
 
         const id = btnSeguir.dataset.id;
-        const sigo = btnSeguir.dataset.sigo === '1';
-        const contador = document.getElementById('nSeguidores');
+        const sigo = btnSeguir.dataset.sigo === '1'; // 1 = siguiendo, 0 = no siguiendo
+        
+        // Si tienes un contador en el perfil visualizado actualmente
+        const contador = document.getElementById('nSeguidores'); 
 
         const url = sigo ?
           '../php/dejar_seguir_usuario.php' :
           '../php/seguir_usuario.php';
+
+        // Feedback visual inmediato (Optimistic UI)
+        const textoOriginal = btnSeguir.textContent;
+        btnSeguir.textContent = '...';
+        btnSeguir.disabled = true;
 
         try {
           const res = await fetch(url, {
@@ -373,25 +416,45 @@ session_start();
 
           if (txt === 'no-login') {
             alert('Tienes que iniciar sesión');
+            btnSeguir.textContent = textoOriginal;
+            btnSeguir.disabled = false;
             return;
           }
-          if (txt !== 'ok') {
-            alert('Error al procesar');
-            return;
-          }
+          
+          if (txt === 'ok') {
+             // ÉXITO: Cambiar estado del botón
+             const nuevoEstado = !sigo;
+             btnSeguir.dataset.sigo = nuevoEstado ? '1' : '0';
+             
+             // Actualizar texto según dónde esté el botón
+             if (btnSeguir.classList.contains('btn-mini')) {
+                 // Estilo barra lateral
+                 btnSeguir.textContent = nuevoEstado ? 'Siguiendo' : 'Seguir';
+                 // Opcional: Si ya sigues, quizás quieras ocultar la fila o dejarla como "Siguiendo"
+                 if(nuevoEstado) btnSeguir.style.opacity = '0.7'; 
+             } else {
+                 // Estilo perfil principal
+                 btnSeguir.textContent = nuevoEstado ? 'Dejar de seguir' : 'Seguir';
+             }
 
-          btnSeguir.dataset.sigo = sigo ? '0' : '1';
-          btnSeguir.textContent = sigo ? 'Seguir' : 'Dejar de seguir';
-
-
-          if (contador) {
-            let n = parseInt(contador.textContent, 10) || 0;
-            contador.textContent = sigo ? Math.max(0, n - 1) : n + 1;
+             // Actualizar contador solo si estamos viendo el perfil de ese usuario
+             // Verificamos si el botón clickeado pertenece al perfil principal visualizado
+             if (contador && !btnSeguir.classList.contains('btn-mini')) {
+               let n = parseInt(contador.textContent, 10) || 0;
+               contador.textContent = nuevoEstado ? n + 1 : Math.max(0, n - 1);
+             }
+          } else {
+             console.error('Respuesta servidor:', txt);
+             alert('Error al procesar la solicitud');
+             btnSeguir.textContent = textoOriginal;
           }
 
         } catch (err) {
           console.error(err);
           alert('Error de conexión');
+          btnSeguir.textContent = textoOriginal;
+        } finally {
+            btnSeguir.disabled = false;
         }
         return;
       }

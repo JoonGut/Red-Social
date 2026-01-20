@@ -4,7 +4,6 @@ $nombreActual = $_SESSION['nombre'] ?? '';
 $bioActual = $_SESSION['biografia'] ?? '';
 $fotoActual = $_SESSION['foto_perfil'] ?? null;
 // Si tienes portada en la BD, recupérala aquí. Si no, usa un default.
-$portadaActual = $_SESSION['portada'] ?? 'fondo_default.jpg'; 
 ?>
 
 <div id="modalEditarPerfil" class="modal-overlay" aria-hidden="true">
@@ -27,7 +26,7 @@ $portadaActual = $_SESSION['portada'] ?? 'fondo_default.jpg';
                src="../multimedia/<?php echo htmlspecialchars($portadaActual); ?>" 
                class="edit-cover-img" 
                alt="Portada"
-               onerror="this.src='../multimedia/fondo_default.jpg'">
+               >
           <input type="file" id="inputPortada" name="portada" accept="image/*" hidden>
         </div>
 
