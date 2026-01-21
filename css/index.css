@@ -366,3 +366,28 @@ a.user-link:hover { text-decoration: underline; }
   .info-perfil{ flex-direction: column; align-items: flex-start; }
   .boton-editar{ width: 100%; }
 }
+/* --- Estilos para los contadores del perfil --- */
+.estadisticas > div {
+  padding: 10px;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+  cursor: pointer; /* Manita al pasar el ratón */
+}
+
+/* Efecto al pasar el ratón: fondo suave */
+.estadisticas > div:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Que los números se vean grandes y claros */
+.estadisticas strong {
+  display: block;
+  font-size: 1.2rem;
+  color: #fff;
+  margin-top: 5px;
+}
+
+.estadisticas span {
+  color: #aaa; /* Texto gris suave */
+  font-size: 0.9rem;
+}

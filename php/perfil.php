@@ -68,33 +68,41 @@ require __DIR__ . '/db.php';
         <p class="nombre-real"><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></p>
 
         <div class="estadisticas">
-          <span></strong> Siguidores
-
-            <strong><?php
-                    $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
-                    $stmt->bind_param('i', $_SESSION['id_usuario']);
-                    $stmt->execute();
-                    echo $stmt->get_result()->fetch_assoc()['total']; ?></strong>
-          </span>
-
-
-          <span>Seguiendo
-            <strong><?php
-                    $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_seguidor = ?');
-                    $stmt->bind_param('i', $_SESSION['id_usuario']);
-                    $stmt->execute();
-                    echo $stmt->get_result()->fetch_assoc()['total']; ?></strong></span>
-
-          <span>
-            Publicaciones
-            <strong><?php
-                    $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM publicacion WHERE id_usuario = ?');
-                    $stmt->bind_param('i', $_SESSION['id_usuario']);
-                    $stmt->execute();
-                    echo $stmt->get_result()->fetch_assoc()['total']; ?>
+          <div onclick="abrirModalUsuarios('seguidores')" style="cursor: pointer; text-align: center;">
+            <span>Seguidores</span>
+            <strong>
+              <?php
+                $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
+                $stmt->bind_param('i', $_SESSION['id_usuario']); // Ojo: Aquí deberías usar $idUsuario del perfil que visitas, no siempre SESSION
+                $stmt->execute();
+                echo $stmt->get_result()->fetch_assoc()['total']; 
+              ?>
             </strong>
+          </div>
 
-          </span>
+          <div onclick="abrirModalUsuarios('siguiendo')" style="cursor: pointer; text-align: center;">
+            <span>Siguiendo</span>
+            <strong>
+              <?php
+                $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_seguidor = ?');
+                $stmt->bind_param('i', $_SESSION['id_usuario']);
+                $stmt->execute();
+                echo $stmt->get_result()->fetch_assoc()['total']; 
+              ?>
+            </strong>
+          </div>
+
+          <div style="text-align: center;">
+            <span>Publicaciones</span>
+            <strong>
+              <?php
+                $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM publicacion WHERE id_usuario = ?');
+                $stmt->bind_param('i', $_SESSION['id_usuario']);
+                $stmt->execute();
+                echo $stmt->get_result()->fetch_assoc()['total']; 
+              ?>
+            </strong>
+          </div>
         </div>
         <?php
         $idUsuario = (int)($_SESSION['id_usuario'] ?? 0);

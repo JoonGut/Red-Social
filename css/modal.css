@@ -483,3 +483,131 @@ body.modal-open { overflow: hidden; }
   background: #151b31;
   border-radius: 0 0 18px 18px;
 }
+/* =========================================
+   ESTILO BÁSICO Y NEON: LISTA DE USUARIOS
+   ========================================= */
+
+/* 1. El contenedor del Modal */
+#modalListaUsuarios .modal-content {
+  background-color: #000;      /* Fondo negro puro */
+  border: 1px solid #333;      /* Borde gris oscuro */
+  border-radius: 12px;         /* Bordes redondeados */
+  width: 100%;
+  max-width: 450px;            /* No muy ancho */
+  height: 500px;               /* Altura fija */
+  display: flex;
+  flex-direction: column;
+  margin: auto;                /* Centrado */
+  padding: 0;                  /* Sin relleno extra */
+  overflow: hidden;
+}
+
+/* 2. Cabecera (Pestañas) */
+.modal-header-tabs {
+  display: flex;
+  background-color: #111;      /* Un poco más claro que el fondo */
+  border-bottom: 1px solid #333;
+}
+
+/* Los botones de las pestañas */
+.tab-btn {
+  flex: 1;                     /* Ocupan mitad y mitad */
+  background: none;
+  border: none;
+  padding: 15px;
+  color: #777;                 /* Texto apagado */
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+/* Cuando la pestaña está activa */
+.tab-btn.active {
+  color: #fff;                 /* Texto blanco brillante */
+  border-bottom: 2px solid #00f3ff; /* Línea NEÓN abajo */
+}
+
+/* Botón de cerrar (X) */
+.btn-cerrar-modal-user {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  padding: 0 15px;
+  cursor: pointer;
+}
+
+/* 3. Lista de usuarios (Cuerpo) */
+#contenedorLista {
+  flex: 1;                     /* Ocupa el resto del espacio */
+  overflow-y: auto;            /* Scroll si hay muchos */
+  padding: 0;
+}
+
+/* --- Cada fila de usuario --- */
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Separa info del botón */
+  padding: 12px 15px;
+  border-bottom: 1px solid #222; /* Línea separadora muy sutil */
+}
+
+.user-row:hover {
+  background-color: #0a0a0a;   /* Cambio sutil al pasar ratón */
+}
+
+/* Info (Avatar + Texto) */
+.user-row .mini-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info h4 {
+  margin: 0;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.user-info span {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+/* 4. Botón "Seguir" (Pequeño y bonito) */
+.user-row .btn-accion-seguir {
+  background-color: #fff;      /* Blanco para resaltar */
+  color: #000;
+  border: none;
+  padding: 6px 15px;
+  border-radius: 20px;         /* Redondito */
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.user-row .btn-accion-seguir:hover {
+  opacity: 0.8;
+}
+
+/* Variación: Si ya lo sigues (Botón transparente con borde) */
+.user-row .btn-accion-seguir[data-sigo="1"] {
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+}

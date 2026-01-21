@@ -1,74 +1,106 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/db.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/db.php';
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$miId = (int)($_SESSION['id_usuario'] ?? 0);
 
+// SQL Actualizada: Ahora cuenta (num_comentarios) también
 $sql = "
-SELECT
-  p.id_publicacion,
-  p.texto,
-  p.ubicacion,
-  p.pie_foto,
-  p.imagen,
-  p.fecha_publicacion,
-  u.usuario
-FROM publicacion p
-JOIN usuario u ON u.id_usuario = p.id_usuario
-ORDER BY p.fecha_publicacion DESC
-LIMIT 200
+    SELECT 
+        p.*, 
+        u.usuario, 
+        u.foto_perfil,
+        (SELECT COUNT(*) FROM interaccion i WHERE i.id_publicacion = p.id_publicacion AND i.tipo_interaccion = 'LIKE') as num_likes,
+        (SELECT COUNT(*) FROM interaccion i WHERE i.id_publicacion = p.id_publicacion AND i.id_usuario = ? AND i.tipo_interaccion = 'LIKE') as liked_by_me,
+        (SELECT COUNT(*) FROM interaccion i WHERE i.id_publicacion = p.id_publicacion AND i.tipo_interaccion = 'COMENTARIO') as num_comentarios
+    FROM publicacion p
+    JOIN usuario u ON p.id_usuario = u.id_usuario
+    ORDER BY p.fecha_publicacion DESC
+    LIMIT 50
 ";
 
 $stmt = $mysqli->prepare($sql);
+$stmt->bind_param('i', $miId);
 $stmt->execute();
-$result = $stmt->get_result();
+$res = $stmt->get_result();
 
-while ($row = $result->fetch_assoc()):
-  $username  = (string)($row['usuario'] ?? '');
-  $texto     = $row['texto'] ?? '';
-  $ubicacion = $row['ubicacion'] ?? '';
-  $pie       = $row['pie_foto'] ?? '';
-  $fecha     = $row['fecha_publicacion'] ?? '';
-  $imagen    = $row['imagen'] ?? null;
+if ($res->num_rows > 0) {
+    while ($row = $res->fetch_assoc()) {
+        $pId = $row['id_publicacion'];
+        $pUser = htmlspecialchars($row['usuario']);
+        $pTexto = nl2br(htmlspecialchars($row['texto'] ?? ''));
+        $pFecha = date('d M', strtotime($row['fecha_publicacion']));
+        $pFoto = $row['foto_perfil'] ? '../multimedia/' . rawurlencode($row['foto_perfil']) : '';
+        $pImg = $row['imagen'] ? '../multimedia/' . rawurlencode($row['imagen']) : '';
+        
+        // Datos de interacción
+        $likes = $row['num_likes'];
+        $coments = $row['num_comentarios'];
+        $isLiked = $row['liked_by_me'] > 0;
+        $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart'; // Solido o borde
+        $heartColor = $isLiked ? 'color:#e0245e' : ''; 
+        
+        // Estructura: 
+        // 1. data-link-post: para ir a la vista detallada
+        // 2. stop-prop: elementos que NO deben llevar al detalle (botones, links usuario)
+        ?>
+        <article class="post tweet-style" data-id="<?php echo $pId; ?>" style="cursor:pointer; border-bottom:1px solid #333; padding:15px;">
+            
+            <div class="post-header" style="display:flex; gap:10px; margin-bottom:5px;">
+                <?php if($pFoto): ?>
+                    <img src="<?php echo $pFoto; ?>" class="stop-prop" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                <?php else: ?>
+                    <div class="stop-prop" style="width:40px; height:40px; border-radius:50%; background:#555;"></div>
+                <?php endif; ?>
+                
+                <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <a href="#" class="user-link stop-prop" data-user="<?php echo $pUser; ?>" style="font-weight:bold; color:#fff; text-decoration:none;">
+                            @<?php echo $pUser; ?>
+                        </a>
+                        <small style="color:#71767b;"><?php echo $pFecha; ?></small>
+                    </div>
+                    
+                    <div class="post-content-area" style="margin-top:5px;">
+                        <div style="color:#fff; margin-bottom:10px;"><?php echo $pTexto; ?></div>
+                        <?php if($pImg): ?>
+                            <div class="post-img-container" style="border-radius:15px; overflow:hidden; border:1px solid #333;">
+                                <img src="<?php echo $pImg; ?>" style="width:100%; display:block;">
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-  $imgUrl = $imagen ? "../multimedia/" . rawurlencode($imagen) : null;
+                    <div class="post-actions stop-prop" style="display:flex; justify-content:space-between; margin-top:12px; max-width:80%;">
+                        
+                        <button class="btn-action btn-comment-inline" data-id="<?php echo $pId; ?>" style="background:none; border:none; color:#71767b; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                            <i class="far fa-comment"></i>
+                            <span class="count-comment"><?php echo $coments > 0 ? $coments : ''; ?></span>
+                        </button>
+
+                        <button class="btn-action btn-like-inline" data-id="<?php echo $pId; ?>" data-liked="<?php echo $isLiked ? '1' : '0'; ?>" style="background:none; border:none; color:#71767b; cursor:pointer; display:flex; align-items:center; gap:5px; <?php echo $heartColor; ?>">
+                            <i class="<?php echo $heartClass; ?> icon-heart"></i>
+                            <span class="count-like"><?php echo $likes > 0 ? $likes : ''; ?></span>
+                        </button>
+
+                        <button class="btn-action" style="background:none; border:none; color:#71767b;">
+                            <i class="fas fa-share"></i>
+                        </button>
+                    </div>
+
+                    <div class="inline-comment-box stop-prop" id="comment-box-<?php echo $pId; ?>" style="display:none; margin-top:10px; border-top:1px solid #333; padding-top:10px;">
+                        <form class="form-inline-comment" data-id="<?php echo $pId; ?>" style="display:flex; gap:10px;">
+                            <input type="text" name="texto" placeholder="Postea tu respuesta" style="flex:1; background:#000; border:1px solid #333; color:#fff; padding:8px 12px; border-radius:20px; outline:none;">
+                            <button type="submit" style="background:#1d9bf0; color:#fff; border:none; padding:6px 15px; border-radius:20px; cursor:pointer; font-weight:bold;">Responder</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </article>
+        <?php
+    }
+} else {
+    echo '<p style="padding:20px; text-align:center; color:#71767b;">No hay publicaciones aún.</p>';
+}
 ?>
-  <article class="publicaciones"
-    data-id="<?= (int)$row['id_publicacion'] ?>"
-    data-usuario="<?= htmlspecialchars($username, ENT_QUOTES) ?>"
-    data-fecha="<?= htmlspecialchars($fecha ?? '', ENT_QUOTES) ?>"
-    data-ubicacion="<?= htmlspecialchars($ubicacion ?? '', ENT_QUOTES) ?>"
-    data-texto="<?= htmlspecialchars($texto ?? '', ENT_QUOTES) ?>"
-    data-img="<?= htmlspecialchars($imgUrl ?? '', ENT_QUOTES) ?>"
-    data-pie="<?= htmlspecialchars($pie ?? '', ENT_QUOTES) ?>"
-    tabindex="0"
-  >
-    <h3>
-      <a
-        href="#"
-        class="user-link"
-        data-user="<?= htmlspecialchars($username, ENT_QUOTES) ?>"
-      >@<?= htmlspecialchars($username) ?></a>
-    </h3>
-
-    <?php if ($fecha): ?>
-      <small><?= htmlspecialchars($fecha) ?></small>
-    <?php endif; ?>
-
-    <?php if ($ubicacion !== ''): ?>
-      <p><strong>📍</strong> <?= htmlspecialchars($ubicacion) ?></p>
-    <?php endif; ?>
-
-    <p><?= nl2br(htmlspecialchars($texto)) ?></p>
-
-    <?php if ($imgUrl): ?>
-      <div class="publicacion-imagen">
-        <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Imagen de la publicación">
-      </div>
-    <?php endif; ?>
-
-    <?php if ($pie !== ''): ?>
-      <p><em><?= htmlspecialchars($pie) ?></em></p>
-    <?php endif; ?>
-  </article>
-<?php endwhile; ?>
