@@ -611,3 +611,78 @@ body.modal-open { overflow: hidden; }
   border: 1px solid #555;
   color: #fff;
 }
+/* --- MEJORA VISUAL DEL MODAL DE PUBLICAR --- */
+
+/* Título del modal más elegante */
+.modal-header h3 {
+  font-family: 'Segoe UI', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+/* Área de texto más grande y limpia */
+#textoPub {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 20px;
+  line-height: 1.5;
+  padding: 20px;
+  min-height: 150px; /* Más alto */
+  color: rgba(255,255,255,0.95);
+}
+
+#textoPub::placeholder {
+  color: rgba(255,255,255,0.3);
+  font-weight: 300;
+}
+
+/* Inputs inferiores (Ubicación / Pie de foto) más sutiles */
+.modal-row {
+  padding: 0 20px; 
+  margin-bottom: 12px;
+}
+
+.modal-row input[type="text"] {
+  background: rgba(255,255,255,0.03); /* Casi transparente */
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; /* Más redondos */
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #00e6ff; /* Texto neón cian al escribir */
+  transition: all 0.3s ease;
+}
+
+.modal-row input[type="text"]:focus {
+  background: rgba(0, 230, 255, 0.05);
+  border-color: #00e6ff;
+  box-shadow: 0 0 15px rgba(0, 230, 255, 0.1);
+}
+
+.modal-row input[type="text"]::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+/* Botón de subir foto más atractivo */
+.custom-file-upload {
+  width: auto; /* Ancho automático para texto */
+  height: auto;
+  padding: 8px 15px;
+  border-radius: 20px;
+  background: rgba(29, 155, 240, 0.1);
+  color: #1d9bf0;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  gap: 8px; /* Espacio entre icono y texto */
+}
+
+.custom-file-upload:hover {
+  background: rgba(29, 155, 240, 0.2);
+}
+
+/* Línea separadora sutil */
+.modal-footer {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 15px 20px;
+}
