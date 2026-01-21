@@ -383,6 +383,30 @@ require __DIR__ . '/db.php';
                 }
             })
             .catch(error => console.error('Error cargando página:', error));
+            // 1. Lógica para el MODO CHAT (Estilo Twitter)
+        if (page === 'chat') {
+            document.body.classList.add('modo-chat'); // <--- AÑADE ESTO
+        } else {
+            document.body.classList.remove('modo-chat'); // <--- AÑADE ESTO
+        }
+
+        loadPageCSS(page);
+        
+        fetch(`${page}.php`)
+            .then(r => {
+                if (!r.ok) throw new Error('Página no encontrada');
+                return r.text();
+            })
+            .then(html => {
+                replaceMainFromHtml(html);
+                // Si es chat, inicializamos
+                if (page === 'chat') {
+                    setTimeout(() => {
+                        if (typeof window.__chatInit === 'function') window.__chatInit();
+                    }, 50);
+                }
+            })
+            .catch(error => console.error('Error cargando página:', error));
     }
 
     // Cargar Vista Detallada del Post
