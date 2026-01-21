@@ -181,10 +181,8 @@ require __DIR__ . '/db.php';
   <?php include __DIR__ . '/modal_lista_usuarios.php'; ?>
 
   <script>
-    // --- 1. VARIABLES GLOBALES ---
     window.__MY_ID__ = <?php echo (int)($_SESSION['id_usuario'] ?? 0); ?>;
     
-    // Mapa de CSS para cargar estilos dinámicamente
     const cssMap = {
       explorar: '../css/explorar.css',
       chat: '../css/chat.css',
