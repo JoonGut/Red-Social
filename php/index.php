@@ -171,28 +171,19 @@ require __DIR__ . '/db.php';
         ?>
       </section>
 
-      <section class="panel panel-footer">
-        <small>Hecho con ⚡ estilo NeonNest</small>
-      </section>
+      
     </aside>
   </div>
 
   <?php include __DIR__ . '/modal_publicar.php'; ?>
   <?php include __DIR__ . '/modal_cerrar_sesion.php'; ?>
-  <?php include __DIR__ . '/modal_publicacion.php'; ?>
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
-  <?php include __DIR__ . '/modal_publicaciones_perfil.php'; ?>
   <?php include __DIR__ . '/modal_lista_usuarios.php'; ?>
 
   <script>
     // --- 1. VARIABLES GLOBALES ---
     window.__MY_ID__ = <?php echo (int)($_SESSION['id_usuario'] ?? 0); ?>;
     
-    window.__BASE__ = (function() {
-      const p = location.pathname;
-      return p.replace(/\/php\/index\.php.*$/, '').replace(/\/$/, '');
-    })();
-
     // Mapa de CSS para cargar estilos dinámicamente
     const cssMap = {
       explorar: '../css/explorar.css',
@@ -225,10 +216,9 @@ require __DIR__ . '/db.php';
     });
 
     // --- 3. DELEGACIÓN DE EVENTOS GLOBAL (EL CEREBRO DE LA PÁGINA) ---
-    // Aquí juntamos TODAS las interacciones: Likes, Comentarios, Navegación, Chat, Seguir.
     document.body.addEventListener('click', (e) => {
         
-        // A) CLICK EN LIKE (Corazón - Lógica Nueva)
+        // A) CLICK EN LIKE (Corazón)
         const btnLike = e.target.closest('.btn-like-inline');
         if (btnLike) {
             e.preventDefault();
@@ -237,7 +227,7 @@ require __DIR__ . '/db.php';
             return;
         }
 
-        // B) CLICK EN COMENTAR (Icono globo - Lógica Nueva Inline)
+        // B) CLICK EN COMENTAR (Icono globo)
         const btnComment = e.target.closest('.btn-comment-inline');
         if (btnComment) {
             e.preventDefault();
@@ -252,16 +242,18 @@ require __DIR__ . '/db.php';
             return;
         }
 
-        // C) CLIC EN EL POST (Navegación estilo Twitter - Lógica Nueva)
-        const postCard = e.target.closest('article.post, article.tweet-style, article.publicaciones');
-        // Verificamos que no sea un clic en un botón, enlace o input interno
+        // C) CLIC EN POST PARA ABRIRLO (Feed y Perfil)
+        // Detectamos posts normales y previews del perfil
+        const postCard = e.target.closest('article.post, article.tweet-style, article.publicaciones, .post-preview-click');
+        
+        // Verificamos que NO sea un clic en elementos interactivos dentro del post
         if (postCard && !e.target.closest('.stop-prop') && !e.target.closest('a') && !e.target.closest('button') && !e.target.closest('input')) {
             const id = postCard.dataset.id;
             cargarVistaPublicacion(id);
             return;
         }
 
-        // D) BOTÓN "SEGUIR" (Tu lógica original mejorada)
+        // D) BOTÓN "SEGUIR"
         const btnSeguir = e.target.closest('.btn-accion-seguir, #btnSeguir');
         if (btnSeguir) {
             e.preventDefault();
@@ -270,7 +262,7 @@ require __DIR__ . '/db.php';
             return;
         }
 
-        // E) BOTÓN "MENSAJE/CHAT" (Tu lógica original)
+        // E) BOTÓN "MENSAJE/CHAT"
         const btnChat = e.target.closest('#btnChat');
         if (btnChat) {
             e.preventDefault();
@@ -288,46 +280,43 @@ require __DIR__ . '/db.php';
             e.preventDefault();
             e.stopPropagation();
             const u = userLink.dataset.user;
-            
-            // CERRAR TODOS LOS MODALES SI ESTÁN ABIERTOS
-            const modalLista = document.getElementById('modalListaUsuarios');
-            if (modalLista) modalLista.style.display = 'none';
-            if (typeof closePostModal === 'function') closePostModal();
-
             if(u) loadUserProfile(u);
             return;
         }
 
-        // G) MENU NAVEGACIÓN
+        // G) MENU DE NAVEGACIÓN (ESTO ES LO QUE TE FALLABA)
         const menuItem = e.target.closest('.menu-item[data-page]');
         if (menuItem) {
             e.preventDefault();
             const page = menuItem.dataset.page;
-            if(page === 'index') location.reload(); 
-            else loadPage(page);
             
+            // Si es inicio, recargamos para limpiar
+            if(page === 'index') {
+                window.location.href = 'index.php';
+            } else {
+                loadPage(page);
+            }
+            
+            // Actualizar clase activo visualmente
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('activo'));
             menuItem.classList.add('activo');
             return;
         }
     });
 
-    // --- 4. LISTENER PARA FORMULARIOS (Comentarios y Fotos) ---
+    // --- 4. LISTENER PARA FORMULARIOS ---
     document.addEventListener('submit', function(e) {
-        // Formulario de Comentario Inline
         if (e.target.classList.contains('form-inline-comment')) {
             e.preventDefault();
             enviarComentarioInline(e.target);
             return;
         }
-        
-        // Evitar recarga en foto de perfil (para manejarlo en 'change')
         if (e.target.id === 'formFotoPerfil') {
             e.preventDefault();
         }
     });
 
-    // Subida de Foto de Perfil
+    // Subida de Foto de Perfil AJAX
     document.addEventListener('change', async function(e) {
       if (!e.target || e.target.id !== 'inputFotoPerfil') return;
       const input = e.target;
@@ -344,7 +333,7 @@ require __DIR__ . '/db.php';
       finally { input.value = ''; }
     });
 
-    // --- 5. FUNCIONES DE NAVEGACIÓN Y CARGA ---
+    // --- 5. FUNCIONES DE CARGA Y NAVEGACIÓN ---
 
     function loadPageCSS(page) {
       const existingLink = document.querySelector('link[data-page-css]');
@@ -372,15 +361,19 @@ require __DIR__ . '/db.php';
       const title = doc.querySelector('title');
       if (title) document.title = title.textContent;
       
+      // Re-ejecutar scripts si hay
+      currentMain.querySelectorAll('script').forEach(s => eval(s.textContent));
+      
       return true;
     }
 
-    // Cargar Páginas (Chat, Explorar, etc.)
+    // Cargar Páginas del Menú
     function loadPage(page) {
         loadPageCSS(page); 
-        fetch(`../php/${page}.php`)
+        // Asumimos que los archivos están en la misma carpeta php/
+        fetch(`${page}.php`)
             .then(r => {
-                 if (!r.ok) throw new Error('PHP not found');
+                 if (!r.ok) throw new Error('Página no encontrada');
                  return r.text();
             })
             .then(html => {
@@ -391,66 +384,55 @@ require __DIR__ . '/db.php';
                     }, 50);
                 }
             })
-            .catch(error => console.error('Error loading page:', error));
+            .catch(error => console.error('Error cargando página:', error));
     }
 
-    // Cargar Vista de Post (Twitter Style)
+    // Cargar Vista Detallada del Post
     function cargarVistaPublicacion(id) {
         history.pushState({view: 'post', id: id}, '', '?post=' + id);
         window.scrollTo(0,0);
         const main = document.querySelector('.contenido-principal');
         main.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Cargando publicación...</div>';
 
-        fetch(`../php/ver_publicacion.php?id=${id}`)
+        fetch(`ver_publicacion.php?id=${id}`)
             .then(r => r.text())
             .then(html => {
                 main.innerHTML = html;
-                // Ejecutar scripts si vienen en el HTML insertado
                 main.querySelectorAll('script').forEach(s => eval(s.textContent));
             });
     }
 
-    // Cargar Perfil de Usuario
+    // Cargar Perfil
     function loadUserProfile(username) {
         history.pushState({type: 'user', u: username}, '', `?u=${encodeURIComponent(username)}`);
         
-        // Ajustar clase activa
+        // Ajustar menú activo
         document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
         const perfilBtn = document.querySelector(`[data-page="perfil"]`);
-        if (perfilBtn) perfilBtn.classList.add('activo');
+        // Solo marcar activo si es mi propio perfil
+        // (Opcional, pero visualmente correcto)
 
-        fetch(`../php/perfil_usuario.php?u=${encodeURIComponent(username)}`)
-            .then(r => {
-                if (!r.ok) throw new Error('Perfil no encontrado');
-                return r.text();
-            })
-            .then(html => replaceMainFromHtml(html))
-            .catch(err => console.error(err));
+        fetch(`perfil_usuario.php?u=${encodeURIComponent(username)}`)
+            .then(r => r.text())
+            .then(html => replaceMainFromHtml(html));
     }
 
     // Realizar Búsqueda
     function realizarBusqueda(termino) {
         history.pushState({ type: 'search', q: termino }, '', `?q=${encodeURIComponent(termino)}`);
-        
-        // Quitar clase activa del menú
         document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
 
-        fetch(`../php/resultados_busqueda.php?q=${encodeURIComponent(termino)}`)
-            .then(r => {
-                if (!r.ok) throw new Error('Error en búsqueda');
-                return r.text();
-            })
-            .then(html => replaceMainFromHtml(html))
-            .catch(err => console.error('Error buscando:', err));
+        fetch(`resultados_busqueda.php?q=${encodeURIComponent(termino)}`)
+            .then(r => r.text())
+            .then(html => replaceMainFromHtml(html));
     }
 
-    // --- 6. FUNCIONES DE ACCIÓN (Like, Comentar, Seguir) ---
+    // --- 6. ACCIONES (Like, Seguir, Comentar) ---
 
-    // Seguir / Dejar de Seguir
     async function handleFollow(btn) {
         const id = btn.dataset.id;
         const sigo = btn.dataset.sigo === '1'; 
-        const url = sigo ? '../php/dejar_seguir_usuario.php' : '../php/seguir_usuario.php';
+        const url = sigo ? 'dejar_seguir_usuario.php' : 'seguir_usuario.php';
         
         const txtOriginal = btn.textContent;
         btn.textContent = '...';
@@ -459,11 +441,7 @@ require __DIR__ . '/db.php';
         try {
             const params = new URLSearchParams();
             params.append('id_usuario', id);
-            // NOTA: Ajusta la ruta si tus archivos PHP están en la misma carpeta o en ../php/
-            // Aquí asumo que index.php está en /php/, por lo que la ruta relativa directa funciona
-            // o si estás en root, ajusta a 'php/...'
-            // Usaré nombres de archivo directos basándome en tu estructura original
-            const res = await fetch(sigo ? 'dejar_seguir_usuario.php' : 'seguir_usuario.php', { method: 'POST', body: params });
+            const res = await fetch(url, { method: 'POST', body: params });
             const txt = (await res.text()).trim();
 
             if (txt.startsWith('ok')) {
@@ -484,22 +462,11 @@ require __DIR__ . '/db.php';
                     let n = parseInt(contador.textContent, 10) || 0;
                     contador.textContent = nuevoEstado ? n + 1 : Math.max(0, n - 1);
                 }
-            } else if (txt === 'no-login') {
-                alert('Debes iniciar sesión');
-                btn.textContent = txtOriginal;
-            } else {
-                console.error('Error PHP:', txt);
-                btn.textContent = txtOriginal;
-            }
-        } catch (err) { 
-            console.error('Error Fetch:', err);
-            btn.textContent = txtOriginal; 
-        } finally { 
-            btn.disabled = false; 
-        }
+            } else { btn.textContent = txtOriginal; }
+        } catch (err) { btn.textContent = txtOriginal; } 
+        finally { btn.disabled = false; }
     }
 
-    // Like
     async function handleLike(btn) {
         const id = btn.dataset.id;
         const isLiked = btn.dataset.liked === '1';
@@ -527,7 +494,6 @@ require __DIR__ . '/db.php';
         } catch(e) { console.error("Error like", e); }
     }
 
-    // Comentar Inline
     async function enviarComentarioInline(form) {
         const idPub = form.dataset.id;
         const input = form.querySelector('input[name="texto"]');
@@ -551,12 +517,10 @@ require __DIR__ . '/db.php';
                 const box = document.getElementById(`comment-box-${idPub}`);
                 if(box) box.style.display = 'none';
 
-                // Actualizar contadores
                 document.querySelectorAll(`.btn-comment-inline[data-id="${idPub}"] .count-comment`).forEach(el => {
                     el.textContent = (parseInt(el.textContent||0) + 1);
                 });
 
-                // Si estamos en vista detallada
                 if(typeof loadCommentsForView === 'function') loadCommentsForView(idPub);
                 const bigCounter = document.getElementById('sp-coments');
                 if(bigCounter) bigCounter.textContent = parseInt(bigCounter.textContent||0)+1;
@@ -568,14 +532,14 @@ require __DIR__ . '/db.php';
         }
     }
 
-    // --- 7. HISTORIAL DEL NAVEGADOR ---
+    // --- 7. HISTORIAL NAVEGADOR ---
     window.addEventListener('popstate', (e) => {
         const s = e.state;
         if (!s) {
-            // Si no hay estado, verificamos si hay parametros en la URL para recargar o ir a index
             const params = new URLSearchParams(window.location.search);
             if (params.has('u')) loadUserProfile(params.get('u'));
             else if (params.has('q')) realizarBusqueda(params.get('q'));
+            else if (params.has('post')) cargarVistaPublicacion(params.get('post'));
             else window.location.href = 'index.php';
         } else if (s.view === 'post') {
             cargarVistaPublicacion(s.id);
@@ -588,7 +552,7 @@ require __DIR__ . '/db.php';
         }
     });
 
-    // Helper para cargar comentarios en vista detallada
+    // Helper Comentarios Vista Detallada
     window.loadCommentsForView = function(id) {
         const cont = document.getElementById('contenedor-comentarios');
         if(!cont) return;
@@ -618,6 +582,11 @@ require __DIR__ . '/db.php';
             });
     };
   </script>
+  
+  <script src="../js/chat.js"></script>
+  <script src="../js/notificaciones.js"></script>
+</body>
+</html>
 
   <script src="../js/chat.js"></script>
   <script src="../js/notificaciones.js"></script>

@@ -1,20 +1,19 @@
 <?php
-
 declare(strict_types=1);
-session_start();
-require __DIR__ . '/db.php';
+// Si se carga vía AJAX la sesión ya existe, si entra directo la iniciamos
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/db.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
   <meta charset="UTF-8" />
-  <title>Perfil · Cloudia</title>
+  <title>Perfil · NeonNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/index.css" />
   <link rel="stylesheet" href="../css/modal.css" />
-  <link rel="icon" href="favicon.ico">
-
+  <link rel="icon" href="../multimedia/file.svg">
 </head>
 
 <body>
@@ -23,11 +22,14 @@ require __DIR__ . '/db.php';
     <main class="contenido-principal">
       <section class="cabecera-perfil">
         <div class="banner">
-          <a href="index.php" class="volver">← Volver</a>
+          <a href="#" class="volver" onclick="if(window.history.length > 1){ window.history.back(); return false; } else { window.location.href='index.php'; }">← Volver</a>
         </div>
+        
         <?php
+        // Datos del usuario logueado
+        // (Nota: Para ver perfiles ajenos necesitaríamos usar $_GET['u'], aquí usamos SESSION como base)
         $foto = $_SESSION['foto_perfil'] ?? '';
-        $fotoUrl = ($foto !== '') ? '../multimedia/' . $foto : '';
+        $fotoUrl = ($foto !== '') ? '../multimedia/' . rawurlencode($foto) : '';
         $bioActual = $_SESSION['biografia'] ?? '';
         ?>
 
@@ -37,16 +39,11 @@ require __DIR__ . '/db.php';
               <?php if ($fotoUrl): ?>
                 <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto de perfil">
               <?php else: ?>
-                <span>👤</span>
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#333; color:#fff; font-size:2rem;">👤</div>
               <?php endif; ?>
             </label>
 
-            <input
-              type="file"
-              id="inputFotoPerfil"
-              name="foto_perfil"
-              accept="image/*"
-              class="input-file-oculto">
+            <input type="file" id="inputFotoPerfil" name="foto_perfil" accept="image/*" class="input-file-oculto">
           </form>
 
           <div class="perfil-mini">
@@ -56,8 +53,8 @@ require __DIR__ . '/db.php';
           <button id="botonEditarPerfil" class="boton-registrarse boton-editar">Editar perfil</button>
         </div>
 
-        <div>
-          <a href="javascript:void(0)" class="boton-cerrar-sesion" onclick="mostrarModal()">
+        <div style="text-align:right; padding:10px;">
+          <a href="cerrar_sesion.php" class="boton-cerrar-sesion" style="color:#f4212e; text-decoration:none; font-size:0.9rem;">
             Cerrar sesión
           </a>
         </div>
@@ -68,19 +65,19 @@ require __DIR__ . '/db.php';
         <p class="nombre-real"><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></p>
 
         <div class="estadisticas">
-          <div onclick="abrirModalUsuarios('seguidores')" style="cursor: pointer; text-align: center;">
+          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('seguidores')" style="cursor: pointer; text-align: center;">
             <span>Seguidores</span>
             <strong>
               <?php
                 $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
-                $stmt->bind_param('i', $_SESSION['id_usuario']); // Ojo: Aquí deberías usar $idUsuario del perfil que visitas, no siempre SESSION
+                $stmt->bind_param('i', $_SESSION['id_usuario']);
                 $stmt->execute();
                 echo $stmt->get_result()->fetch_assoc()['total']; 
               ?>
             </strong>
           </div>
 
-          <div onclick="abrirModalUsuarios('siguiendo')" style="cursor: pointer; text-align: center;">
+          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('siguiendo')" style="cursor: pointer; text-align: center;">
             <span>Siguiendo</span>
             <strong>
               <?php
@@ -104,15 +101,16 @@ require __DIR__ . '/db.php';
             </strong>
           </div>
         </div>
-        <?php
-        $idUsuario = (int)($_SESSION['id_usuario'] ?? 0);
 
+        <?php
+        // Obtener publicaciones del usuario
+        $idUsuario = (int)($_SESSION['id_usuario'] ?? 0);
         $stmt = $mysqli->prepare("
-  SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion
-  FROM publicacion
-  WHERE id_usuario = ?
-  ORDER BY fecha_publicacion DESC, id_publicacion DESC
-");
+            SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion
+            FROM publicacion
+            WHERE id_usuario = ?
+            ORDER BY fecha_publicacion DESC, id_publicacion DESC
+        ");
         $stmt->bind_param('i', $idUsuario);
         $stmt->execute();
         $pubs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -122,61 +120,66 @@ require __DIR__ . '/db.php';
         <section class="mis-publicaciones">
           <h3 class="titulo-seccion">Publicaciones</h3>
 
-          <div class="grid-publicaciones">
+          <div class="grid-publicaciones" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
             <?php foreach ($pubs as $p):
               $idp = (int)$p['id_publicacion'];
               $img = trim((string)($p['imagen'] ?? ''));
               $txt = (string)($p['texto'] ?? '');
-              $pie = (string)($p['pie_foto'] ?? '');
-
-              $imgUrl = $img !== '' ? '../multimedia/' . $img : '';
-              $textoModal = trim($pie . "\n" . $txt);
+              $imgUrl = $img !== '' ? '../multimedia/' . rawurlencode($img) : '';
             ?>
-              <button
-                type="button"
-                class="grid-item"
+              <div 
+                class="grid-item post-preview-click" 
                 data-id="<?php echo $idp; ?>"
-                data-img="<?php echo htmlspecialchars($imgUrl); ?>"
-                data-pie="<?php echo htmlspecialchars($pie); ?>"
-                data-desc="<?php echo htmlspecialchars($txt); ?>"
-                data-fecha="<?php echo htmlspecialchars($p['fecha_publicacion'] ?? ''); ?>">
-
+                style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: #1a1a1a; overflow: hidden; border-radius: 4px; border:1px solid #333;">
+                
                 <?php if ($imgUrl): ?>
-                  <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Publicación <?php echo $idp; ?>">
+                  <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Post" style="width: 100%; height: 100%; object-fit: cover; display:block;">
                 <?php else: ?>
-                  <div class="grid-item-texto">
-                    <?php if (trim($pie) !== ''): ?>
-                      <div class="grid-txt-pie"><?php echo htmlspecialchars($pie); ?></div>
-                      <div class="grid-txt-desc"><?php echo htmlspecialchars($txt); ?></div>
-                    <?php else: ?>
-                      <div class="grid-txt-desc"><?php echo htmlspecialchars($txt); ?></div>
-                    <?php endif; ?>
+                  <div style="padding: 10px; font-size: 0.8rem; color: #fff; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
+                      <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>
                   </div>
                 <?php endif; ?>
-              </button>
+                
+              </div>
             <?php endforeach; ?>
           </div>
         </section>
 
       </section>
-
-
     </main>
 
     <aside class="barra-derecha">
       <section class="panel">
         <h2>Sugerencias</h2>
-        <p>@persona1</p>
-        <p>@persona2</p>
+        <p style="color:#777; padding:10px; font-style:italic;">Pronto más sugerencias...</p>
       </section>
     </aside>
 
   </div>
 
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
-  <?php include __DIR__ . '/modal_publicaciones_perfil.php'; ?>
 
   <script>
+    // 1. Detectar clic en el Grid y navegar
+    document.addEventListener('click', (e) => {
+        const postPreview = e.target.closest('.post-preview-click');
+        
+        if (postPreview) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = postPreview.dataset.id;
+            
+            // Si estamos dentro del sistema SPA (Index), usamos su función
+            if (typeof window.cargarVistaPublicacion === 'function') {
+                window.cargarVistaPublicacion(id);
+            } else {
+                // Fallback: Si se entró directo a perfil.php, vamos al index con el post
+                window.location.href = `index.php?post=${id}`;
+            }
+        }
+    });
+
+    // 2. Subida de Foto de Perfil AJAX
     document.addEventListener('change', async (e) => {
       if (e.target && e.target.id === 'inputFotoPerfil') {
         const input = e.target;
@@ -184,37 +187,21 @@ require __DIR__ . '/db.php';
         if (!form || !input.files || input.files.length === 0) return;
 
         try {
-          const res = await fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form)
-          });
-          const data = await res.json();
-
-          if (!data.ok) {
-            alert(data.error || 'Error al subir foto');
-            return;
-          }
-
-          const img = form.querySelector('label.avatar img');
-          if (img) {
-            img.src = data.foto_url + '?t=' + Date.now();
+          const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+          // Recargar para ver cambios
+          const u = new URLSearchParams(window.location.search).get('u');
+          if (typeof window.loadUserProfile === 'function' && u) {
+             window.loadUserProfile(u);
           } else {
-            const label = form.querySelector('label.avatar');
-            if (label) {
-              label.innerHTML = `<img src="${data.foto_url}?t=${Date.now()}" alt="Foto de perfil">`;
-            }
+             location.reload();
           }
-
         } catch (err) {
           console.error(err);
-          alert('Error de red');
+          alert('Error al subir la imagen');
         }
       }
     });
   </script>
 
-
-
 </body>
-
 </html>

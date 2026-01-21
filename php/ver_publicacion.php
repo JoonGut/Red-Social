@@ -1,107 +1,195 @@
 <?php
 declare(strict_types=1);
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
 
-$pId = (int)($_GET['id'] ?? 0);
 $miId = (int)($_SESSION['id_usuario'] ?? 0);
+$pId  = (int)($_GET['id'] ?? 0);
 
 if ($pId <= 0) {
-    echo "<h2 style='color:white; padding:20px;'>Post no encontrado</h2>";
+    echo '<div style="color:white; padding:20px;">Publicación no válida.</div>';
     exit;
 }
 
-// 1. Obtener el Post Principal
+// 1. OBTENER DATOS DE LA PUBLICACIÓN
 $sql = "
-    SELECT p.*, u.usuario, u.foto_perfil,
-    (SELECT COUNT(*) FROM interaccion WHERE id_publicacion = p.id_publicacion AND tipo_interaccion='LIKE') as likes,
-    (SELECT COUNT(*) FROM interaccion WHERE id_publicacion = p.id_publicacion AND id_usuario = ? AND tipo_interaccion='LIKE') as liked_by_me,
-    (SELECT COUNT(*) FROM interaccion WHERE id_publicacion = p.id_publicacion AND tipo_interaccion='COMENTARIO') as coments
-    FROM publicacion p 
-    JOIN usuario u ON p.id_usuario = u.id_usuario 
+    SELECT 
+        p.*, 
+        u.usuario, 
+        u.nombre, 
+        u.foto_perfil,
+        (SELECT COUNT(*) FROM interaccion WHERE id_publicacion = p.id_publicacion AND tipo_interaccion = 'LIKE') as num_likes,
+        (SELECT COUNT(*) FROM interaccion WHERE id_publicacion = p.id_publicacion AND id_usuario = ? AND tipo_interaccion = 'LIKE') as liked_by_me
+    FROM publicacion p
+    JOIN usuario u ON p.id_usuario = u.id_usuario
     WHERE p.id_publicacion = ?
 ";
+
 $stmt = $mysqli->prepare($sql);
 $stmt->bind_param('ii', $miId, $pId);
 $stmt->execute();
-$post = $stmt->get_result()->fetch_assoc();
+$res = $stmt->get_result();
+$post = $res->fetch_assoc();
 
 if (!$post) {
-    echo "<h2 style='color:white; padding:20px;'>El post ha sido eliminado.</h2>";
+    echo '<div style="color:white; padding:20px;">La publicación no existe o fue eliminada.</div>';
     exit;
 }
 
-// Variables visuales
+// 2. PROCESAR DATOS VISUALES
+$usuario  = htmlspecialchars($post['usuario']);
+$nombre   = htmlspecialchars($post['nombre']);
+$textoRaw = htmlspecialchars($post['texto']);
+$fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion'])); // Ej: 10:30 PM · 21 Ene. 2026
+
+// Rutas de imágenes
+$fotoPerfil = $post['foto_perfil'] ? '../multimedia/' . rawurlencode($post['foto_perfil']) : '';
+$imgPost    = $post['imagen'] ? '../multimedia/' . rawurlencode($post['imagen']) : '';
+
+// Estado del Like
+$likes = $post['num_likes'];
 $isLiked = $post['liked_by_me'] > 0;
 $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart';
 $heartColor = $isLiked ? 'color:#e0245e' : 'color:#71767b';
+
+// Convertir menciones (@usuario) en enlaces
+$textoProcesado = preg_replace(
+    '/@(\w+)/', 
+    '<a href="#" class="user-link stop-prop" data-user="$1" style="color:#1d9bf0; text-decoration:none;">@$1</a>', 
+    nl2br($textoRaw)
+);
 ?>
 
-<header class="cabecera sticky-top" style="display:flex; align-items:center; gap:20px; padding:10px 15px; border-bottom:1px solid #333;">
-    <button onclick="window.history.back()" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer; padding:5px;">
-        <i class="fas fa-arrow-left"></i>
-    </button>
-    <h2 style="margin:0; font-size:1.2rem;">Post</h2>
-</header>
-
-<div class="single-post-view" style="padding:15px; border-bottom:1px solid #333;">
-    <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
-        <img src="<?php echo $post['foto_perfil'] ? '../multimedia/'.$post['foto_perfil'] : '../multimedia/file.svg'; ?>" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-        <div>
-            <div style="font-weight:bold;">@<?php echo htmlspecialchars($post['usuario']); ?></div>
-        </div>
-    </div>
-
-    <div style="font-size:1.1rem; line-height:1.5; margin-bottom:15px; color:#fff;">
-        <?php echo nl2br(htmlspecialchars($post['texto'] ?? '')); ?>
-    </div>
-
-    <?php if($post['imagen']): ?>
-        <div style="margin-bottom:15px; border-radius:15px; overflow:hidden; border:1px solid #333;">
-            <img src="../multimedia/<?php echo rawurlencode($post['imagen']); ?>" style="width:100%; display:block;">
-        </div>
-    <?php endif; ?>
-
-    <div style="color:#71767b; font-size:0.9rem; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #333;">
-        <?php echo date('h:i A · d M, Y', strtotime($post['fecha_publicacion'])); ?>
-    </div>
-
-    <div style="display:flex; gap:20px; padding-bottom:15px; border-bottom:1px solid #333; margin-bottom:15px;">
-        <div><strong id="sp-likes"><?php echo $post['likes']; ?></strong> <span style="color:#71767b;">Likes</span></div>
-        <div><strong id="sp-coments"><?php echo $post['coments']; ?></strong> <span style="color:#71767b;">Comentarios</span></div>
-    </div>
-
-    <div style="display:flex; justify-content:space-around; padding-bottom:15px; border-bottom:1px solid #333;">
-        <button style="background:none; border:none; color:#71767b; font-size:1.2rem; cursor:pointer;">
-            <i class="far fa-comment"></i>
+<div class="detalle-post-container" style="max-width:600px; margin:0 auto; border-right:1px solid #333; min-height:100vh;">
+    
+    <div style="padding:10px 15px; display:flex; align-items:center; gap:20px; position:sticky; top:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:10;">
+        <button onclick="window.history.back()" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">
+            <i class="fas fa-arrow-left"></i>
         </button>
-        <button id="btnLikeBig" class="btn-like-inline" data-id="<?php echo $pId; ?>" data-liked="<?php echo $isLiked?'1':'0'; ?>" style="background:none; border:none; font-size:1.2rem; cursor:pointer; <?php echo $heartColor; ?>">
-            <i class="<?php echo $heartClass; ?> icon-heart"></i>
-        </button>
-        <button style="background:none; border:none; color:#71767b; font-size:1.2rem; cursor:pointer;">
-            <i class="fas fa-share"></i>
-        </button>
+        <h2 style="font-size:1.2rem; margin:0;">Publicación</h2>
     </div>
 
-    <div style="padding:15px 0;">
-        <form class="form-inline-comment" data-id="<?php echo $pId; ?>" data-is-main="true" style="display:flex; gap:10px;">
-            <img src="../multimedia/file.svg" style="width:40px; height:40px; border-radius:50%; background:#333;">
-            <div style="flex:1;">
-                <input type="text" name="texto" placeholder="Postea tu respuesta" style="width:100%; background:none; border:none; color:#fff; font-size:1.1rem; outline:none; padding:10px 0;">
-                <div style="text-align:right; margin-top:5px;">
-                    <button type="submit" style="background:#1d9bf0; color:#fff; border:none; padding:8px 18px; border-radius:20px; cursor:pointer; font-weight:bold;">Responder</button>
-                </div>
+    <div style="padding:15px;">
+        
+        <div style="display:flex; gap:12px; margin-bottom:15px;">
+            <?php if ($fotoPerfil): ?>
+                <img src="<?php echo $fotoPerfil; ?>" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
+            <?php else: ?>
+                <div style="width:48px; height:48px; border-radius:50%; background:#333;"></div>
+            <?php endif; ?>
+            
+            <div style="display:flex; flex-direction:column; justify-content:center;">
+                <span style="font-weight:bold; font-size:1rem; color:#fff;"><?php echo $nombre; ?></span>
+                <span style="color:#71767b;">@<?php echo $usuario; ?></span>
             </div>
-        </form>
+        </div>
+
+        <?php if (!empty($post['ubicacion'])): ?>
+            <div style="font-size:0.9rem; color:#71767b; margin-bottom:10px;">
+                <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($post['ubicacion']); ?>
+            </div>
+        <?php endif; ?>
+
+        <div style="font-size:1.4rem; line-height:1.4; color:#fff; margin-bottom:15px;">
+            <?php echo $textoProcesado; ?>
+        </div>
+
+        <?php if ($imgPost): ?>
+            <div style="margin-bottom:15px; border-radius:15px; overflow:hidden; border:1px solid #333;">
+                <img src="<?php echo $imgPost; ?>" style="width:100%; display:block;">
+            </div>
+        <?php endif; ?>
+
+        <div style="border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:15px;">
+            <span style="color:#71767b; font-size:0.95rem;"><?php echo $fecha; ?></span>
+        </div>
+
+        <?php if ($likes > 0): ?>
+            <div style="border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:15px; display:flex; gap:20px;">
+                <span><strong style="color:#fff;"><?php echo $likes; ?></strong> <span style="color:#71767b;">Me gusta</span></span>
+            </div>
+        <?php endif; ?>
+
+        <div style="display:flex; justify-content:space-around; padding-bottom:15px; border-bottom:1px solid #333;">
+            
+            <button onclick="document.getElementById('inputComentarioDetalle').focus()" style="background:none; border:none; color:#71767b; font-size:1.3rem; cursor:pointer;" title="Comentar">
+                <i class="far fa-comment"></i>
+            </button>
+            
+            <button id="btnLikeBig" class="btn-like-inline" data-id="<?php echo $pId; ?>" data-liked="<?php echo $isLiked?'1':'0'; ?>" style="background:none; border:none; font-size:1.3rem; cursor:pointer; transition:transform 0.1s; <?php echo $heartColor; ?>" title="Me gusta">
+                <i class="<?php echo $heartClass; ?> icon-heart"></i>
+            </button>
+            
+            <button style="background:none; border:none; color:#71767b; font-size:1.3rem; cursor:pointer;" title="Compartir">
+                <i class="fas fa-share"></i>
+            </button>
+
+            <?php if ($post['id_usuario'] === $miId): ?>
+                <a href="php/eliminar_publicacion.php?id=<?php echo $pId; ?>" 
+                   onclick="return confirm('¿Seguro que quieres eliminar este post? Esta acción no se puede deshacer.');"
+                   style="background:none; border:none; color:#f4212e; font-size:1.3rem; cursor:pointer; display:flex; align-items:center;" 
+                   title="Eliminar publicación">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            <?php endif; ?>
+            </div>
+
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <div style="width:40px; height:40px; border-radius:50%; background:#333; overflow:hidden;">
+               <?php 
+                 $miFoto = $_SESSION['foto_perfil'] ?? '';
+                 if($miFoto) echo '<img src="../multimedia/'.rawurlencode($miFoto).'" style="width:100%; height:100%; object-fit:cover;">';
+               ?>
+            </div>
+            <form id="formComentarioDetalle" data-id="<?php echo $pId; ?>" style="flex:1;">
+                <input type="text" id="inputComentarioDetalle" placeholder="Postea tu respuesta" style="width:100%; background:none; border:none; border-bottom:1px solid #333; padding:10px; color:#fff; font-size:1.1rem; outline:none;">
+                <div style="text-align:right; margin-top:10px;">
+                    <button type="submit" style="background:#1d9bf0; color:#fff; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:0.9rem;">Responder</button>
+                </div>
+            </form>
+        </div>
+
     </div>
+
+    <div id="contenedor-comentarios" style="padding-bottom:100px;">
+        </div>
 </div>
 
-<div id="contenedor-comentarios">
-    </div>
-
 <script>
-    // Script automático al cargar esta vista: Cargar comentarios
+    // Cargar comentarios al iniciar
     if(typeof loadCommentsForView === 'function') {
         loadCommentsForView(<?php echo $pId; ?>);
     }
+
+    // Manejar envío de comentario en esta vista
+    document.getElementById('formComentarioDetalle').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const input = document.getElementById('inputComentarioDetalle');
+        const txt = input.value.trim();
+        const btn = this.querySelector('button');
+
+        if(!txt) return;
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        try {
+            const fd = new URLSearchParams();
+            fd.append('id_publicacion', this.dataset.id);
+            fd.append('texto', txt);
+            
+            const res = await fetch('comentar.php', { method:'POST', body:fd });
+            const data = await res.json();
+            
+            if(data.ok) {
+                input.value = '';
+                // Recargar comentarios
+                loadCommentsForView(this.dataset.id);
+            }
+        } catch(err) {
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Responder';
+        }
+    });
 </script>
