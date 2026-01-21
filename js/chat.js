@@ -261,7 +261,7 @@
   async function markRead(ultimoId) {
     if (state.chatId <= 0) return;
     // Asegúrate de que el nombre del PHP coincida con el que creaste (marcar_leido.php)
-    await fetch(PHP("marcar_leido.php"), {
+    await fetch(PHP("chat_mark_read.php"), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: "id_chat=" + state.chatId + "&ultimo_id=" + ultimoId,
@@ -403,7 +403,6 @@
 
       input.value = ""; 
 
-      // Asegúrate del nombre: enviar_mensaje.php
       const r = await fetchJson(PHP("chat_send.php"), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
