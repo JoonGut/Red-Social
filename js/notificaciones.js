@@ -1,114 +1,152 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('btnNoti');
-    const lista = document.getElementById('listaNoti');
-    const badge = document.getElementById('badgeNoti');
-    const content = document.getElementById('contenidoNoti');
-    let lastNotiId = 0; // Para saber cual es la última y lanzar popup
+// js/notificaciones.js
 
-    // 1. Abrir/Cerrar menú
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const esVisible = lista.style.display === 'block';
-        lista.style.display = esVisible ? 'none' : 'block';
-        
-        if (!esVisible) {
-            // Marcar como leídas al abrir
-            fetch('../php/get_notificaciones.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'marcar_leidas=1'
+(function() { // Función de aislamiento (IIFE)
+    
+    // Evita que el script corra dos veces si se incluye múltiple
+    if (window.NotificacionesIniciadas) return; 
+    window.NotificacionesIniciadas = true;
+
+    console.log("🔔 Script de notificaciones cargado.");
+
+    let lastNotiId = 0; 
+    let pollingInterval = null;
+
+    // Esperar a que el HTML exista
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("🔔 DOM Cargado. Buscando elementos...");
+
+        const btn = document.getElementById('btnNoti');
+        const lista = document.getElementById('listaNoti');
+        const badge = document.getElementById('badgeNoti');
+        const content = document.getElementById('contenidoNoti');
+
+        if (!btn) console.error("❌ ERROR CRÍTICO: No encuentro el botón con id='btnNoti'");
+        if (!lista) console.error("❌ ERROR CRÍTICO: No encuentro el div con id='listaNoti'");
+
+        if (btn && lista) {
+            // 1. CLIC EN EL BOTÓN
+            btn.addEventListener('click', (e) => {
+                console.log("🔔 Click en campana.");
+                e.stopPropagation(); // Evita que el clic llegue al documento
+                
+                // Toggle simple
+                if (lista.style.display === 'block') {
+                    lista.style.display = 'none';
+                } else {
+                    lista.style.display = 'block';
+                    console.log("🔔 Abriendo menú...");
+                    
+                    // Ocultar badge visualmente
+                    if(badge) badge.style.display = 'none';
+                    
+                    // Llamar al servidor
+                    cargarDatos(true); // true = marcar como leídas
+                }
             });
-            badge.style.display = 'none'; // Quitar bolita roja
+
+            // 2. CLIC FUERA (Cerrar)
+            document.addEventListener('click', (e) => {
+                if (lista.style.display === 'block') {
+                    if (!lista.contains(e.target) && !btn.contains(e.target)) {
+                        lista.style.display = 'none';
+                    }
+                }
+            });
+
+            // Evitar que clic dentro de la lista la cierre
+            lista.addEventListener('click', (e) => e.stopPropagation());
         }
-    });
 
-    // Cerrar si clic fuera
-    document.addEventListener('click', () => lista.style.display = 'none');
-    lista.addEventListener('click', e => e.stopPropagation());
+        // 3. FUNCIÓN DE CARGA
+        async function cargarDatos(marcarLeidas = false) {
+            if (!content) return;
 
-    // 2. Función principal de carga
-    async function checkNotificaciones() {
-        try {
-            const res = await fetch('../php/get_notificaciones.php');
-            const json = await res.json();
-            
-            if (!json.ok) return;
-
-            // Actualizar Badge
-            if (json.sin_leer > 0) {
-                badge.textContent = json.sin_leer;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
-
-            // Renderizar lista
-            content.innerHTML = '';
-            json.items.forEach(n => {
-                // Detectar si es nueva para lanzar POPUP (Toast)
-                if (Number(n.id_notificacion) > lastNotiId && lastNotiId !== 0) {
-                    showToast(n);
+            try {
+                // Si hay que marcar leídas, lanzamos petición en segundo plano
+                if (marcarLeidas) {
+                    fetch('get_notificaciones.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: 'marcar_leidas=1'
+                    }).catch(e => console.log(e));
                 }
 
-                // Crear HTML de la lista
-                const div = document.createElement('div');
-                div.className = `noti-item ${n.leido == 0 ? 'sin-leer' : ''}`;
-                
-                // Icono según tipo
-                let icono = '🔔';
-                let accion = 'Notificación';
-                if(n.tipo === 'mensaje') { icono = '💬'; accion = 'Nuevo mensaje'; }
-                if(n.tipo === 'seguir') { icono = '👤'; accion = 'Nuevo seguidor'; }
-                if(n.tipo === 'dejar_seguir') { icono = '💔'; accion = 'Ya no te sigue'; }
-                if(n.tipo === 'comentario') { icono = '📝'; accion = 'Comentó tu post'; }
+                // Pedir datos
+                const res = await fetch('get_notificaciones.php');
+                const json = await res.json();
 
-                const foto = n.actor_foto ? `../multimedia/${n.actor_foto}` : '../multimedia/file.svg';
+                if (!json.ok) return;
 
-                div.innerHTML = `
-                    <img src="${foto}" class="noti-avatar">
-                    <div class="noti-text">
-                        <strong>${n.actor_usuario}</strong> <small>${accion}</small>
-                        <div style="font-size:0.85em; opacity:0.8">"${n.texto_extra}"</div>
-                    </div>
-                `;
-                content.appendChild(div);
-            });
+                // Badge
+                if (badge && !marcarLeidas) {
+                    if (json.sin_leer > 0) {
+                        badge.style.display = 'block';
+                        badge.textContent = json.sin_leer;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
 
-            // Guardar el ID más alto para la próxima comparación
-            if (json.items.length > 0) {
-                lastNotiId = Math.max(...json.items.map(i => Number(i.id_notificacion)));
-            } else {
-                content.innerHTML = '<p class="noti-empty" style="padding:10px; color:#aaa">Sin novedades.</p>';
+                // Popup Toast
+                if (json.items.length > 0) {
+                    const latest = Number(json.items[0].id_notificacion);
+                    if (lastNotiId > 0 && latest > lastNotiId) {
+                        showToast(json.items[0]);
+                    }
+                    lastNotiId = latest;
+                }
+
+                // Renderizar (Solo si está visible para ahorrar)
+                if (lista && lista.style.display === 'block') {
+                    content.innerHTML = '';
+                    if (json.items.length === 0) {
+                        content.innerHTML = '<div style="padding:15px; text-align:center; color:#777">No hay notificaciones.</div>';
+                    } else {
+                        json.items.forEach(n => {
+                            const div = document.createElement('div');
+                            div.className = `noti-item ${n.leido == 0 ? 'sin-leer' : ''}`;
+                            div.style.padding = '10px';
+                            div.style.borderBottom = '1px solid #333';
+                            div.style.cursor = 'pointer';
+                            div.style.display = 'flex'; 
+                            div.style.gap = '10px';
+                            div.style.alignItems = 'center';
+                            
+                            const foto = n.actor_foto ? `../multimedia/${n.actor_foto}` : '../multimedia/file.svg';
+                            const jsAction = n.link_accion ? n.link_accion.replace('javascript:', '') : '';
+                            
+                            div.setAttribute('onclick', jsAction);
+                            div.innerHTML = `
+                                <img src="${foto}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
+                                <div>
+                                    <strong style="color:#fff">${n.actor_usuario}</strong> 
+                                    <span style="color:#ccc; font-size:0.9rem">${n.texto_formato}</span>
+                                    ${n.texto_extra ? `<div style="font-size:0.8rem; color:#777; font-style:italic">"${n.texto_extra}"</div>` : ''}
+                                </div>
+                            `;
+                            content.appendChild(div);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Error cargando notificaciones:", e);
             }
+        }
 
-        } catch (e) { console.error(e); }
-    }
+        // 4. TOAST
+        function showToast(n) {
+            const container = document.getElementById('toastContainer');
+            if(!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<strong>@${n.actor_usuario}</strong> ${n.texto_formato}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 4000);
+        }
 
-    // 3. Mostrar Popup (Toast)
-    function showToast(n) {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = `
-            <div>${n.tipo === 'mensaje' ? '💬' : '🔔'}</div>
-            <div>
-                <strong>${n.actor_usuario}</strong>
-                <div>${n.texto_extra}</div>
-            </div>
-        `;
-        container.appendChild(toast);
-        
-        // Sonido opcional
-        // new Audio('../multimedia/notification.mp3').play().catch(e=>{});
+        // Arrancar ciclo
+        cargarDatos();
+        setInterval(() => cargarDatos(), 5000);
+    });
 
-        // Quitar a los 4 segundos
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 500);
-        }, 4000);
-    }
-
-    // Arrancar bucle (Polling) cada 3 segundos
-    checkNotificaciones(); // Primera vez inmediata
-    setInterval(checkNotificaciones, 3000);
-});
+})();
