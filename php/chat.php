@@ -40,7 +40,7 @@ if (empty($_SESSION['id_usuario'])) {
             <div id="chatTopName" class="chat-topbar-name">Usuario</div>
             <div id="chatTopUser" class="chat-topbar-handle">@usuario</div>
           </div>
-          <button style="background:none; border:none; color:var(--neon-blue); cursor:pointer;">
+          <button style="background:none; border:none; color:var(--accent2); cursor:pointer; font-size:1.1rem;">
              <i class="fas fa-info-circle"></i>
           </button>
         </div>

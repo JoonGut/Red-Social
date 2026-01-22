@@ -4,13 +4,14 @@ $nombreActual = $_SESSION['nombre'] ?? '';
 $bioActual = $_SESSION['biografia'] ?? '';
 $fotoActual = $_SESSION['foto_perfil'] ?? null;
 // Si tienes portada en la BD, recupérala aquí. Si no, usa un default.
+$portadaActual = $_SESSION['portada'] ?? 'file.svg'; // Asegúrate de tener una imagen por defecto
 ?>
 
 <div id="modalEditarPerfil" class="modal-overlay" aria-hidden="true">
   <div class="modal modal-edit">
     
     <div class="modal-header">
-      <h3 style="margin:0; font-size:18px; color: #fff;">Editar perfil</h3>
+      <h3>Editar perfil</h3>
       <button type="button" id="cerrarModalEditarPerfil" class="btn-close" aria-label="Cerrar">×</button>
     </div>
 
@@ -26,8 +27,7 @@ $fotoActual = $_SESSION['foto_perfil'] ?? null;
                src="../multimedia/<?php echo htmlspecialchars($portadaActual); ?>" 
                class="edit-cover-img" 
                alt="Portada"
-               >
-          <input type="file" id="inputPortada" name="portada" accept="image/*" hidden>
+               onerror="this.src='../multimedia/file.svg';"> <input type="file" id="inputPortada" name="portada" accept="image/*" hidden>
         </div>
 
         <div class="edit-avatar-wrap">
@@ -69,10 +69,10 @@ $fotoActual = $_SESSION['foto_perfil'] ?? null;
           ><?php echo htmlspecialchars($bioActual); ?></textarea>
         </div>
 
-        </div>
+      </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-danger" id="cancelarEditarPerfil" style="background:transparent; border:1px solid #333; margin-right:auto;">Cancelar</button>
+        <button type="button" class="btn-danger" id="cancelarEditarPerfil" style="background:transparent; border:1px solid var(--border); color:var(--text); margin-right:auto;">Cancelar</button>
         <button type="submit" class="boton-registrarse" id="guardarEditarPerfil">Guardar cambios</button>
       </div>
     </form>
@@ -185,7 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Imágenes (Si el servidor devuelve las nuevas rutas)
             if (data.foto_perfil) {
                 // Actualiza todas las fotos de perfil que veas en la pantalla
-                document.querySelectorAll('.avatar-img-class-o-id').forEach(img => {
+                // Buscamos por clase común o IDs específicos si los tienes
+                document.querySelectorAll('img[src*="file.svg"], .avatar-img-class').forEach(img => {
                     img.src = '../multimedia/' + data.foto_perfil + '?t=' + new Date().getTime();
                 });
             }

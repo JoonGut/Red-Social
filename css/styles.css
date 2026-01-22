@@ -1,28 +1,32 @@
+/* css/login.css (o registro.css) - Adaptado a Temas */
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-  background: linear-gradient(180deg, #f5f8fa, #e6ecf0);
+  /* CAMBIO: Usamos var(--bg) en lugar de gradiente fijo */
+  background: var(--bg);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0f1419;
+  color: var(--text); /* CAMBIO */
 }
 
 /* Tarjeta principal */
 .tarjeta-registro {
-  background: #ffffff;
+  background: var(--card); /* CAMBIO: Fondo de tarjeta dinámico */
   width: 100%;
   max-width: 420px;
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  /* CAMBIO: Sombra dinámica y borde sutil */
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
 }
 
 /* Logo */
@@ -34,7 +38,7 @@ body {
 
 .logo-red span {
   font-size: 2.5rem;
-  color: #1da1f2;
+  color: var(--accent); /* CAMBIO: Azul dinámico */
 }
 
 /* Títulos */
@@ -42,11 +46,12 @@ body {
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
   text-align: center;
+  color: var(--text); /* Aseguramos color */
 }
 
 .subtitulo {
   text-align: center;
-  color: #536471;
+  color: var(--muted); /* CAMBIO: Gris dinámico */
   font-size: 0.95rem;
   margin-bottom: 1.8rem;
 }
@@ -60,22 +65,27 @@ body {
 
 .campo label {
   font-size: 0.85rem;
-  color: #536471;
+  color: var(--muted); /* CAMBIO */
+  margin-bottom: 4px;
+  display: block;
 }
 
 .campo input {
   width: 100%;
   padding: 0.75rem 0.9rem;
   border-radius: 8px;
-  border: 1px solid #cfd9de;
+  /* CAMBIO CRÍTICO PARA INPUTS EN MODO OSCURO */
+  background: var(--card2); 
+  border: 1px solid var(--border);
+  color: var(--text);
   font-size: 0.95rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .campo input:focus {
   outline: none;
-  border-color: #1da1f2;
-  box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.2);
+  border-color: var(--accent); /* CAMBIO */
+  box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.2); /* Esto se puede dejar o ajustar */
 }
 
 /* Botón */
@@ -84,8 +94,8 @@ body {
   padding: 0.8rem;
   border-radius: 999px;
   border: none;
-  background: #1da1f2;
-  color: #ffffff;
+  background: var(--accent); /* CAMBIO */
+  color: #ffffff; /* El texto del botón suele ser blanco siempre */
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -93,7 +103,7 @@ body {
 }
 
 .boton-registrarse:hover {
-  background: #1a91da;
+  filter: brightness(1.1); /* Efecto hover genérico */
 }
 
 .boton-registrarse:active {
@@ -105,11 +115,11 @@ body {
   margin-top: 1.5rem;
   text-align: center;
   font-size: 0.85rem;
-  color: #536471;
+  color: var(--muted); /* CAMBIO */
 }
 
 .texto-footer a {
-  color: #1da1f2;
+  color: var(--accent); /* CAMBIO */
   text-decoration: none;
   font-weight: 500;
 }
@@ -117,11 +127,13 @@ body {
 .texto-footer a:hover {
   text-decoration: underline;
 }
+
 .error-msg {
-    color: crimson;
-    font-size: 0.85em;
-    margin-top: 4px;
+  color: #ff4757; /* Rojo fijo o var(--error) si la creaste */
+  font-size: 0.85em;
+  margin-top: 4px;
 }
+
 /* Responsive */
 @media (max-width: 480px) {
   .tarjeta-registro {
@@ -130,5 +142,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border: none;
+    background: var(--bg); /* En móvil pantalla completa, usa el fondo base */
   }
 }

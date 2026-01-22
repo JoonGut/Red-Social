@@ -1,13 +1,13 @@
 /* =========================
-   NeonNest — MODAL.css (COMPLETO Y CORREGIDO)
+   NeonNest — MODAL.css (ADAPTADO A TEMAS)
    ========================= */
 
 /* Overlay */
 .modal-overlay{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.75); /* Un poco más oscuro para que resalte */
-  backdrop-filter: blur(4px);  /* Efecto desenfoque */
+  background: rgba(0,0,0,.75); /* Mantenemos oscuro para resaltar siempre */
+  backdrop-filter: blur(4px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -21,10 +21,10 @@
 .modal{
   width: min(640px, 100%);
   max-height: 90vh;
-  background: #12172a;
-  border: 1px solid rgba(255,255,255,.08);
+  background: var(--card); /* CAMBIO */
+  border: 1px solid var(--border); /* CAMBIO */
   border-radius: 18px;
-  box-shadow: 0 25px 50px rgba(0,0,0,.6);
+  box-shadow: var(--shadow); /* CAMBIO */
   overflow: hidden;
   display:flex;
   flex-direction:column;
@@ -43,9 +43,9 @@
   justify-content:space-between;
   gap: 12px;
   padding: 14px 18px;
-  background: #151b31; /* O puedes poner rgba(21, 27, 49, 0.9) si quieres transparencia */
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  color: rgba(255,255,255,.92);
+  background: var(--card2); /* CAMBIO */
+  border-bottom: 1px solid var(--border); /* CAMBIO */
+  color: var(--text); /* CAMBIO */
   position: sticky;
   top: 0;
   z-index: 10;
@@ -60,9 +60,9 @@
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.92);
+  border: 1px solid var(--border);
+  background: var(--hover-bg); /* CAMBIO */
+  color: var(--muted); /* CAMBIO */
   cursor: pointer;
   font-size: 18px;
   line-height: 1;
@@ -74,30 +74,30 @@
 .btn-close:hover{
   background: rgba(255,120,120,.18);
   border-color: rgba(255,120,120,.28);
-  color: #fff;
+  color: #ff4757;
   transform: scale(1.06);
 }
 
 /* Body (AQUÍ ESTÁ EL ARREGLO DEL SCROLLBAR) */
 .modal-body{
-  padding: 0; /* Quitamos padding global para que el scroll pegue al borde */
-  background: #12172a;
+  padding: 0; 
+  background: var(--card); /* CAMBIO */
   overflow-y: auto;
   display: flex; 
   flex-direction: column;
   
-  /* Scrollbar oscura personalizada */
+  /* Scrollbar adaptada a variables */
   scrollbar-width: thin;
-  scrollbar-color: #334155 #12172a;
+  scrollbar-color: var(--border) var(--card); /* CAMBIO */
 }
 
-/* Webkit Scrollbar (Chrome/Safari) para quitar la barra blanca */
+/* Webkit Scrollbar */
 .modal-body::-webkit-scrollbar { width: 8px; }
 .modal-body::-webkit-scrollbar-track { background: transparent; }
 .modal-body::-webkit-scrollbar-thumb { 
-  background-color: #334155; 
+  background-color: var(--border); /* CAMBIO */
   border-radius: 10px; 
-  border: 2px solid #12172a; 
+  border: 2px solid var(--card); /* CAMBIO */
 }
 
 /* ===== Post header (Visualización) ===== */
@@ -118,7 +118,7 @@
 .post-user{
   font-weight: 800;
   font-size: 15px;
-  color: rgba(255,255,255,.96);
+  color: var(--text); /* CAMBIO */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -127,15 +127,15 @@
 
 .post-meta{
   font-size: 12px;
-  color: rgba(255,255,255,.60);
+  color: var(--muted); /* CAMBIO */
 }
 
-/* ===== Post layout (AQUÍ ESTÁ EL ARREGLO VISUAL "ENCAJONADO") ===== */
+/* ===== Post layout ===== */
 .post-modal{
-  border-radius: 0; /* Quitamos radio para que fluya */
-  border: none;     /* Quitamos borde interno */
-  background: transparent; /* FONDO TRANSPARENTE: Clave para que no se vea "caja en caja" */
-  padding: 20px 24px 5px 24px; /* Damos aire al contenido */
+  border-radius: 0; 
+  border: none;    
+  background: transparent; 
+  padding: 20px 24px 5px 24px; 
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -144,16 +144,16 @@
 /* Texto arriba */
 .post-text{
   margin: 0;
-  font-size: 16px; /* Un pelín más grande */
+  font-size: 16px; 
   line-height: 1.5;
-  color: rgba(255,255,255,.95);
+  color: var(--text); /* CAMBIO */
   white-space: pre-line;
 }
 
 /* Ubicación */
 .post-location{
   font-size: 13px;
-  color: #00e6ff; /* Color NeonNest */
+  color: var(--accent2); /* CAMBIO */
 }
 
 /* Media (Imagen) */
@@ -162,8 +162,8 @@
   max-height: 65vh;
   overflow: hidden;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.08); /* Borde sutil */
-  background: rgba(0,0,0,.2); /* Fondo sutil, no gris solido */
+  border: 1px solid var(--border); /* CAMBIO */
+  background: rgba(0,0,0,.05); /* CAMBIO: Sutil */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -184,12 +184,11 @@
   border-radius: 0;
   background: transparent;
   border: none;
-  color: rgba(255,255,255,.60);
+  color: var(--muted); /* CAMBIO */
   font-size: 13px;
   font-style: italic;
 }
 
-/* Si vacío, no ocupa espacio */
 .post-caption:empty{ display:none; }
 .post-text:empty{ display:none; }
 
@@ -205,7 +204,7 @@
   border-radius: 12px;
   border: 1px solid rgba(255,120,120,.25);
   background: rgba(255,120,120,.10);
-  color: rgba(255,255,255,.92);
+  color: var(--text); /* CAMBIO */
   cursor: pointer;
   font-weight: 750;
 }
@@ -217,14 +216,13 @@
 
 /* =========================================================
    PARTE RESTAURADA (Creación de posts / Inputs)
-   Esto es lo que borré antes y aquí está de vuelta intacto.
    ========================================================= */
 
 /* Close btn (X) alternativo */
 .modal-close {
   background: transparent;
   border: none;
-  color: rgba(255,255,255,.6);
+  color: var(--muted); /* CAMBIO */
   font-size: 20px;
   cursor: pointer;
   transition: color .2s;
@@ -233,26 +231,26 @@
 }
 
 .modal-close:hover {
-  color: #fff;
+  color: var(--text); /* CAMBIO */
 }
 
 .modal-spacer { flex: 1; }
 
-/* Textarea (¿Qué está pasando?) */
+/* Textarea */
 #textoPub {
   width: 100%;
   min-height: 120px;
   background: transparent;
   border: none;
-  color: #fff;
-  font-size: 19px; /* Tamaño tipo Twitter */
+  color: var(--text); /* CAMBIO */
+  font-size: 19px; 
   resize: none;
   outline: none;
-  padding: 16px; /* Añadido padding para que no pegue al borde */
+  padding: 16px; 
 }
 
 #textoPub::placeholder {
-  color: rgba(255,255,255,0.4);
+  color: var(--muted); /* CAMBIO */
 }
 
 /* Inputs de Ubicación y Pie de foto */
@@ -260,23 +258,23 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 16px; /* Padding lateral */
+  padding: 0 16px; 
 }
 
 .modal-row input[type="text"] {
   width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--card2); /* CAMBIO */
+  border: 1px solid var(--border); /* CAMBIO */
   border-radius: 8px;
   padding: 8px 12px;
-  color: #fff;
+  color: var(--text); /* CAMBIO */
   font-size: 14px;
   transition: all .2s;
 }
 
 .modal-row input[type="text"]:focus {
-  background: rgba(255,255,255,0.08);
-  border-color: #00acee; /* Azul acento */
+  background: var(--card); /* CAMBIO */
+  border-color: var(--accent); /* CAMBIO */
   outline: none;
 }
 
@@ -288,14 +286,14 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  color: #00acee;
-  background: rgba(0, 172, 238, 0.1);
+  color: var(--accent); /* CAMBIO */
+  background: var(--hover-bg); /* CAMBIO */
   cursor: pointer;
   transition: background .2s;
 }
 
 .custom-file-upload:hover {
-  background: rgba(0, 172, 238, 0.2);
+  background: rgba(143, 123, 255, 0.15); /* Ajuste suave */
 }
 
 /* Footer & Contador */
@@ -305,18 +303,18 @@
   justify-content: flex-end;
   gap: 15px;
   padding: 12px 16px;
-  border-top: 1px solid rgba(255,255,255,.08);
+  border-top: 1px solid var(--border); /* CAMBIO */
   margin-top: 10px;
 }
 
 #contador {
-  color: rgba(255,255,255,0.4);
+  color: var(--muted); /* CAMBIO */
   font-size: 13px;
 }
 
-/* Publicar Button (Estilo NeonNest) */
+/* Publicar Button */
 .boton-registrarse {
-  background: #00acee;
+  background: var(--accent); /* CAMBIO */
   color: #fff;
   border: none;
   padding: 8px 20px;
@@ -337,25 +335,24 @@
 
 /* Bloquear scroll fondo */
 body.modal-open { overflow: hidden; }
+
 /* =========================================
    ESTILOS EXCLUSIVOS PARA MODAL DE EDICIÓN
    ========================================= */
 
-/* --- Estructura Visual (Portada + Avatar) --- */
-
-/* Forzar reset de padding en el cuerpo de este modal específico */
+/* Forzar reset de padding */
 .modal-edit .modal-body {
     padding: 0 !important;
     overflow-x: hidden;
-    background: #0c1224; /* Asegurar fondo oscuro */
+    background: var(--card); /* CAMBIO */
 }
 
 /* Contenedor general de imágenes */
 .modal-edit .edit-visuals {
   position: relative;
-  height: 200px; /* Altura total reservada para la cabecera visual */
+  height: 200px; 
   margin-bottom: 20px;
-  background: #0c101d;
+  background: var(--card2); /* CAMBIO */
 }
 
 /* PORTADA */
@@ -363,7 +360,7 @@ body.modal-open { overflow: hidden; }
   width: 100%;
   height: 150px;
   position: relative;
-  background: #2a2a3c;
+  background: var(--hover-bg); /* CAMBIO */
   overflow: hidden;
 }
 
@@ -376,7 +373,7 @@ body.modal-open { overflow: hidden; }
   transition: opacity 0.3s;
 }
 
-/* AVATAR (Redondo y superpuesto) */
+/* AVATAR */
 .modal-edit .edit-avatar-wrap {
   position: absolute;
   bottom: 15px; 
@@ -384,8 +381,8 @@ body.modal-open { overflow: hidden; }
   width: 110px;
   height: 110px;
   border-radius: 50%;
-  border: 5px solid #12172a; /* Borde del color del fondo para "recortar" la portada */
-  background: #12172a;
+  border: 5px solid var(--card); /* CAMBIO: Borde igual al fondo */
+  background: var(--card); /* CAMBIO */
   overflow: hidden;
   z-index: 5;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
@@ -407,7 +404,7 @@ body.modal-open { overflow: hidden; }
   align-items: center;
   justify-content: center;
   font-size: 26px;
-  opacity: 0; /* Oculto por defecto */
+  opacity: 0; 
   transition: all 0.2s ease;
   cursor: pointer;
   color: #fff;
@@ -441,7 +438,7 @@ body.modal-open { overflow: hidden; }
 .modal-edit .input-group-neon label {
   font-size: 13px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted); /* CAMBIO */
   margin-left: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -452,11 +449,11 @@ body.modal-open { overflow: hidden; }
 .modal-edit .input-group-neon input[type="url"],
 .modal-edit .input-group-neon textarea {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: var(--card2) !important; /* CAMBIO */
+  border: 1px solid var(--border) !important; /* CAMBIO */
   border-radius: 14px !important;
   padding: 14px 16px !important;
-  color: #fff !important;
+  color: var(--text) !important; /* CAMBIO */
   font-size: 15px !important;
   outline: none !important;
   transition: all 0.2s ease;
@@ -468,54 +465,55 @@ body.modal-open { overflow: hidden; }
   min-height: 90px;
 }
 
-/* Efecto Focus (Brillo Cian) */
+/* Efecto Focus */
 .modal-edit .input-group-neon input:focus,
 .modal-edit .input-group-neon textarea:focus {
-  border-color: #00e6ff !important;
+  border-color: var(--accent2) !important; /* CAMBIO */
   background: rgba(0, 230, 255, 0.08) !important;
   box-shadow: 0 0 15px rgba(0, 230, 255, 0.15) !important;
 }
 
 /* Ajustes del Footer */
 .modal-edit .modal-footer {
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid var(--border); /* CAMBIO */
   padding: 16px 24px;
-  background: #151b31;
+  background: var(--card2); /* CAMBIO */
   border-radius: 0 0 18px 18px;
 }
+
 /* =========================================
-   ESTILO BÁSICO Y NEON: LISTA DE USUARIOS
+   LISTA DE USUARIOS
    ========================================= */
 
 /* 1. El contenedor del Modal */
 #modalListaUsuarios .modal-content {
-  background-color: #000;      /* Fondo negro puro */
-  border: 1px solid #333;      /* Borde gris oscuro */
-  border-radius: 12px;         /* Bordes redondeados */
+  background-color: var(--card); /* CAMBIO */
+  border: 1px solid var(--border); /* CAMBIO */
+  border-radius: 12px; 
   width: 100%;
-  max-width: 450px;            /* No muy ancho */
-  height: 500px;               /* Altura fija */
+  max-width: 450px; 
+  height: 500px; 
   display: flex;
   flex-direction: column;
-  margin: auto;                /* Centrado */
-  padding: 0;                  /* Sin relleno extra */
+  margin: auto; 
+  padding: 0; 
   overflow: hidden;
 }
 
 /* 2. Cabecera (Pestañas) */
 .modal-header-tabs {
   display: flex;
-  background-color: #111;      /* Un poco más claro que el fondo */
-  border-bottom: 1px solid #333;
+  background-color: var(--card2); /* CAMBIO */
+  border-bottom: 1px solid var(--border); /* CAMBIO */
 }
 
 /* Los botones de las pestañas */
 .tab-btn {
-  flex: 1;                     /* Ocupan mitad y mitad */
+  flex: 1; 
   background: none;
   border: none;
   padding: 15px;
-  color: #777;                 /* Texto apagado */
+  color: var(--muted); /* CAMBIO */
   font-weight: bold;
   cursor: pointer;
   text-transform: uppercase;
@@ -524,15 +522,15 @@ body.modal-open { overflow: hidden; }
 
 /* Cuando la pestaña está activa */
 .tab-btn.active {
-  color: #fff;                 /* Texto blanco brillante */
-  border-bottom: 2px solid #00f3ff; /* Línea NEÓN abajo */
+  color: var(--text); /* CAMBIO */
+  border-bottom: 2px solid var(--accent2); /* Línea NEÓN abajo */
 }
 
 /* Botón de cerrar (X) */
 .btn-cerrar-modal-user {
   background: none;
   border: none;
-  color: #fff;
+  color: var(--text); /* CAMBIO */
   font-size: 20px;
   padding: 0 15px;
   cursor: pointer;
@@ -540,8 +538,8 @@ body.modal-open { overflow: hidden; }
 
 /* 3. Lista de usuarios (Cuerpo) */
 #contenedorLista {
-  flex: 1;                     /* Ocupa el resto del espacio */
-  overflow-y: auto;            /* Scroll si hay muchos */
+  flex: 1; 
+  overflow-y: auto; 
   padding: 0;
 }
 
@@ -549,13 +547,13 @@ body.modal-open { overflow: hidden; }
 .user-row {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Separa info del botón */
+  justify-content: space-between; 
   padding: 12px 15px;
-  border-bottom: 1px solid #222; /* Línea separadora muy sutil */
+  border-bottom: 1px solid var(--border); /* CAMBIO */
 }
 
 .user-row:hover {
-  background-color: #0a0a0a;   /* Cambio sutil al pasar ratón */
+  background-color: var(--hover-bg); /* CAMBIO */
 }
 
 /* Info (Avatar + Texto) */
@@ -564,8 +562,8 @@ body.modal-open { overflow: hidden; }
   height: 40px;
   border-radius: 50%;
   margin-right: 10px;
-  background: #333;
-  color: white;
+  background: var(--card2); /* CAMBIO */
+  color: var(--text); /* CAMBIO */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -579,22 +577,22 @@ body.modal-open { overflow: hidden; }
 
 .user-info h4 {
   margin: 0;
-  color: #fff;
+  color: var(--text); /* CAMBIO */
   font-size: 0.95rem;
 }
 
 .user-info span {
-  color: #666;
+  color: var(--muted); /* CAMBIO */
   font-size: 0.8rem;
 }
 
-/* 4. Botón "Seguir" (Pequeño y bonito) */
+/* 4. Botón "Seguir" */
 .user-row .btn-accion-seguir {
-  background-color: #fff;      /* Blanco para resaltar */
-  color: #000;
+  background-color: var(--text); /* CAMBIO: En oscuro es blanco, en claro es negro */
+  color: var(--bg); /* CAMBIO: Color opuesto al fondo */
   border: none;
   padding: 6px 15px;
-  border-radius: 20px;         /* Redondito */
+  border-radius: 20px; 
   font-size: 0.8rem;
   font-weight: bold;
   cursor: pointer;
@@ -605,84 +603,25 @@ body.modal-open { overflow: hidden; }
   opacity: 0.8;
 }
 
-/* Variación: Si ya lo sigues (Botón transparente con borde) */
+/* Variación: Si ya lo sigues */
 .user-row .btn-accion-seguir[data-sigo="1"] {
   background: transparent;
-  border: 1px solid #555;
-  color: #fff;
+  border: 1px solid var(--muted); /* CAMBIO */
+  color: var(--text); /* CAMBIO */
 }
+
 /* --- MEJORA VISUAL DEL MODAL DE PUBLICAR --- */
 
-/* Título del modal más elegante */
+/* Título del modal */
 .modal-header h3 {
   font-family: 'Segoe UI', sans-serif;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255,255,255,0.2);
+  color: var(--text); /* CAMBIO */
+  text-shadow: 0 0 10px rgba(255,255,255,0.1);
 }
 
-/* Área de texto más grande y limpia */
-#textoPub {
-  font-family: 'Segoe UI', sans-serif;
-  font-size: 20px;
-  line-height: 1.5;
-  padding: 20px;
-  min-height: 150px; /* Más alto */
-  color: rgba(255,255,255,0.95);
-}
-
-#textoPub::placeholder {
-  color: rgba(255,255,255,0.3);
-  font-weight: 300;
-}
-
-/* Inputs inferiores (Ubicación / Pie de foto) más sutiles */
-.modal-row {
-  padding: 0 20px; 
-  margin-bottom: 12px;
-}
-
-.modal-row input[type="text"] {
-  background: rgba(255,255,255,0.03); /* Casi transparente */
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px; /* Más redondos */
-  padding: 10px 15px;
-  font-size: 14px;
-  color: #00e6ff; /* Texto neón cian al escribir */
-  transition: all 0.3s ease;
-}
-
-.modal-row input[type="text"]:focus {
-  background: rgba(0, 230, 255, 0.05);
-  border-color: #00e6ff;
-  box-shadow: 0 0 15px rgba(0, 230, 255, 0.1);
-}
-
+/* Inputs inferiores */
 .modal-row input[type="text"]::placeholder {
-  color: rgba(255,255,255,0.4);
-}
-
-/* Botón de subir foto más atractivo */
-.custom-file-upload {
-  width: auto; /* Ancho automático para texto */
-  height: auto;
-  padding: 8px 15px;
-  border-radius: 20px;
-  background: rgba(29, 155, 240, 0.1);
-  color: #1d9bf0;
-  font-weight: 600;
-  font-size: 14px;
-  display: flex;
-  gap: 8px; /* Espacio entre icono y texto */
-}
-
-.custom-file-upload:hover {
-  background: rgba(29, 155, 240, 0.2);
-}
-
-/* Línea separadora sutil */
-.modal-footer {
-  border-top: 1px solid rgba(255,255,255,0.05);
-  padding: 15px 20px;
+  color: var(--muted); /* CAMBIO */
 }

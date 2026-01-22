@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
@@ -46,10 +45,14 @@ require __DIR__ . '/db.php';
       </div>
 
       <nav class="menu">
-        <a href="index.php" class="menu-item activo">Inicio</a>
+        <a href="index.php" class="menu-item activo" data-page="index">Inicio</a>
         <a href="#" class="menu-item" data-page="explorar">Explorar</a>
         <a href="#" class="menu-item" data-page="chat">Mensajes</a>
         <a href="#" class="menu-item" data-page="perfil">Perfil</a>
+        <a href="#" id="btnThemeToggle" class="menu-item">
+          <i class="fas fa-moon" id="themeIcon"></i>
+          <span>Tema</span>
+        </a>
       </nav>
 
       <div class="sidebar-cta">
@@ -72,21 +75,29 @@ require __DIR__ . '/db.php';
         <div class="cabecera-right">
           <label class="buscador" aria-label="Buscar">
             <span class="buscador-ico">🔎</span>
-            <input type="search" id="inputBusquedaGlobal" placeholder="Buscar..." />
+            <input type="search" id="inputBusquedaGlobal" placeholder="Buscar..." autocomplete="off" />
           </label>
-          <div class="cabecera-right">
-            <label class="buscador">...</label>
-          </div>
           <div id="toastContainer" class="toast-container"></div>
         </div>
       </header>
 
       <section class="crear-publicacion">
         <div class="composer">
-          <div class="avatar">😊</div>
+          <div class="avatar" style="overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
+            <?php 
+              $miFoto = $_SESSION['foto_perfil'] ?? '';
+              if($miFoto): 
+            ?>
+              <img src="../multimedia/<?php echo rawurlencode($miFoto); ?>" alt="Yo" style="width:100%; height:100%; object-fit:cover;">
+            <?php else: ?>
+              <span style="font-size:1.5rem;">😊</span>
+            <?php endif; ?>
+          </div>
+
           <button class="composer-input" type="button" id="abrirModalQuick">
             ¿Qué quieres publicar?
           </button>
+          
           <button class="boton-registrarse boton-publicar" type="button" id="abrirModalQuick2">
             Publicar
           </button>
@@ -99,15 +110,7 @@ require __DIR__ . '/db.php';
     </main>
 
     <aside class="barra-derecha">
-      <section class="panel">
-        <h2>🔥 Tendencias</h2>
-        <ul>
-          <li><span class="tag">#Tecnología</span></li>
-          <li><span class="tag">#Ciencia</span></li>
-          <li><span class="tag">#DiseñoWeb</span></li>
-          <li><span class="tag">#Programación</span></li>
-        </ul>
-      </section>
+      
 
       <section class="panel">
         <h2>🤝 A quién seguir</h2>
@@ -157,22 +160,21 @@ require __DIR__ . '/db.php';
                   <button class="btn-mini btn-accion-seguir"
                     type="button"
                     data-id="<?php echo $sugId; ?>"
-                    data-sigo="0">
+                    data-sigo="0"
+                    style="background:var(--text); color:var(--bg); border:none; font-weight:bold;">
                     Seguir
                   </button>
                 </div>
         <?php
               }
             } else {
-              echo '<p style="padding:10px; color:#aaa; font-size:0.9rem;">¡Estás al día! No hay nuevas sugerencias.</p>';
+              echo '<p style="padding:10px; color:var(--muted); font-size:0.9rem;">¡Estás al día! No hay nuevas sugerencias.</p>';
             }
             $stmtSug->close();
           }
         }
         ?>
       </section>
-
-
     </aside>
   </div>
 
@@ -183,6 +185,8 @@ require __DIR__ . '/db.php';
 
   <script>
     window.__MY_ID__ = <?php echo (int)($_SESSION['id_usuario'] ?? 0); ?>;
+    // Helper para avatar en JS
+    window.USER_AVATAR = "<?php echo isset($_SESSION['foto_perfil']) ? '../multimedia/'.rawurlencode($_SESSION['foto_perfil']) : ''; ?>";
 
     const cssMap = {
       explorar: '../css/explorar.css',
@@ -378,29 +382,13 @@ require __DIR__ . '/db.php';
     // Cargar Páginas del Menú
     function loadPage(page) {
       loadPageCSS(page);
-      // Asumimos que los archivos están en la misma carpeta php/
-      fetch(`${page}.php`)
-        .then(r => {
-          if (!r.ok) throw new Error('Página no encontrada');
-          return r.text();
-        })
-        .then(html => {
-          replaceMainFromHtml(html);
-          if (page === 'chat') {
-            setTimeout(() => {
-              if (typeof window.__chatInit === 'function') window.__chatInit();
-            }, 50);
-          }
-        })
-        .catch(error => console.error('Error cargando página:', error));
+      
       // 1. Lógica para el MODO CHAT (Estilo Twitter)
       if (page === 'chat') {
-        document.body.classList.add('modo-chat'); // <--- AÑADE ESTO
+        document.body.classList.add('modo-chat'); 
       } else {
-        document.body.classList.remove('modo-chat'); // <--- AÑADE ESTO
+        document.body.classList.remove('modo-chat'); 
       }
-
-      loadPageCSS(page);
 
       fetch(`${page}.php`)
         .then(r => {
@@ -409,7 +397,6 @@ require __DIR__ . '/db.php';
         })
         .then(html => {
           replaceMainFromHtml(html);
-          // Si es chat, inicializamos
           if (page === 'chat') {
             setTimeout(() => {
               if (typeof window.__chatInit === 'function') window.__chatInit();
@@ -427,7 +414,7 @@ require __DIR__ . '/db.php';
       }, '', '?post=' + id);
       window.scrollTo(0, 0);
       const main = document.querySelector('.contenido-principal');
-      main.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Cargando publicación...</div>';
+      main.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted);">Cargando publicación...</div>';
 
       fetch(`ver_publicacion.php?id=${id}`)
         .then(r => r.text())
@@ -493,10 +480,20 @@ require __DIR__ . '/db.php';
           btn.dataset.sigo = nuevoEstado ? '1' : '0';
 
           if (btn.classList.contains('btn-mini')) {
-            btn.textContent = nuevoEstado ? 'Siguiendo' : 'Seguir';
-            btn.style.background = nuevoEstado ? 'transparent' : '#fff';
-            btn.style.color = nuevoEstado ? '#fff' : '#000';
-            btn.style.border = nuevoEstado ? '1px solid #555' : 'none';
+            // CAMBIO: Estilos dinámicos usando Variables CSS
+            if(nuevoEstado) {
+                // Siguiendo (Transparente + Borde)
+                btn.textContent = 'Siguiendo';
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--text)';
+                btn.style.border = '1px solid var(--border)';
+            } else {
+                // Seguir (Relleno + Contraste)
+                btn.textContent = 'Seguir';
+                btn.style.background = 'var(--text)';
+                btn.style.color = 'var(--bg)';
+                btn.style.border = 'none';
+            }
           } else {
             btn.textContent = nuevoEstado ? 'Dejar de seguir' : 'Seguir';
           }
@@ -531,7 +528,7 @@ require __DIR__ . '/db.php';
         if (span) span.textContent = (parseInt(span.textContent || 0) + 1) || 1;
       } else {
         icon.classList.replace('fas', 'far');
-        btn.style.color = '#71767b';
+        btn.style.color = 'var(--muted)'; // CAMBIO: Usar variable gris
         let n = (parseInt(span.textContent || 0) - 1);
         if (span) span.textContent = n > 0 ? n : '';
       }
@@ -619,124 +616,127 @@ require __DIR__ . '/db.php';
 
     // 3. Cambiar pestaña y Cargar datos (AJAX)
     window.cambiarTab = async function(tipo) {
-        // ... (Tu código de gestión de pestañas sigue igual) ...
-        const tabSeg = document.getElementById('tabSeguidores');
-        const tabSig = document.getElementById('tabSiguiendo');
-        if(tabSeg) tabSeg.classList.remove('active');
-        if(tabSig) tabSig.classList.remove('active');
-        if (tipo === 'seguidores' && tabSeg) tabSeg.classList.add('active');
-        if (tipo === 'siguiendo' && tabSig) tabSig.classList.add('active');
+      // ... (Tu código de gestión de pestañas sigue igual) ...
+      const tabSeg = document.getElementById('tabSeguidores');
+      const tabSig = document.getElementById('tabSiguiendo');
+      if (tabSeg) tabSeg.classList.remove('active');
+      if (tabSig) tabSig.classList.remove('active');
+      if (tipo === 'seguidores' && tabSeg) tabSeg.classList.add('active');
+      if (tipo === 'siguiendo' && tabSig) tabSig.classList.add('active');
 
-        const contenedor = document.getElementById('contenedorLista');
-        if(!contenedor) return;
-        contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Cargando...</p>';
+      const contenedor = document.getElementById('contenedorLista');
+      if (!contenedor) return;
+      contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">Cargando...</p>';
 
-        try {
-            // Llamamos a la API
-            const url = `api_lista_usuarios.php?tipo=${tipo}&id_usuario=${currentListUserId}`;
-            const res = await fetch(url);
-            const data = await res.json();
+      try {
+        // Llamamos a la API
+        const url = `api_lista_usuarios.php?tipo=${tipo}&id_usuario=${currentListUserId}`;
+        const res = await fetch(url);
+        const data = await res.json();
 
-            if (data.length === 0) {
-                contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">La lista está vacía.</p>';
-                return;
-            }
+        if (data.length === 0) {
+          contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">La lista está vacía.</p>';
+          return;
+        }
 
-            let html = '';
-            data.forEach(u => {
-                // 1. ARREGLO DE FOTOS: Usamos ../multimedia/ porque index.php está en php/
-                const foto = u.foto_perfil ? `../multimedia/${u.foto_perfil}` : '../multimedia/file.svg';
-                
-                // 2. LOGICA DEL BOTÓN SEGUIR
-                let botonHtml = '';
-                if (!u.soy_yo) { // No mostrar botón si soy yo mismo
-                    if (u.lo_sigo === 1) {
-                        // YA LO SIGUES -> Botón "Siguiendo" (transparente/borde)
-                        botonHtml = `
+        let html = '';
+        data.forEach(u => {
+          // 1. ARREGLO DE FOTOS: Usamos ../multimedia/ porque index.php está en php/
+          const foto = u.foto_perfil ? `../multimedia/${u.foto_perfil}` : '../multimedia/file.svg';
+
+          // 2. LOGICA DEL BOTÓN SEGUIR
+          let botonHtml = '';
+          if (!u.soy_yo) { // No mostrar botón si soy yo mismo
+            if (u.lo_sigo === 1) {
+              // YA LO SIGUES -> Botón "Siguiendo" (transparente/borde)
+              botonHtml = `
                             <button class="btn-mini btn-lista-seguir" 
                                     data-id="${u.id_usuario}" 
                                     data-sigo="1"
                                     onclick="event.stopPropagation(); toggleFollowList(this)"
-                                    style="background:transparent; border:1px solid #555; color:#fff; padding:5px 12px; border-radius:20px; cursor:pointer;">
+                                    style="background:transparent; border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:20px; cursor:pointer;">
                                 Siguiendo
                             </button>`;
-                    } else {
-                        // NO LO SIGUES -> Botón "Seguir" (blanco/relleno)
-                        botonHtml = `
+            } else {
+              // NO LO SIGUES -> Botón "Seguir" (blanco/relleno)
+              botonHtml = `
                             <button class="btn-mini btn-lista-seguir" 
                                     data-id="${u.id_usuario}" 
                                     data-sigo="0"
                                     onclick="event.stopPropagation(); toggleFollowList(this)"
-                                    style="background:#fff; border:none; color:#000; padding:5px 12px; border-radius:20px; cursor:pointer; font-weight:bold;">
+                                    style="background:var(--text); border:none; color:var(--bg); padding:5px 12px; border-radius:20px; cursor:pointer; font-weight:bold;">
                                 Seguir
                             </button>`;
-                    }
-                }
+            }
+          }
 
-                html += `
-                <div class="user-row" onclick="window.loadUserProfile('${u.usuario}'); cerrarModalUsuarios();" style="cursor:pointer; display:flex; align-items:center; padding:10px; border-bottom:1px solid #222;">
-                    <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:#333; margin-right:10px; flex-shrink:0;">
+          html += `
+                <div class="user-row" onclick="window.loadUserProfile('${u.usuario}'); cerrarModalUsuarios();" style="cursor:pointer; display:flex; align-items:center; padding:10px; border-bottom:1px solid var(--border);">
+                    <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--card2); margin-right:10px; flex-shrink:0;">
                         <img src="${foto}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div class="user-info" style="flex:1;">
-                        <h4 style="color:white; margin:0; font-size:0.95rem;">${u.nombre}</h4>
-                        <span style="color:#777; font-size:0.85rem;">@${u.usuario}</span>
+                        <h4 style="color:var(--text); margin:0; font-size:0.95rem;">${u.nombre}</h4>
+                        <span style="color:var(--muted); font-size:0.85rem;">@${u.usuario}</span>
                     </div>
                     <div>
                         ${botonHtml}
                     </div>
                 </div>`;
-            });
-            contenedor.innerHTML = html;
+        });
+        contenedor.innerHTML = html;
 
-        } catch (error) {
-            console.error(error);
-            contenedor.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error.</p>';
-        }
+      } catch (error) {
+        console.error(error);
+        contenedor.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error.</p>';
+      }
     };
 
     // 4. NUEVA FUNCIÓN PARA SEGUIR DESDE LA LISTA
     window.toggleFollowList = async function(btn) {
-        const id = btn.dataset.id;
-        const sigo = btn.dataset.sigo === '1';
-        
-        // Efecto visual inmediato
-        btn.disabled = true;
-        btn.textContent = '...';
+      const id = btn.dataset.id;
+      const sigo = btn.dataset.sigo === '1';
 
-        const url = sigo ? 'dejar_seguir_usuario.php' : 'seguir_usuario.php';
+      // Efecto visual inmediato
+      btn.disabled = true;
+      btn.textContent = '...';
 
-        try {
-            const params = new URLSearchParams();
-            params.append('id_usuario', id);
-            
-            const res = await fetch(url, { method: 'POST', body: params });
-            const txt = (await res.text()).trim();
+      const url = sigo ? 'dejar_seguir_usuario.php' : 'seguir_usuario.php';
 
-            if (txt.startsWith('ok')) {
-                const nuevoEstado = !sigo;
-                btn.dataset.sigo = nuevoEstado ? '1' : '0';
-                
-                // Cambiar estilo del botón dinámicamente
-                if (nuevoEstado) {
-                    btn.textContent = 'Siguiendo';
-                    btn.style.background = 'transparent';
-                    btn.style.color = '#fff';
-                    btn.style.border = '1px solid #555';
-                    btn.style.fontWeight = 'normal';
-                } else {
-                    btn.textContent = 'Seguir';
-                    btn.style.background = '#fff';
-                    btn.style.color = '#000';
-                    btn.style.border = 'none';
-                    btn.style.fontWeight = 'bold';
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        } finally {
-            btn.disabled = false;
+      try {
+        const params = new URLSearchParams();
+        params.append('id_usuario', id);
+
+        const res = await fetch(url, {
+          method: 'POST',
+          body: params
+        });
+        const txt = (await res.text()).trim();
+
+        if (txt.startsWith('ok')) {
+          const nuevoEstado = !sigo;
+          btn.dataset.sigo = nuevoEstado ? '1' : '0';
+
+          // Cambiar estilo del botón dinámicamente
+          if (nuevoEstado) {
+            btn.textContent = 'Siguiendo';
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text)';
+            btn.style.border = '1px solid var(--border)';
+            btn.style.fontWeight = 'normal';
+          } else {
+            btn.textContent = 'Seguir';
+            btn.style.background = 'var(--text)';
+            btn.style.color = 'var(--bg)';
+            btn.style.border = 'none';
+            btn.style.fontWeight = 'bold';
+          }
         }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+      }
     };
 
     // Cerrar al hacer clic fuera del modal
@@ -770,93 +770,93 @@ require __DIR__ . '/db.php';
     // --- GESTIÓN DE COMENTARIOS Y RESPUESTAS (Rutas Corregidas) ---
 
     // 1. Cargar y Pintar Comentarios
-   // --- GESTIÓN DE COMENTARIOS ESTILO TWITTER/X ---
+    // --- GESTIÓN DE COMENTARIOS ESTILO TWITTER/X ---
 
     // 1. Cargar y Pintar Comentarios
     window.loadCommentsForView = function(id) {
-        const cont = document.getElementById('contenedor-comentarios');
-        if(!cont) return;
-        
-        // Loader simple
-        cont.innerHTML = '<div style="padding:20px; text-align:center;"><div class="spinner"></div></div>';
-        
-        fetch(`get_comentarios.php?id_publicacion=${id}`)
-            .then(r => r.json())
-            .then(data => {
-                if(data.ok && data.items.length > 0) {
-                    cont.innerHTML = ''; 
-                    
-                    // A. Pintar todos
-                    data.items.forEach(c => {
-                        const html = renderComentarioHTML(c);
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = html;
-                        cont.appendChild(tempDiv.firstElementChild);
-                    });
+      const cont = document.getElementById('contenedor-comentarios');
+      if (!cont) return;
 
-                    // B. Ordenar (Anidar respuestas visualmente)
-                    data.items.forEach(c => {
-                        if (c.id_padre && c.id_padre > 0) {
-                            const hijo = document.getElementById(`comentario-${c.id_comentario}`);
-                            const padre = document.getElementById(`respuestas-${c.id_padre}`);
-                            if (hijo && padre) {
-                                // Añadimos una línea vertical visual si quieres, o solo indentación
-                                hijo.classList.add('es-respuesta'); 
-                                padre.appendChild(hijo);
-                            }
-                        }
-                    });
+      // Loader simple
+      cont.innerHTML = '<div style="padding:20px; text-align:center;"><div class="spinner"></div></div>';
 
-                } else {
-                    cont.innerHTML = '<p style="text-align:center; padding:30px; color:#71767b;">Sé la primera persona en responder.</p>';
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                cont.innerHTML = '<p style="color:#e0245e; text-align:center; padding:20px;">No se pudieron cargar los comentarios.</p>';
+      fetch(`get_comentarios.php?id_publicacion=${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok && data.items.length > 0) {
+            cont.innerHTML = '';
+
+            // A. Pintar todos
+            data.items.forEach(c => {
+              const html = renderComentarioHTML(c);
+              const tempDiv = document.createElement('div');
+              tempDiv.innerHTML = html;
+              cont.appendChild(tempDiv.firstElementChild);
             });
+
+            // B. Ordenar (Anidar respuestas visualmente)
+            data.items.forEach(c => {
+              if (c.id_padre && c.id_padre > 0) {
+                const hijo = document.getElementById(`comentario-${c.id_comentario}`);
+                const padre = document.getElementById(`respuestas-${c.id_padre}`);
+                if (hijo && padre) {
+                  // Añadimos una línea vertical visual si quieres, o solo indentación
+                  hijo.classList.add('es-respuesta');
+                  padre.appendChild(hijo);
+                }
+              }
+            });
+
+          } else {
+            cont.innerHTML = '<p style="text-align:center; padding:30px; color:var(--muted);">Sé la primera persona en responder.</p>';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          cont.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">No se pudieron cargar los comentarios.</p>';
+        });
     };
 
     // 2. Generador de HTML (ESTILO TWITTER EXACTO)
     function renderComentarioHTML(c) {
-        const foto = c.foto_perfil ? `../multimedia/${c.foto_perfil}` : '../multimedia/file.svg';
-        // Formato de tiempo estilo Twitter (ej: 4h o fecha corta)
-        const fechaObj = new Date(c.creado_en);
-        const ahora = new Date();
-        const diff = Math.floor((ahora - fechaObj) / 1000); // segundos
-        let tiempo = '';
-        
-        if (diff < 60) tiempo = diff + 's';
-        else if (diff < 3600) tiempo = Math.floor(diff/60) + 'm';
-        else if (diff < 86400) tiempo = Math.floor(diff/3600) + 'h';
-        else tiempo = fechaObj.toLocaleDateString();
+      const foto = c.foto_perfil ? `../multimedia/${c.foto_perfil}` : '../multimedia/file.svg';
+      // Formato de tiempo estilo Twitter (ej: 4h o fecha corta)
+      const fechaObj = new Date(c.creado_en);
+      const ahora = new Date();
+      const diff = Math.floor((ahora - fechaObj) / 1000); // segundos
+      let tiempo = '';
 
-        return `
+      if (diff < 60) tiempo = diff + 's';
+      else if (diff < 3600) tiempo = Math.floor(diff / 60) + 'm';
+      else if (diff < 86400) tiempo = Math.floor(diff / 3600) + 'h';
+      else tiempo = fechaObj.toLocaleDateString();
+
+      return `
         <div id="comentario-${c.id_comentario}" class="comentario-wrap" style="position:relative; transition:background 0.2s;">
-            <div class="comentario-body" style="display:flex; padding:12px 16px; border-bottom:1px solid #2f3336;">
+            <div class="comentario-body" style="display:flex; padding:12px 16px; border-bottom:1px solid var(--border);">
                 
                 <div style="flex-shrink:0; margin-right:12px; display:flex; flex-direction:column; align-items:center;">
-                    <img src="${foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:#333;">
+                    <img src="${foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--card2);">
                     </div>
                 
                 <div style="flex:1; min-width:0;">
                     
                     <div style="font-size:15px; line-height:20px; display:flex; align-items:baseline; gap:5px;">
-                        <span style="font-weight:700; color:#e7e9ea; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <span style="font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                             ${c.nombre || c.usuario}
                         </span>
-                        <span style="color:#71767b; font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <span style="color:var(--muted); font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                             @${c.usuario}
                         </span>
-                        <span style="color:#71767b; font-size:14px;">· ${tiempo}</span>
+                        <span style="color:var(--muted); font-size:14px;">· ${tiempo}</span>
                     </div>
 
-                    <div style="color:#e7e9ea; font-size:15px; line-height:20px; margin-top:2px; white-space:pre-wrap; word-break:break-word;">${c.texto}</div>
+                    <div style="color:var(--text); font-size:15px; line-height:20px; margin-top:2px; white-space:pre-wrap; word-break:break-word;">${c.texto}</div>
                     
                     <div style="margin-top:12px; display:flex; gap:20px;">
                         <button onclick="mostrarFormResponder(${c.id_comentario})" 
                                 class="btn-reply-action"
-                                style="background:none; border:none; color:#71767b; cursor:pointer; display:flex; align-items:center; gap:5px; padding:0; font-size:13px; transition:color 0.2s;">
+                                style="background:none; border:none; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:5px; padding:0; font-size:13px; transition:color 0.2s;">
                             <svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px; height:18px; fill:currentColor;"><g><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></g></svg>
                             <span>Responder</span>
                         </button>
@@ -867,9 +867,9 @@ require __DIR__ . '/db.php';
                             <img src="${window.USER_AVATAR || '../multimedia/file.svg'}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
                             <div style="flex:1;">
                                 <input type="text" name="texto" placeholder="Postea tu respuesta" required
-                                       style="width:100%; background:transparent; border:none; border-bottom:1px solid #333; color:#fff; padding:10px 0; outline:none; font-size:16px;">
+                                       style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--border); color:var(--text); padding:10px 0; outline:none; font-size:16px;">
                                 <div style="display:flex; justify-content:flex-end; margin-top:10px;">
-                                    <button type="submit" style="background:#1d9bf0; color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer;">
+                                    <button type="submit" style="background:var(--accent); color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer;">
                                         Responder
                                     </button>
                                 </div>
@@ -887,74 +887,77 @@ require __DIR__ . '/db.php';
     // Puedes añadir esto al final de tu función o en tu archivo CSS
     const styleHilo = document.createElement('style');
     styleHilo.innerHTML = `
-        .btn-reply-action:hover { color: #1d9bf0 !important; }
+        .btn-reply-action:hover { color: var(--accent) !important; }
         /* Las respuestas se indentan un poco y se conectan */
-        .comentario-wrap .comentario-wrap { margin-left: 20px; border-left: 2px solid #2f3336; border-bottom: none; }
+        .comentario-wrap .comentario-wrap { margin-left: 20px; border-left: 2px solid var(--border); border-bottom: none; }
         .comentario-wrap .comentario-wrap .comentario-body { border-bottom: none; padding-bottom: 8px; }
     `;
     document.head.appendChild(styleHilo);
 
     // 3. Mostrar Formulario (Igual)
     window.mostrarFormResponder = function(idComentario) {
-        const form = document.getElementById(`form-reply-${idComentario}`);
-        if (form) {
-            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
-            if (form.style.display === 'block') form.querySelector('input')?.focus();
-        }
+      const form = document.getElementById(`form-reply-${idComentario}`);
+      if (form) {
+        form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        if (form.style.display === 'block') form.querySelector('input')?.focus();
+      }
     };
 
     // 4. Enviar Respuesta
     window.enviarRespuesta = async function(e, idPadre) {
-        e.preventDefault();
-        const form = e.target;
-        const input = form.querySelector('input[name="texto"]');
-        const texto = input.value.trim();
-        const idPublicacion = new URLSearchParams(window.location.search).get('post') || form.dataset.idPub;
+      e.preventDefault();
+      const form = e.target;
+      const input = form.querySelector('input[name="texto"]');
+      const texto = input.value.trim();
+      const idPublicacion = new URLSearchParams(window.location.search).get('post') || form.dataset.idPub;
 
-        if(!texto) return;
+      if (!texto) return;
 
-        const btn = form.querySelector('button');
-        btn.disabled = true;
+      const btn = form.querySelector('button');
+      btn.disabled = true;
 
-        const fd = new URLSearchParams();
-        fd.append('id_publicacion', idPublicacion);
-        fd.append('id_padre', idPadre);
-        fd.append('texto', texto);
+      const fd = new URLSearchParams();
+      fd.append('id_publicacion', idPublicacion);
+      fd.append('id_padre', idPadre);
+      fd.append('texto', texto);
 
-        try {
-            // CORRECCIÓN AQUÍ: Quitamos 'php/'
-            const res = await fetch('comentar.php', { method: 'POST', body: fd });
-            const data = await res.json(); // Si aquí falla, es que comentar.php tiene error PHP
+      try {
+        // CORRECCIÓN AQUÍ: Quitamos 'php/'
+        const res = await fetch('comentar.php', {
+          method: 'POST',
+          body: fd
+        });
+        const data = await res.json(); // Si aquí falla, es que comentar.php tiene error PHP
 
-            if(data.ok) {
-                input.value = '';
-                form.style.display = 'none';
-                loadCommentsForView(idPublicacion);
-            } else {
-                alert('Error: ' + (data.error || 'No se pudo enviar'));
-            }
-        } catch(err) {
-            console.error("Error al enviar respuesta:", err);
-            // Si ves este alert, mira la pestaña Network en F12 para ver la respuesta roja
-            alert("Error de conexión con comentar.php");
-        } finally {
-            btn.disabled = false;
+        if (data.ok) {
+          input.value = '';
+          form.style.display = 'none';
+          loadCommentsForView(idPublicacion);
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo enviar'));
         }
+      } catch (err) {
+        console.error("Error al enviar respuesta:", err);
+        // Si ves este alert, mira la pestaña Network en F12 para ver la respuesta roja
+        alert("Error de conexión con comentar.php");
+      } finally {
+        btn.disabled = false;
+      }
     };
     //5 Función para eliminar publicación
-window.eliminarPublicacion = async function(idPublicacion, btn) {
-    // 1. Confirmación de seguridad
-    if (!confirm("¿Estás seguro de que quieres eliminar esta publicación? No se puede deshacer.")) {
+    window.eliminarPublicacion = async function(idPublicacion, btn) {
+      // 1. Confirmación de seguridad
+      if (!confirm("¿Estás seguro de que quieres eliminar esta publicación? No se puede deshacer.")) {
         return;
-    }
+      }
 
-    // 2. Desactivar botón para evitar doble click
-    if(btn) {
+      // 2. Desactivar botón para evitar doble click
+      if (btn) {
         btn.disabled = true;
         btn.innerText = "...";
-    }
+      }
 
-    try {
+      try {
         // 3. Preparar los datos formato formulario (NO JSON)
         const datos = new URLSearchParams();
         datos.append('id', idPublicacion); // La clave 'id' debe coincidir con $_POST['id']
@@ -962,53 +965,93 @@ window.eliminarPublicacion = async function(idPublicacion, btn) {
         // 4. Enviar petición (Ajusta la ruta si es necesario)
         // Si index.php está en php/, la ruta es 'eliminar_publicacion.php'
         const respuesta = await fetch('eliminar_publicacion.php', {
-            method: 'POST',
-            body: datos
+          method: 'POST',
+          body: datos
         });
 
         const resultado = await respuesta.text();
 
         // 5. Manejar respuesta
         if (resultado.trim() === 'ok') {
-            alert("Publicación eliminada.");
-            
-            // Eliminar visualmente del HTML sin recargar
-            // Buscamos el elemento padre (post) y lo quitamos
-            const postElement = document.querySelector(`article[data-id="${idPublicacion}"], .post-preview-click[data-id="${idPublicacion}"]`);
-            if (postElement) {
-                postElement.remove();
-            } else {
-                // Si no lo encuentra (estás en vista detalle), vuelve al inicio
-                window.location.href = 'index.php';
-            }
-        } else {
-            alert("Error al eliminar: " + resultado);
-            if(btn) {
-                btn.disabled = false;
-                btn.innerText = "Eliminar";
-            }
-        }
+          alert("Publicación eliminada.");
 
-    } catch (error) {
-        console.error(error);
-        alert("Error de conexión");
-        if(btn) {
+          // Eliminar visualmente del HTML sin recargar
+          // Buscamos el elemento padre (post) y lo quitamos
+          const postElement = document.querySelector(`article[data-id="${idPublicacion}"], .post-preview-click[data-id="${idPublicacion}"]`);
+          if (postElement) {
+            postElement.remove();
+          } else {
+            // Si no lo encuentra (estás en vista detalle), vuelve al inicio
+            window.location.href = 'index.php';
+          }
+        } else {
+          alert("Error al eliminar: " + resultado);
+          if (btn) {
             btn.disabled = false;
             btn.innerText = "Eliminar";
+          }
         }
-    }
-};
-    function obtenerIdPubActual() { return new URLSearchParams(window.location.search).get('post') || 0; }
-  </script>
 
+      } catch (error) {
+        console.error(error);
+        alert("Error de conexión");
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "Eliminar";
+        }
+      }
+    };
+
+    function obtenerIdPubActual() {
+      return new URLSearchParams(window.location.search).get('post') || 0;
+    }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Elementos
+      const btnTheme = document.getElementById('btnThemeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const body = document.body;
+
+      // 2. Verificar preferencia guardada al cargar
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        body.classList.add('light-mode');
+        updateIcon(true);
+      }
+
+      // 3. Evento Click (Solo si el botón existe)
+      if (btnTheme) {
+        btnTheme.addEventListener('click', (e) => {
+          e.preventDefault(); // Evita que la página salte al inicio
+
+          // Alternar clase
+          body.classList.toggle('light-mode');
+
+          // Guardar estado
+          const isLight = body.classList.contains('light-mode');
+          localStorage.setItem('theme', isLight ? 'light' : 'dark');
+
+          // Cambiar icono
+          updateIcon(isLight);
+        });
+      }
+
+      // Función auxiliar para el icono
+      function updateIcon(isLight) {
+        if (!themeIcon) return;
+        if (isLight) {
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        } else {
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        }
+      }
+    });
+  </script>
   <script src="../js/chat.js"></script>
   <script src="../js/notificaciones.js"></script>
-</body>
-
-</html>
-
-<script src="../js/chat.js"></script>
-<script src="../js/notificaciones.js"></script>
 </body>
 
 </html>

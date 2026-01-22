@@ -7,7 +7,7 @@ $miId = (int)($_SESSION['id_usuario'] ?? 0);
 $pId  = (int)($_GET['id'] ?? 0);
 
 if ($pId <= 0) {
-    echo '<div style="color:white; padding:20px;">Publicación no válida.</div>';
+    echo '<div style="color:var(--text); padding:20px;">Publicación no válida.</div>';
     exit;
 }
 
@@ -32,7 +32,7 @@ $res = $stmt->get_result();
 $post = $res->fetch_assoc();
 
 if (!$post) {
-    echo '<div style="color:white; padding:20px;">La publicación no existe o fue eliminada.</div>';
+    echo '<div style="color:var(--text); padding:20px;">La publicación no existe o fue eliminada.</div>';
     exit;
 }
 
@@ -40,7 +40,7 @@ if (!$post) {
 $usuario  = htmlspecialchars($post['usuario']);
 $nombre   = htmlspecialchars($post['nombre']);
 $textoRaw = htmlspecialchars($post['texto']);
-$fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion'])); // Ej: 10:30 PM · 21 Ene. 2026
+$fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion'])); 
 
 // Rutas de imágenes
 $fotoPerfil = $post['foto_perfil'] ? '../multimedia/' . rawurlencode($post['foto_perfil']) : '';
@@ -50,23 +50,23 @@ $imgPost    = $post['imagen'] ? '../multimedia/' . rawurlencode($post['imagen'])
 $likes = $post['num_likes'];
 $isLiked = $post['liked_by_me'] > 0;
 $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart';
-$heartColor = $isLiked ? 'color:#e0245e' : 'color:#71767b';
+$heartColor = $isLiked ? 'color:#e0245e' : 'color:var(--muted)';
 
 // Convertir menciones (@usuario) en enlaces
 $textoProcesado = preg_replace(
     '/@(\w+)/', 
-    '<a href="#" class="user-link stop-prop" data-user="$1" style="color:#1d9bf0; text-decoration:none;">@$1</a>', 
+    '<a href="#" class="user-link stop-prop" data-user="$1" style="color:var(--accent); text-decoration:none;">@$1</a>', 
     nl2br($textoRaw)
 );
 ?>
 
-<div class="detalle-post-container" style="max-width:600px; margin:0 auto; border-right:1px solid #333; min-height:100vh;">
+<div class="detalle-post-container" style="max-width:600px; margin:0 auto; border-right:1px solid var(--border); min-height:100vh;">
     
-    <div style="padding:10px 15px; display:flex; align-items:center; gap:20px; position:sticky; top:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:10;">
-        <button onclick="window.history.back()" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">
+    <div style="padding:10px 15px; display:flex; align-items:center; gap:20px; position:sticky; top:0; background:var(--card); opacity:0.98; backdrop-filter:blur(10px); z-index:10; border-bottom:1px solid var(--border);">
+        <button onclick="window.history.back()" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">
             <i class="fas fa-arrow-left"></i>
         </button>
-        <h2 style="font-size:1.2rem; margin:0;">Publicación</h2>
+        <h2 style="font-size:1.2rem; margin:0; color:var(--text);">Publicación</h2>
     </div>
 
     <div style="padding:15px;">
@@ -75,44 +75,44 @@ $textoProcesado = preg_replace(
             <?php if ($fotoPerfil): ?>
                 <img src="<?php echo $fotoPerfil; ?>" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
             <?php else: ?>
-                <div style="width:48px; height:48px; border-radius:50%; background:#333;"></div>
+                <div style="width:48px; height:48px; border-radius:50%; background:var(--card2);"></div>
             <?php endif; ?>
             
             <div style="display:flex; flex-direction:column; justify-content:center;">
-                <span style="font-weight:bold; font-size:1rem; color:#fff;"><?php echo $nombre; ?></span>
-                <span style="color:#71767b;">@<?php echo $usuario; ?></span>
+                <span style="font-weight:bold; font-size:1rem; color:var(--text);"><?php echo $nombre; ?></span>
+                <span style="color:var(--muted);">@<?php echo $usuario; ?></span>
             </div>
         </div>
 
         <?php if (!empty($post['ubicacion'])): ?>
-            <div style="font-size:0.9rem; color:#71767b; margin-bottom:10px;">
+            <div style="font-size:0.9rem; color:var(--muted); margin-bottom:10px;">
                 <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($post['ubicacion']); ?>
             </div>
         <?php endif; ?>
 
-        <div style="font-size:1.4rem; line-height:1.4; color:#fff; margin-bottom:15px;">
+        <div style="font-size:1.4rem; line-height:1.4; color:var(--text); margin-bottom:15px;">
             <?php echo $textoProcesado; ?>
         </div>
 
         <?php if ($imgPost): ?>
-            <div style="margin-bottom:15px; border-radius:15px; overflow:hidden; border:1px solid #333;">
+            <div style="margin-bottom:15px; border-radius:15px; overflow:hidden; border:1px solid var(--border);">
                 <img src="<?php echo $imgPost; ?>" style="width:100%; display:block;">
             </div>
         <?php endif; ?>
 
-        <div style="border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:15px;">
-            <span style="color:#71767b; font-size:0.95rem;"><?php echo $fecha; ?></span>
+        <div style="border-bottom:1px solid var(--border); padding-bottom:15px; margin-bottom:15px;">
+            <span style="color:var(--muted); font-size:0.95rem;"><?php echo $fecha; ?></span>
         </div>
 
         <?php if ($likes > 0): ?>
-            <div style="border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:15px; display:flex; gap:20px;">
-                <span><strong style="color:#fff;"><?php echo $likes; ?></strong> <span style="color:#71767b;">Me gusta</span></span>
+            <div style="border-bottom:1px solid var(--border); padding-bottom:15px; margin-bottom:15px; display:flex; gap:20px;">
+                <span><strong style="color:var(--text);"><?php echo $likes; ?></strong> <span style="color:var(--muted);">Me gusta</span></span>
             </div>
         <?php endif; ?>
 
-        <div style="display:flex; justify-content:space-around; padding-bottom:15px; border-bottom:1px solid #333;">
+        <div style="display:flex; justify-content:space-around; padding-bottom:15px; border-bottom:1px solid var(--border);">
             
-            <button onclick="document.getElementById('inputComentarioDetalle').focus()" style="background:none; border:none; color:#71767b; font-size:1.3rem; cursor:pointer;" title="Comentar">
+            <button onclick="document.getElementById('inputComentarioDetalle').focus()" style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;" title="Comentar">
                 <i class="far fa-comment"></i>
             </button>
             
@@ -120,7 +120,7 @@ $textoProcesado = preg_replace(
                 <i class="<?php echo $heartClass; ?> icon-heart"></i>
             </button>
             
-            <button style="background:none; border:none; color:#71767b; font-size:1.3rem; cursor:pointer;" title="Compartir">
+            <button style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;" title="Compartir">
                 <i class="fas fa-share"></i>
             </button>
 
@@ -134,16 +134,16 @@ $textoProcesado = preg_replace(
             </div>
 
         <div style="margin-top:20px; display:flex; gap:10px;">
-            <div style="width:40px; height:40px; border-radius:50%; background:#333; overflow:hidden;">
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden;">
                <?php 
                  $miFoto = $_SESSION['foto_perfil'] ?? '';
                  if($miFoto) echo '<img src="../multimedia/'.rawurlencode($miFoto).'" style="width:100%; height:100%; object-fit:cover;">';
                ?>
             </div>
             <form id="formComentarioDetalle" data-id="<?php echo $pId; ?>" style="flex:1;">
-                <input type="text" id="inputComentarioDetalle" placeholder="Postea tu respuesta" style="width:100%; background:none; border:none; border-bottom:1px solid #333; padding:10px; color:#fff; font-size:1.1rem; outline:none;">
+                <input type="text" id="inputComentarioDetalle" placeholder="Postea tu respuesta" style="width:100%; background:none; border:none; border-bottom:1px solid var(--border); padding:10px; color:var(--text); font-size:1.1rem; outline:none;">
                 <div style="text-align:right; margin-top:10px;">
-                    <button type="submit" style="background:#1d9bf0; color:#fff; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:0.9rem;">Responder</button>
+                    <button type="submit" style="background:var(--accent); color:#fff; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:0.9rem;">Responder</button>
                 </div>
             </form>
         </div>

@@ -10,8 +10,6 @@ $tipo = $_GET['tipo'] ?? 'seguidores'; // 'seguidores' o 'siguiendo'
 
 if ($tipo === 'seguidores') {
     // Buscar quién sigue al usuario del perfil
-    // JOIN tabla usuario para sacar nombre y foto
-    // JOIN seguidores donde id_usuario = perfilId (los que le siguen a él)
     $sql = "
         SELECT u.id_usuario, u.usuario, u.nombre, u.foto_perfil, u.biografia
         FROM usuario u
@@ -20,7 +18,6 @@ if ($tipo === 'seguidores') {
     ";
 } else {
     // Buscar a quién sigue el usuario del perfil
-    // JOIN seguidores donde id_seguidor = perfilId (a los que él sigue)
     $sql = "
         SELECT u.id_usuario, u.usuario, u.nombre, u.foto_perfil, u.biografia
         FROM usuario u
@@ -37,14 +34,12 @@ $res = $stmt->get_result();
 $listaHTML = "";
 
 if ($res->num_rows > 0) {
-    // ... (código anterior igual hasta el while) ...
-
     while ($row = $res->fetch_assoc()) {
         $uId = $row['id_usuario'];
         $uUser = htmlspecialchars($row['usuario']);
         $uNombre = htmlspecialchars($row['nombre'] ?? $uUser);
         $uBio = htmlspecialchars($row['biografia'] ?? '');
-        $uFoto = $row['foto_perfil'] ? '../multimedia/' . $row['foto_perfil'] : null;
+        $uFoto = $row['foto_perfil'] ? '../multimedia/' . rawurlencode($row['foto_perfil']) : null;
         $inicial = strtoupper(substr($uUser, 0, 1));
 
         // Verificar si lo sigo
@@ -60,12 +55,12 @@ if ($res->num_rows > 0) {
         // Renderizar fila
         $listaHTML .= '<div class="user-row">';
         
-        // --- AQUÍ ESTÁ EL CAMBIO: Envolvemos Avatar + Info en un enlace ---
-        // Usamos la clase "user-link" y "data-user" para que tu JS lo detecte automáticamente
+        // --- Avatar + Info (Enlace al perfil) ---
+        // Se usa 'user-link' para navegación AJAX y estilos flex del CSS
         $listaHTML .= '<a href="#" class="user-link" data-user="'.$uUser.'" style="display:flex; align-items:center; flex:1; text-decoration:none; color:inherit; overflow:hidden; margin-right:10px;">';
 
             // Avatar
-            $listaHTML .= '<div class="mini-avatar" style="width:40px; height:40px; font-size:1.2rem; flex-shrink:0;">';
+            $listaHTML .= '<div class="mini-avatar">';
             if ($uFoto) {
                 $listaHTML .= '<img src="'.$uFoto.'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">';
             } else {
@@ -77,30 +72,28 @@ if ($res->num_rows > 0) {
             $listaHTML .= '<div class="user-info" style="margin-left:10px;">';
             $listaHTML .= '<h4>'.$uNombre.'</h4>';
             $listaHTML .= '<span>@'.$uUser.'</span>';
-            if($uBio) $listaHTML .= '<span class="user-bio">'.$uBio.'</span>';
+            // Opcional: Mostrar bio recortada si quieres
+            // if($uBio) $listaHTML .= '<span class="user-bio" style="font-size:0.75rem; opacity:0.7;">'.substr($uBio,0,30).'...</span>';
             $listaHTML .= '</div>';
         
         $listaHTML .= '</a>'; 
-        // --- FIN DEL CAMBIO ---
 
-        // Botón Seguir (Se queda fuera del enlace para poder pulsarlo sin ir al perfil)
+        // Botón Seguir
         if ($miId != $uId) {
             $txtBtn = $sigo ? 'Siguiendo' : 'Seguir';
-            // Nota: Si ya tienes CSS para esto, puedes quitar el style inline
-            $estiloBtn = $sigo ? 'background:transparent; border:1px solid #555; color:#fff;' : 'background:#fff; color:#000; border:none;';
-            
+            // El atributo data-sigo permite al CSS cambiar el estilo (borde vs relleno) automáticamente
             $listaHTML .= '<button class="btn-accion-seguir" 
-                            style="padding: 6px 15px; border-radius: 20px; font-weight:bold; cursor:pointer; font-size:0.8rem; '.$estiloBtn.'"
-                            data-id="'.$uId.'" 
-                            data-sigo="'.($sigo?'1':'0').'">
-                            '.$txtBtn.'
+                                    data-id="'.$uId.'" 
+                                    data-sigo="'.($sigo?'1':'0').'">
+                                    '.$txtBtn.'
                            </button>';
         }
 
         $listaHTML .= '</div>';
     }
 } else {
-    $listaHTML = '<div style="padding:20px; text-align:center; color:#777;">No hay usuarios aquí.</div>';
+    // Mensaje de vacío usando variables CSS implícitas (color muted)
+    $listaHTML .= '<div style="padding:20px; text-align:center; opacity:0.6;">No hay usuarios aquí.</div>';
 }
 
 echo $listaHTML;

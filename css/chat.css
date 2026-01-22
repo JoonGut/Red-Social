@@ -1,5 +1,5 @@
 /* =========================================
-   CHAT.CSS - ESTILO "TARJETA NEONNEST"
+   CHAT.CSS - ESTILO "TARJETA NEONNEST" (ADAPTADO A TEMAS)
    ========================================= */
 
 /* Usamos tus variables del CSS principal */
@@ -51,7 +51,8 @@ body.modo-chat .contenido-principal {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border);
-    background: rgba(22, 28, 54, 0.4); /* Un poco más oscuro que la tarjeta */
+    /* CAMBIO: Usamos var(--card2) para que se adapte al modo claro/oscuro */
+    background: var(--card2); 
 }
 
 .chat-left-head {
@@ -63,7 +64,7 @@ body.modo-chat .contenido-principal {
     width: 100%;
     padding: 10px 14px;
     border-radius: 12px;
-    background: var(--card2);
+    background: var(--bg); /* CAMBIO: Fondo input más oscuro que la tarjeta */
     border: 1px solid var(--border);
     color: var(--text);
     outline: none;
@@ -92,19 +93,21 @@ body.modo-chat .contenido-principal {
     border: 1px solid transparent;
 }
 .chat-item:hover {
-    background: rgba(255, 255, 255, 0.03);
+    /* CAMBIO: Usamos var(--hover-bg) para que se vea en modo claro */
+    background: var(--hover-bg); 
     border-color: var(--border);
 }
 .chat-item.active {
-    background: rgba(143, 123, 255, 0.1);
-    border-color: rgba(143, 123, 255, 0.3);
+    /* CAMBIO: Un fondo suave basado en el acento */
+    background: rgba(143, 123, 255, 0.15); 
+    border-color: var(--accent);
 }
 
 .chat-avatar {
     width: 44px; height: 44px;
     border-radius: 14px;
     margin-right: 12px;
-    background: var(--card2);
+    background: var(--card); /* CAMBIO */
     border: 1px solid var(--border);
     flex-shrink: 0; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
@@ -133,8 +136,11 @@ body.modo-chat .contenido-principal {
     padding: 0 20px;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center;
-    background: rgba(22, 28, 54, 0.8);
+    /* CAMBIO: Usamos var(--card) con un poco de opacidad si quieres blur, o solido */
+    background: var(--card); 
+    opacity: 0.98;
     backdrop-filter: blur(5px);
+    z-index: 5;
 }
 .chat-topbar-name { font-weight: 700; font-size: 1.05rem; color: var(--text); }
 .chat-topbar-handle { font-size: 0.8rem; color: var(--muted); }
@@ -171,11 +177,11 @@ body.modo-chat .contenido-principal {
 /* Enviado */
 .msg.me {
     background: var(--accent); /* Morado */
-    color: #fff;
+    color: #fff; /* Texto blanco siempre en el enviado porque el fondo es oscuro/intenso */
     align-self: flex-end;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid var(--border); /* CAMBIO */
     box-shadow: 0 4px 12px rgba(143, 123, 255, 0.3);
 }
 
@@ -235,6 +241,7 @@ body.modo-chat .contenido-principal {
     
     .chat-right {
         display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 100; background: var(--bg);
+        z-index: 100; 
+        background: var(--bg); /* CAMBIO */
     }
 }

@@ -1,17 +1,37 @@
-:root{
+/* --- INICIO BLOQUE VARIABLES TEMA (Reemplazar tu :root actual) --- */
+
+:root {
+  /* TEMA OSCURO (Por defecto) */
   --bg: #0c1224;
   --card: #161c36;
-  --card2:#101736;
+  --card2: #101736;
   --text: rgba(255,255,255,.96);
   --muted: rgba(255,255,255,.72);
   --border: rgba(255,255,255,.10);
-  --accent: #8f7bff;  
-  --accent2:#00e6ff;  
-  --ok: #35f2a6;      
+  --accent: #8f7bff;
+  --accent2: #00e6ff;
+  --ok: #35f2a6;
   --shadow: 0 10px 22px rgba(0,0,0,.45);
   --r1: 18px;
   --r2: 14px;
+  --hover-bg: rgba(255,255,255,.05);
 }
+
+/* TEMA CLARO (Se activa con JS) */
+body.light-mode {
+  --bg: #f3f4f6;              /* Gris muy claro de fondo */
+  --card: #ffffff;            /* Blanco puro para tarjetas */
+  --card2: #f9fafb;           /* Gris casi blanco para inputs */
+  --text: #111827;            /* Gris casi negro para texto */
+  --muted: #6b7280;           /* Gris medio para textos secundarios */
+  --border: #e5e7eb;          /* Gris claro para bordes */
+  --accent: #6366f1;          /* Índigo (más legible en blanco) */
+  --accent2: #0ea5e9;         /* Azul cielo */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra más suave */
+  --hover-bg: rgba(0,0,0,.05);
+}
+
+/* --- FIN BLOQUE VARIABLES --- */
 
 *{
   box-sizing: border-box;
@@ -400,4 +420,42 @@ a.user-link:hover { text-decoration: underline; }
 .comentario-wrap .comentario-wrap .comentario-body { 
     border-bottom: none; 
     padding-bottom: 8px; 
+}
+/* Aseguramos que la cabecera use las variables */
+.cabecera {
+    background-color: var(--card); /* Blanco en Light, Azul en Dark */
+    border-bottom: 1px solid var(--border);
+}
+
+/* El input del buscador */
+.buscador {
+    background-color: var(--card2) !important; /* Gris claro en Light */
+    border: 1px solid var(--border) !important;
+}
+
+.buscador input {
+    color: var(--text) !important; /* Negro en Light, Blanco en Dark */
+}
+
+.buscador input::placeholder {
+    color: var(--muted);
+}
+
+/* El botón grande de "¿Qué quieres publicar?" */
+.composer-input {
+    background-color: var(--card2) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--muted) !important; /* Texto gris suave */
+    transition: all 0.2s;
+}
+
+.composer-input:hover {
+    background-color: var(--hover-bg) !important;
+    color: var(--text) !important;
+}
+
+/* El contenedor de crear publicación */
+.crear-publicacion {
+    background-color: var(--card);
+    border: 1px solid var(--border);
 }

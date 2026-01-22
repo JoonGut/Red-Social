@@ -13,13 +13,11 @@ require_once __DIR__ . '/db.php';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/index.css" />
   <link rel="stylesheet" href="../css/modal.css" />
-  <link rel="icon" href="../multimedia/file.svg">
+  <link rel="stylesheet" href="../css/perfil.css" /> <link rel="icon" href="../multimedia/file.svg">
 </head>
 
 <body>
-  <div class="contenedor-inicio">
-
-    <main class="contenido-principal">
+  <div class="contenedor-inicio layout-solo-main"> <main class="contenido-principal">
       <section class="cabecera-perfil">
         <div class="banner">
           <a href="#" class="volver" onclick="if(window.history.length > 1){ window.history.back(); return false; } else { window.location.href='index.php'; }">← Volver</a>
@@ -27,7 +25,6 @@ require_once __DIR__ . '/db.php';
         
         <?php
         // Datos del usuario logueado
-        // (Nota: Para ver perfiles ajenos necesitaríamos usar $_GET['u'], aquí usamos SESSION como base)
         $foto = $_SESSION['foto_perfil'] ?? '';
         $fotoUrl = ($foto !== '') ? '../multimedia/' . rawurlencode($foto) : '';
         $bioActual = $_SESSION['biografia'] ?? '';
@@ -39,7 +36,7 @@ require_once __DIR__ . '/db.php';
               <?php if ($fotoUrl): ?>
                 <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto de perfil">
               <?php else: ?>
-                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#333; color:#fff; font-size:2rem;">👤</div>
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--card2); color:var(--muted); font-size:2rem;">👤</div>
               <?php endif; ?>
             </label>
 
@@ -54,7 +51,7 @@ require_once __DIR__ . '/db.php';
         </div>
 
         <div style="text-align:right; padding:10px;">
-          <a href="cerrar_sesion.php" class="boton-cerrar-sesion" style="color:#f4212e; text-decoration:none; font-size:0.9rem;">
+          <a href="cerrar_sesion.php" class="boton-cerrar-sesion" style="color:#ff4757; text-decoration:none; font-size:0.9rem;">
             Cerrar sesión
           </a>
         </div>
@@ -65,9 +62,11 @@ require_once __DIR__ . '/db.php';
         <p class="nombre-real"><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></p>
 
         <div class="estadisticas">
-          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('seguidores')" style="cursor: pointer; text-align: center;">
-            <span>Seguidores</span>
-            <strong>
+          
+          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('seguidores')" 
+               style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
+            <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Seguidores</span>
+            <strong style="display:block; font-size: 1.2rem; color: var(--text);">
               <?php
                 $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
                 $stmt->bind_param('i', $_SESSION['id_usuario']);
@@ -77,9 +76,10 @@ require_once __DIR__ . '/db.php';
             </strong>
           </div>
 
-          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('siguiendo')" style="cursor: pointer; text-align: center;">
-            <span>Siguiendo</span>
-            <strong>
+          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('siguiendo')" 
+               style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
+            <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Siguiendo</span>
+            <strong style="display:block; font-size: 1.2rem; color: var(--text);">
               <?php
                 $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_seguidor = ?');
                 $stmt->bind_param('i', $_SESSION['id_usuario']);
@@ -89,9 +89,9 @@ require_once __DIR__ . '/db.php';
             </strong>
           </div>
 
-          <div style="text-align: center;">
-            <span>Publicaciones</span>
-            <strong>
+          <div style="text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px;">
+            <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Publicaciones</span>
+            <strong style="display:block; font-size: 1.2rem; color: var(--text);">
               <?php
                 $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM publicacion WHERE id_usuario = ?');
                 $stmt->bind_param('i', $_SESSION['id_usuario']);
@@ -100,6 +100,7 @@ require_once __DIR__ . '/db.php';
               ?>
             </strong>
           </div>
+          
         </div>
 
         <?php
@@ -130,12 +131,12 @@ require_once __DIR__ . '/db.php';
               <div 
                 class="grid-item post-preview-click" 
                 data-id="<?php echo $idp; ?>"
-                style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: #1a1a1a; overflow: hidden; border-radius: 4px; border:1px solid #333;">
+                style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: var(--card2); overflow: hidden; border-radius: 4px; border:1px solid var(--border);">
                 
                 <?php if ($imgUrl): ?>
                   <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Post" style="width: 100%; height: 100%; object-fit: cover; display:block;">
                 <?php else: ?>
-                  <div style="padding: 10px; font-size: 0.8rem; color: #fff; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
+                  <div style="padding: 10px; font-size: 0.8rem; color: var(--text); height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
                       <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>
                   </div>
                 <?php endif; ?>
@@ -151,7 +152,7 @@ require_once __DIR__ . '/db.php';
     <aside class="barra-derecha">
       <section class="panel">
         <h2>Sugerencias</h2>
-        <p style="color:#777; padding:10px; font-style:italic;">Pronto más sugerencias...</p>
+        <p style="color:var(--muted); padding:10px; font-style:italic;">Pronto más sugerencias...</p>
       </section>
     </aside>
 
