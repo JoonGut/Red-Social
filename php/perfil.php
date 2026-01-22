@@ -156,7 +156,6 @@ require_once __DIR__ . '/db.php';
     </aside>
 
   </div>
-
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
 
   <script>

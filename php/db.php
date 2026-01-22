@@ -1,9 +1,9 @@
 
 <?php
-$host = '127.0.0.1';
+$host = '18.208.57.228';
 $db   = 'bd_social';
-$user = 'root';
-$pass = 'root';
+$user = 'usuario';
+$pass = 'usuario';
 $port = 3306;
 
 $mysqli = new mysqli($host, $user, $pass, $db, $port);
