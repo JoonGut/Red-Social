@@ -941,7 +941,63 @@ require __DIR__ . '/db.php';
             btn.disabled = false;
         }
     };
-    
+    //5 Función para eliminar publicación
+window.eliminarPublicacion = async function(idPublicacion, btn) {
+    // 1. Confirmación de seguridad
+    if (!confirm("¿Estás seguro de que quieres eliminar esta publicación? No se puede deshacer.")) {
+        return;
+    }
+
+    // 2. Desactivar botón para evitar doble click
+    if(btn) {
+        btn.disabled = true;
+        btn.innerText = "...";
+    }
+
+    try {
+        // 3. Preparar los datos formato formulario (NO JSON)
+        const datos = new URLSearchParams();
+        datos.append('id', idPublicacion); // La clave 'id' debe coincidir con $_POST['id']
+
+        // 4. Enviar petición (Ajusta la ruta si es necesario)
+        // Si index.php está en php/, la ruta es 'eliminar_publicacion.php'
+        const respuesta = await fetch('eliminar_publicacion.php', {
+            method: 'POST',
+            body: datos
+        });
+
+        const resultado = await respuesta.text();
+
+        // 5. Manejar respuesta
+        if (resultado.trim() === 'ok') {
+            alert("Publicación eliminada.");
+            
+            // Eliminar visualmente del HTML sin recargar
+            // Buscamos el elemento padre (post) y lo quitamos
+            const postElement = document.querySelector(`article[data-id="${idPublicacion}"], .post-preview-click[data-id="${idPublicacion}"]`);
+            if (postElement) {
+                postElement.remove();
+            } else {
+                // Si no lo encuentra (estás en vista detalle), vuelve al inicio
+                window.location.href = 'index.php';
+            }
+        } else {
+            alert("Error al eliminar: " + resultado);
+            if(btn) {
+                btn.disabled = false;
+                btn.innerText = "Eliminar";
+            }
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Error de conexión");
+        if(btn) {
+            btn.disabled = false;
+            btn.innerText = "Eliminar";
+        }
+    }
+};
     function obtenerIdPubActual() { return new URLSearchParams(window.location.search).get('post') || 0; }
   </script>
 

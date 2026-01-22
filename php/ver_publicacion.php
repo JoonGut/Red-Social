@@ -124,13 +124,12 @@ $textoProcesado = preg_replace(
                 <i class="fas fa-share"></i>
             </button>
 
-            <?php if ($post['id_usuario'] === $miId): ?>
-                <a href="php/eliminar_publicacion.php?id=<?php echo $pId; ?>" 
-                   onclick="return confirm('¿Seguro que quieres eliminar este post? Esta acción no se puede deshacer.');"
+          <?php if ((int)$post['id_usuario'] === $miId): ?>
+                <button onclick="event.stopPropagation(); eliminarPublicacion(<?php echo $pId; ?>, this)" 
                    style="background:none; border:none; color:#f4212e; font-size:1.3rem; cursor:pointer; display:flex; align-items:center;" 
                    title="Eliminar publicación">
                     <i class="fas fa-trash-alt"></i>
-                </a>
+                </button>
             <?php endif; ?>
             </div>
 

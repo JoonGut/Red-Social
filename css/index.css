@@ -391,3 +391,13 @@ a.user-link:hover { text-decoration: underline; }
   color: #aaa; /* Texto gris suave */
   font-size: 0.9rem;
 }
+.btn-reply-action:hover { color: #1d9bf0 !important; }
+.comentario-wrap .comentario-wrap { 
+    margin-left: 20px; 
+    border-left: 2px solid #2f3336; 
+    border-bottom: none; 
+}
+.comentario-wrap .comentario-wrap .comentario-body { 
+    border-bottom: none; 
+    padding-bottom: 8px; 
+}
