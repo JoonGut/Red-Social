@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 // Si se carga vía AJAX la sesión ya existe, si entra directo la iniciamos
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -13,18 +14,21 @@ require_once __DIR__ . '/db.php';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/index.css" />
   <link rel="stylesheet" href="../css/modal.css" />
-  <link rel="stylesheet" href="../css/perfil.css" /> <link rel="icon" href="../multimedia/file.svg">
+  <link rel="stylesheet" href="../css/perfil.css" />
+  <link rel="icon" href="../multimedia/file.svg">
 </head>
 
 <body>
-  <div class="contenedor-inicio layout-solo-main"> <main class="contenido-principal">
+  <div class="contenedor-inicio layout-solo-main">
+    <main class="contenido-principal">
       <section class="cabecera-perfil">
-        <div class="banner">
+
+        <div class="banner" style="background-image: url('../multimedia/file.svg'); background-size: cover; background-position: center;">
           <a href="#" class="volver" onclick="if(window.history.length > 1){ window.history.back(); return false; } else { window.location.href='index.php'; }">← Volver</a>
         </div>
-        
+
         <?php
-        // Datos del usuario logueado
+        // Datos del usuario logueado (Avatar y Bio)
         $foto = $_SESSION['foto_perfil'] ?? '';
         $fotoUrl = ($foto !== '') ? '../multimedia/' . rawurlencode($foto) : '';
         $bioActual = $_SESSION['biografia'] ?? '';
@@ -51,40 +55,43 @@ require_once __DIR__ . '/db.php';
         </div>
 
         <div style="text-align:right; padding:10px;">
-          <a href="cerrar_sesion.php" class="boton-cerrar-sesion" style="color:#ff4757; text-decoration:none; font-size:0.9rem;">
+          <button
+            type="button"
+            class="boton-cerrar-sesion"
+            onclick="event.stopPropagation(); window.location.href='cerrarSesion.php';"
+            style="background:none; border:none; color:#ff4757; text-decoration:none; font-size:0.9rem; cursor:pointer;">
             Cerrar sesión
-          </a>
+          </button>
         </div>
       </section>
-
       <section class="datos-perfil">
         <h2>@<?php echo htmlspecialchars($_SESSION['usuario'] ?? ''); ?></h2>
         <p class="nombre-real"><?php echo htmlspecialchars($_SESSION['nombre'] ?? ''); ?></p>
 
         <div class="estadisticas">
-          
-          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('seguidores')" 
-               style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
+
+          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('seguidores')"
+            style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
             <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Seguidores</span>
             <strong style="display:block; font-size: 1.2rem; color: var(--text);">
               <?php
-                $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
-                $stmt->bind_param('i', $_SESSION['id_usuario']);
-                $stmt->execute();
-                echo $stmt->get_result()->fetch_assoc()['total']; 
+              $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
+              $stmt->bind_param('i', $_SESSION['id_usuario']);
+              $stmt->execute();
+              echo $stmt->get_result()->fetch_assoc()['total'];
               ?>
             </strong>
           </div>
 
-          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('siguiendo')" 
-               style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
+          <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('siguiendo')"
+            style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
             <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Siguiendo</span>
             <strong style="display:block; font-size: 1.2rem; color: var(--text);">
               <?php
-                $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_seguidor = ?');
-                $stmt->bind_param('i', $_SESSION['id_usuario']);
-                $stmt->execute();
-                echo $stmt->get_result()->fetch_assoc()['total']; 
+              $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_seguidor = ?');
+              $stmt->bind_param('i', $_SESSION['id_usuario']);
+              $stmt->execute();
+              echo $stmt->get_result()->fetch_assoc()['total'];
               ?>
             </strong>
           </div>
@@ -93,14 +100,14 @@ require_once __DIR__ . '/db.php';
             <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Publicaciones</span>
             <strong style="display:block; font-size: 1.2rem; color: var(--text);">
               <?php
-                $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM publicacion WHERE id_usuario = ?');
-                $stmt->bind_param('i', $_SESSION['id_usuario']);
-                $stmt->execute();
-                echo $stmt->get_result()->fetch_assoc()['total']; 
+              $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM publicacion WHERE id_usuario = ?');
+              $stmt->bind_param('i', $_SESSION['id_usuario']);
+              $stmt->execute();
+              echo $stmt->get_result()->fetch_assoc()['total'];
               ?>
             </strong>
           </div>
-          
+
         </div>
 
         <?php
@@ -128,19 +135,19 @@ require_once __DIR__ . '/db.php';
               $txt = (string)($p['texto'] ?? '');
               $imgUrl = $img !== '' ? '../multimedia/' . rawurlencode($img) : '';
             ?>
-              <div 
-                class="grid-item post-preview-click" 
+              <div
+                class="grid-item post-preview-click"
                 data-id="<?php echo $idp; ?>"
                 style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: var(--card2); overflow: hidden; border-radius: 4px; border:1px solid var(--border);">
-                
+
                 <?php if ($imgUrl): ?>
                   <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Post" style="width: 100%; height: 100%; object-fit: cover; display:block;">
                 <?php else: ?>
                   <div style="padding: 10px; font-size: 0.8rem; color: var(--text); height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
-                      <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>
+                    <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>
                   </div>
                 <?php endif; ?>
-                
+
               </div>
             <?php endforeach; ?>
           </div>
@@ -162,21 +169,21 @@ require_once __DIR__ . '/db.php';
   <script>
     // 1. Detectar clic en el Grid y navegar
     document.addEventListener('click', (e) => {
-        const postPreview = e.target.closest('.post-preview-click');
-        
-        if (postPreview) {
-            e.preventDefault();
-            e.stopPropagation();
-            const id = postPreview.dataset.id;
-            
-            // Si estamos dentro del sistema SPA (Index), usamos su función
-            if (typeof window.cargarVistaPublicacion === 'function') {
-                window.cargarVistaPublicacion(id);
-            } else {
-                // Fallback: Si se entró directo a perfil.php, vamos al index con el post
-                window.location.href = `index.php?post=${id}`;
-            }
+      const postPreview = e.target.closest('.post-preview-click');
+
+      if (postPreview) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = postPreview.dataset.id;
+
+        // Si estamos dentro del sistema SPA (Index), usamos su función
+        if (typeof window.cargarVistaPublicacion === 'function') {
+          window.cargarVistaPublicacion(id);
+        } else {
+          // Fallback: Si se entró directo a perfil.php, vamos al index con el post
+          window.location.href = `index.php?post=${id}`;
         }
+      }
     });
 
     // 2. Subida de Foto de Perfil AJAX
@@ -187,13 +194,16 @@ require_once __DIR__ . '/db.php';
         if (!form || !input.files || input.files.length === 0) return;
 
         try {
-          const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form)
+          });
           // Recargar para ver cambios
           const u = new URLSearchParams(window.location.search).get('u');
           if (typeof window.loadUserProfile === 'function' && u) {
-             window.loadUserProfile(u);
+            window.loadUserProfile(u);
           } else {
-             location.reload();
+            location.reload();
           }
         } catch (err) {
           console.error(err);
@@ -204,4 +214,5 @@ require_once __DIR__ . '/db.php';
   </script>
 
 </body>
+
 </html>

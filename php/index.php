@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
@@ -84,9 +85,9 @@ require __DIR__ . '/db.php';
       <section class="crear-publicacion">
         <div class="composer">
           <div class="avatar" style="overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
-            <?php 
-              $miFoto = $_SESSION['foto_perfil'] ?? '';
-              if($miFoto): 
+            <?php
+            $miFoto = $_SESSION['foto_perfil'] ?? '';
+            if ($miFoto):
             ?>
               <img src="../multimedia/<?php echo rawurlencode($miFoto); ?>" alt="Yo" style="width:100%; height:100%; object-fit:cover;">
             <?php else: ?>
@@ -97,7 +98,7 @@ require __DIR__ . '/db.php';
           <button class="composer-input" type="button" id="abrirModalQuick">
             ¿Qué quieres publicar?
           </button>
-          
+
           <button class="boton-registrarse boton-publicar" type="button" id="abrirModalQuick2">
             Publicar
           </button>
@@ -110,7 +111,7 @@ require __DIR__ . '/db.php';
     </main>
 
     <aside class="barra-derecha">
-      
+
 
       <section class="panel">
         <h2>🤝 A quién seguir</h2>
@@ -186,7 +187,7 @@ require __DIR__ . '/db.php';
   <script>
     window.__MY_ID__ = <?php echo (int)($_SESSION['id_usuario'] ?? 0); ?>;
     // Helper para avatar en JS
-    window.USER_AVATAR = "<?php echo isset($_SESSION['foto_perfil']) ? '../multimedia/'.rawurlencode($_SESSION['foto_perfil']) : ''; ?>";
+    window.USER_AVATAR = "<?php echo isset($_SESSION['foto_perfil']) ? '../multimedia/' . rawurlencode($_SESSION['foto_perfil']) : ''; ?>";
 
     const cssMap = {
       explorar: '../css/explorar.css',
@@ -220,7 +221,10 @@ require __DIR__ . '/db.php';
 
     // --- 3. DELEGACIÓN DE EVENTOS GLOBAL (EL CEREBRO DE LA PÁGINA) ---
     document.body.addEventListener('click', (e) => {
-
+      // Si pulsamos en el botón de cerrar sesión, NO hacemos preventDefault
+      if (e.target.closest('a[href="cerrar_sesion.php"]') || e.target.closest('.boton-cerrar-sesion')) {
+        return; // Salimos de la función y dejamos que el navegador siga el enlace
+      }
       // A) CLICK EN LIKE (Corazón)
       const btnLike = e.target.closest('.btn-like-inline');
       if (btnLike) {
@@ -382,12 +386,12 @@ require __DIR__ . '/db.php';
     // Cargar Páginas del Menú
     function loadPage(page) {
       loadPageCSS(page);
-      
+
       // 1. Lógica para el MODO CHAT (Estilo Twitter)
       if (page === 'chat') {
-        document.body.classList.add('modo-chat'); 
+        document.body.classList.add('modo-chat');
       } else {
-        document.body.classList.remove('modo-chat'); 
+        document.body.classList.remove('modo-chat');
       }
 
       fetch(`${page}.php`)
@@ -481,18 +485,18 @@ require __DIR__ . '/db.php';
 
           if (btn.classList.contains('btn-mini')) {
             // CAMBIO: Estilos dinámicos usando Variables CSS
-            if(nuevoEstado) {
-                // Siguiendo (Transparente + Borde)
-                btn.textContent = 'Siguiendo';
-                btn.style.background = 'transparent';
-                btn.style.color = 'var(--text)';
-                btn.style.border = '1px solid var(--border)';
+            if (nuevoEstado) {
+              // Siguiendo (Transparente + Borde)
+              btn.textContent = 'Siguiendo';
+              btn.style.background = 'transparent';
+              btn.style.color = 'var(--text)';
+              btn.style.border = '1px solid var(--border)';
             } else {
-                // Seguir (Relleno + Contraste)
-                btn.textContent = 'Seguir';
-                btn.style.background = 'var(--text)';
-                btn.style.color = 'var(--bg)';
-                btn.style.border = 'none';
+              // Seguir (Relleno + Contraste)
+              btn.textContent = 'Seguir';
+              btn.style.background = 'var(--text)';
+              btn.style.color = 'var(--bg)';
+              btn.style.border = 'none';
             }
           } else {
             btn.textContent = nuevoEstado ? 'Dejar de seguir' : 'Seguir';

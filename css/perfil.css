@@ -204,3 +204,29 @@
 .estadisticas > div:hover {
     background-color: var(--hover-bg) !important;
 }
+.banner {
+    height: 150px; /* Altura de la portada */
+    width: 100%;
+    background-color: var(--accent); /* Color de respaldo */
+    background-size: cover;          /* La imagen cubre todo el espacio */
+    background-position: center;     /* Centrar la imagen */
+    position: relative;
+    /* Opcional: radio superior si quieres bordes redondos arriba */
+    border-top-left-radius: 16px;    
+    border-top-right-radius: 16px;
+}
+
+/* Para que el botón 'Volver' se vea bien sobre cualquier imagen */
+.volver {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+    backdrop-filter: blur(4px);
+}
