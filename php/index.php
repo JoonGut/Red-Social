@@ -50,7 +50,6 @@ require __DIR__ . '/db.php';
         <a href="#" class="menu-item" data-page="explorar">Explorar</a>
         <a href="#" class="menu-item" data-page="chat">Mensajes</a>
         <a href="#" class="menu-item" data-page="perfil">Perfil</a>
-        <a href="#" class="menu-item" data-page="perfil">Perfil</a>
 
         <?php if (isset($_SESSION['id_rol']) && (int)$_SESSION['id_rol'] === 2): ?>
             <a href="#" class="menu-item" data-page="admin" style="color: #ff4757;">

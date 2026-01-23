@@ -88,13 +88,28 @@ if ($yo > 0 && $yo !== $idPerfil) {
 <body>
     <main class="contenido-principal">
 
-        <section class="cabecera-perfil">
-            <div class="banner" style="background-image: url('../multimedia/file.svg'); background-size: cover; background-position: center; height:150px; position:relative; margin-bottom:-40px;">
+       <section class="cabecera-perfil">
+            <div class="banner" style="background-image: url('../multimedia/file.svg'); background-size: cover; background-position: center; height:150px; position:relative;">
                 <a href="javascript:history.back()" class="volver" style="position:absolute; top:15px; left:15px; background:rgba(0,0,0,0.5); color:white; padding:5px 12px; border-radius:20px; text-decoration:none; font-weight:bold; backdrop-filter:blur(4px);">← Volver</a>
             </div>
 
-            <div class="info-perfil">
-                <div class="avatar" style="width:100px; height:100px; border-radius:50%; border:4px solid var(--bg); position:relative; z-index:2; overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
+            <div class="info-perfil" style="
+                display: flex; 
+                justify-content: space-between; /* Separa Avatar a la izq y Botones a la der */
+                align-items: flex-end;          /* Alinea todo abajo */
+                padding: 0 20px 20px;           /* Espacio interno */
+                margin-top: -40px;              /* Sube la caja blanca sobre el banner */
+                position: relative;             /* Necesario para el z-index */
+                z-index: 2;">
+
+                <div class="avatar" style="
+                    width:100px; height:100px; 
+                    border-radius:50%; 
+                    border:4px solid var(--bg); 
+                    overflow:hidden; 
+                    background:var(--card2); 
+                    display:flex; align-items:center; justify-content:center;
+                    flex-shrink: 0; /* Evita que se aplaste */">
                     <?php if ($fotoUrl): ?>
                         <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto" style="width:100%; height:100%; object-fit:cover;">
                     <?php else: ?>
@@ -102,12 +117,22 @@ if ($yo > 0 && $yo !== $idPerfil) {
                     <?php endif; ?>
                 </div>
 
-                <div class="perfil-mini">
-                    <p class="bio-perfil" id="perfilBio"><?php echo htmlspecialchars($bio); ?></p>
-                </div>
-
                 <?php if ($yo > 0 && $yo !== $idPerfil): ?>
-                    <div class="acciones-perfil" style="margin-top:10px;">
+                    <div class="acciones-perfil" style="
+                        display: flex; 
+                        gap: 10px;          /* Espacio entre botones */
+                        padding-bottom: 10px; /* Un poco de aire abajo */">
+                        
+                        <button
+                            id="btnChat"
+                            class="boton-registrarse boton-secundario"
+                            data-user="<?php echo htmlspecialchars($usuario); ?>"
+                            type="button"
+                            style="background:var(--card2); color:var(--text); border:1px solid var(--border); padding:8px 20px; border-radius:20px; font-weight:bold; cursor:pointer; display: flex; align-items: center; gap: 5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            Chat
+                        </button>
+
                         <button
                             id="btnSeguir"
                             class="boton-registrarse btn-accion-seguir"
@@ -124,18 +149,16 @@ if ($yo > 0 && $yo !== $idPerfil) {
                                 color: <?php echo $sigo ? 'var(--text)' : 'var(--bg)'; ?>;">
                             <?php echo $sigo ? 'Siguiendo' : 'Seguir'; ?>
                         </button>
-
-                        <button
-                            id="btnChat"
-                            class="boton-registrarse boton-secundario"
-                            data-user="<?php echo htmlspecialchars($usuario); ?>"
-                            type="button"
-                            style="background:var(--card2); color:var(--text); border:1px solid var(--border);">
-                            💬 Chat
-                        </button>
                     </div>
+                <?php else: ?>
+                    <div></div>
                 <?php endif; ?>
             </div>
+
+            <div class="perfil-mini" style="padding: 0 20px;">
+                <p class="bio-perfil" id="perfilBio" style="margin-top: 10px;"><?php echo htmlspecialchars($bio); ?></p>
+            </div>
+
         </section>
 
         <section class="datos-perfil">
