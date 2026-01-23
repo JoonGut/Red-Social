@@ -50,6 +50,14 @@ require __DIR__ . '/db.php';
         <a href="#" class="menu-item" data-page="explorar">Explorar</a>
         <a href="#" class="menu-item" data-page="chat">Mensajes</a>
         <a href="#" class="menu-item" data-page="perfil">Perfil</a>
+        <a href="#" class="menu-item" data-page="perfil">Perfil</a>
+
+        <?php if (isset($_SESSION['id_rol']) && (int)$_SESSION['id_rol'] === 2): ?>
+            <a href="#" class="menu-item" data-page="admin" style="color: #ff4757;">
+                <i class="fas fa-shield-alt"></i>
+                <span>Admin</span>
+            </a>
+        <?php endif; ?>
         <a href="#" id="btnThemeToggle" class="menu-item">
           <i class="fas fa-moon" id="themeIcon"></i>
           <span>Tema</span>

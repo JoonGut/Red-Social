@@ -459,3 +459,8 @@ a.user-link:hover { text-decoration: underline; }
     background-color: var(--card);
     border: 1px solid var(--border);
 }
+/* Estilos básicos para tablas de admin */
+table { width: 100%; border-collapse: collapse; }
+th { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; }
+td { font-size: 0.95rem; }
+tr:last-child { border-bottom: none !important; }

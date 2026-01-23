@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
@@ -14,12 +13,8 @@ if ($u === '' || !preg_match('/^[a-zA-Z0-9_]{3,30}$/', $u)) {
     exit;
 }
 
-$stmt = $mysqli->prepare("
-  SELECT id_usuario, usuario, nombre, biografia, foto_perfil
-  FROM usuario
-  WHERE usuario = ?
-  LIMIT 1
-");
+// Obtener datos usuario
+$stmt = $mysqli->prepare("SELECT id_usuario, usuario, nombre, biografia, foto_perfil FROM usuario WHERE usuario = ? LIMIT 1");
 $stmt->bind_param('s', $u);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -42,6 +37,7 @@ if ($foto !== '') {
     $fotoUrl = '../multimedia/' . rawurlencode($foto);
 }
 
+// Contadores
 $stmt = $mysqli->prepare('SELECT COUNT(*) total FROM seguidores WHERE id_usuario = ?');
 $stmt->bind_param('i', $idPerfil);
 $stmt->execute();
@@ -60,20 +56,16 @@ $stmt->execute();
 $publicaciones = (int)$stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
-$stmt = $mysqli->prepare("
-  SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion
-  FROM publicacion
-  WHERE id_usuario = ?
-  ORDER BY fecha_publicacion DESC, id_publicacion DESC
-");
+// Publicaciones
+$stmt = $mysqli->prepare("SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion FROM publicacion WHERE id_usuario = ? ORDER BY fecha_publicacion DESC, id_publicacion DESC");
 $stmt->bind_param('i', $idPerfil);
 $stmt->execute();
 $pubs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+// Estado "Te sigo"
 $yo = (int)($_SESSION['id_usuario'] ?? 0);
 $sigo = false;
-
 if ($yo > 0 && $yo !== $idPerfil) {
     $stmt = $mysqli->prepare("SELECT 1 FROM seguidores WHERE id_usuario = ? AND id_seguidor = ? LIMIT 1");
     $stmt->bind_param('ii', $idPerfil, $yo);
@@ -89,22 +81,24 @@ if ($yo > 0 && $yo !== $idPerfil) {
     <meta charset="UTF-8" />
     <title>Perfil · @<?php echo htmlspecialchars($usuario); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/index.css" />
+    <link rel="stylesheet" href="../css/perfil.css" />
 </head>
 
 <body>
     <main class="contenido-principal">
 
         <section class="cabecera-perfil">
-            <div class="banner">
-                <a href="javascript:history.back()" class="volver">← Volver</a>
+            <div class="banner" style="background-image: url('../multimedia/file.svg'); background-size: cover; background-position: center; height:150px; position:relative; margin-bottom:-40px;">
+                <a href="javascript:history.back()" class="volver" style="position:absolute; top:15px; left:15px; background:rgba(0,0,0,0.5); color:white; padding:5px 12px; border-radius:20px; text-decoration:none; font-weight:bold; backdrop-filter:blur(4px);">← Volver</a>
             </div>
 
             <div class="info-perfil">
-                <div class="avatar">
+                <div class="avatar" style="width:100px; height:100px; border-radius:50%; border:4px solid var(--bg); position:relative; z-index:2; overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
                     <?php if ($fotoUrl): ?>
-                        <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto de perfil">
+                        <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto" style="width:100%; height:100%; object-fit:cover;">
                     <?php else: ?>
-                        <span>👤</span>
+                        <span style="font-size:2.5rem;">👤</span>
                     <?php endif; ?>
                 </div>
 
@@ -113,21 +107,30 @@ if ($yo > 0 && $yo !== $idPerfil) {
                 </div>
 
                 <?php if ($yo > 0 && $yo !== $idPerfil): ?>
-                    <div class="acciones-perfil">
+                    <div class="acciones-perfil" style="margin-top:10px;">
                         <button
                             id="btnSeguir"
                             class="boton-registrarse btn-accion-seguir"
                             data-id="<?php echo $idPerfil; ?>"
                             data-sigo="<?php echo $sigo ? '1' : '0'; ?>"
-                            type="button">
-                            <?php echo $sigo ? 'Dejar de seguir' : 'Seguir'; ?>
+                            type="button"
+                            style="
+                                padding:8px 20px; 
+                                border-radius:20px; 
+                                font-weight:bold; 
+                                cursor:pointer;
+                                border: <?php echo $sigo ? '1px solid var(--border)' : 'none'; ?>;
+                                background: <?php echo $sigo ? 'transparent' : 'var(--text)'; ?>;
+                                color: <?php echo $sigo ? 'var(--text)' : 'var(--bg)'; ?>;">
+                            <?php echo $sigo ? 'Siguiendo' : 'Seguir'; ?>
                         </button>
 
                         <button
                             id="btnChat"
                             class="boton-registrarse boton-secundario"
                             data-user="<?php echo htmlspecialchars($usuario); ?>"
-                            type="button">
+                            type="button"
+                            style="background:var(--card2); color:var(--text); border:1px solid var(--border);">
                             💬 Chat
                         </button>
                     </div>
@@ -139,16 +142,30 @@ if ($yo > 0 && $yo !== $idPerfil) {
             <h2>@<?php echo htmlspecialchars($usuario); ?></h2>
             <p class="nombre-real"><?php echo htmlspecialchars($nombre); ?></p>
 
-            <div class="estadisticas">
-                <span>Siguidores <strong id="nSeguidores"><?php echo $seguidores; ?></strong></span>
-                <span>Seguiendo <strong><?php echo $seguiendo; ?></strong></span>
-                <span>Publicaciones <strong><?php echo $publicaciones; ?></strong></span>
+            <div class="estadisticas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 10px;">
+                
+                <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('seguidores', <?php echo $idPerfil; ?>)"
+                     style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
+                    <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Seguidores</span>
+                    <strong id="nSeguidores" style="display:block; font-size: 1.2rem; color: var(--text);"><?php echo $seguidores; ?></strong>
+                </div>
+
+                <div onclick="if(typeof abrirModalUsuarios === 'function') abrirModalUsuarios('siguiendo', <?php echo $idPerfil; ?>)"
+                     style="cursor: pointer; text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px; transition: background 0.2s;">
+                    <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Siguiendo</span>
+                    <strong style="display:block; font-size: 1.2rem; color: var(--text);"><?php echo $seguiendo; ?></strong>
+                </div>
+
+                <div style="text-align: center; background: var(--card2); border: 1px solid var(--border); padding: 12px; border-radius: 14px;">
+                    <span style="display:block; font-size:0.85rem; color: var(--muted); margin-bottom: 4px;">Publicaciones</span>
+                    <strong style="display:block; font-size: 1.2rem; color: var(--text);"><?php echo $publicaciones; ?></strong>
+                </div>
             </div>
 
             <section class="mis-publicaciones">
                 <h3 class="titulo-seccion">Publicaciones</h3>
 
-                <div class="grid-publicaciones">
+                <div class="grid-publicaciones" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
                     <?php foreach ($pubs as $p):
                         $idp = (int)$p['id_publicacion'];
                         $img = trim((string)($p['imagen'] ?? ''));
@@ -156,27 +173,19 @@ if ($yo > 0 && $yo !== $idPerfil) {
                         $pie = (string)($p['pie_foto'] ?? '');
                         $imgUrl = $img !== '' ? '../multimedia/' . rawurlencode($img) : '';
                     ?>
-                        <button
-                            type="button"
-                            class="grid-item"
+                        <div
+                            class="grid-item post-preview-click"
                             data-id="<?php echo $idp; ?>"
-                            data-img="<?php echo htmlspecialchars($imgUrl); ?>"
-                            data-pie="<?php echo htmlspecialchars($pie); ?>"
-                            data-desc="<?php echo htmlspecialchars($txt); ?>"
-                            data-fecha="<?php echo htmlspecialchars($p['fecha_publicacion'] ?? ''); ?>">
+                            style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: var(--card2); overflow: hidden; border-radius: 4px; border:1px solid var(--border);">
+                            
                             <?php if ($imgUrl): ?>
-                                <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Publicación <?php echo $idp; ?>">
+                                <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Publicación" style="width: 100%; height: 100%; object-fit: cover; display:block;">
                             <?php else: ?>
-                                <div class="grid-item-texto">
-                                    <?php if (trim($pie) !== ''): ?>
-                                        <div class="grid-txt-pie"><?php echo htmlspecialchars($pie); ?></div>
-                                        <div class="grid-txt-desc"><?php echo htmlspecialchars($txt); ?></div>
-                                    <?php else: ?>
-                                        <div class="grid-txt-desc"><?php echo htmlspecialchars($txt); ?></div>
-                                    <?php endif; ?>
+                                <div style="padding: 10px; font-size: 0.8rem; color: var(--text); height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
+                                    <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>
                                 </div>
                             <?php endif; ?>
-                        </button>
+                        </div>
                     <?php endforeach; ?>
                 </div>
             </section>
