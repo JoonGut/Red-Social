@@ -218,13 +218,13 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
 
                 let html = '';
                 if (actual > 1) {
-                    html += `<button onclick="${fn}(${actual - 1})" class="boton-registrarse" style="padding:5px 15px; font-size:0.9rem;">« Anterior</button>`;
+                    html += `<button onclick="${fn}(${actual - 1})" class="boton-registrarse" style="padding:50px 150px; font-size:0.9rem;">« Anterior</button>`;
                 } else {
                     html += `<button disabled class="boton-registrarse" style="padding:5px 15px; font-size:0.9rem; opacity:0.5; cursor:not-allowed;">« Anterior</button>`;
                 }
-                html += `<span style="display:flex; align-items:center; font-weight:bold; color:var(--text);">Pág ${actual} / ${total}</span>`;
+                html += `<span style="display:flex; align-items:center; margin-left:10px; font-weight:bold; color:var(--text);">Pág ${actual} / ${total}</span>`;
                 if (actual < total) {
-                    html += `<button onclick="${fn}(${actual + 1})" class="boton-registrarse" style="padding:5px 15px; font-size:0.9rem;">Siguiente »</button>`;
+                    html += `<button onclick="${fn}(${actual + 1})" class="boton-registrarse" style="padding:5px 15px; margin-left:10px; font-size:0.9rem;">Siguiente »</button>`;
                 } else {
                     html += `<button disabled class="boton-registrarse" style="padding:5px 15px; font-size:0.9rem; opacity:0.5; cursor:not-allowed;">Siguiente »</button>`;
                 }
