@@ -5,9 +5,7 @@ require __DIR__ . '/db.php';
 // Capturamos el término de búsqueda (si existe)
 $busqueda = trim((string)($_GET['q'] ?? ''));
 
-// --- CORRECCIÓN DEL ERROR SQL ---
-// Hemos quitado "AND i.tipo = 'like'" porque tu tabla no tiene esa columna.
-// Ahora cuenta todas las interacciones de esa publicación.
+// SQL Base
 $sqlBase = "SELECT p.*, u.usuario, u.foto_perfil, 
             (SELECT COUNT(*) FROM interaccion i WHERE i.id_publicacion = p.id_publicacion) as num_likes
             FROM publicacion p
@@ -22,7 +20,8 @@ if ($busqueda !== '') {
 } else {
     // MODO TENDENCIAS
     // Ordenar por popularidad (num_likes) y luego por fecha
-    $sql = "$sqlBase WHERE p.imagen != '' ORDER BY num_likes DESC, p.fecha_publicacion DESC LIMIT 21";
+    // Filtramos que la imagen NO sea NULL o vacía (BLOB con contenido)
+    $sql = "$sqlBase WHERE p.imagen IS NOT NULL AND LENGTH(p.imagen) > 0 ORDER BY num_likes DESC, p.fecha_publicacion DESC LIMIT 21";
     $stmt = $mysqli->prepare($sql);
 }
 
@@ -64,7 +63,7 @@ $posts = $res->fetch_all(MYSQLI_ASSOC);
                     cursor:pointer; 
                     box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
                     transition: transform 0.2s;
-                 "
+                  "
                  onmouseover="this.style.transform='scale(1.02)'"
                  onmouseout="this.style.transform='scale(1)'">
                 <div>
@@ -98,7 +97,14 @@ $posts = $res->fetch_all(MYSQLI_ASSOC);
                 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
                     <?php foreach ($posts as $index => $p): 
-                        $img = $p['imagen'] ? '../multimedia/'.rawurlencode($p['imagen']) : '';
+                        
+                        // --- CORRECCIÓN: IMAGEN BLOB A BASE64 ---
+                        $img = '';
+                        if (!empty($p['imagen'])) {
+                            $base64 = base64_encode($p['imagen']);
+                            $img = 'data:image/jpeg;base64,' . $base64;
+                        }
+                        
                         $hasImg = !empty($img);
                         
                         $esTop1 = ($index === 0 && !$busqueda); 
