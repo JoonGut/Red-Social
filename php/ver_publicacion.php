@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
@@ -43,17 +42,20 @@ $nombre   = htmlspecialchars($post['nombre']);
 $textoRaw = htmlspecialchars($post['texto']);
 $fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion']));
 
-// --- IMÁGENES ---
+// --- IMÁGENES (CORRECCIÓN BLOB) ---
 
-// A. Foto de Perfil (Asumimos que sigue siendo archivo en carpeta)
-$fotoPerfil = $post['foto_perfil'] ? '../multimedia/' . rawurlencode($post['foto_perfil']) : '';
+// A. Foto de Perfil (BLOB -> Base64)
+$fotoPerfil = '';
+if (!empty($post['foto_perfil'])) {
+    $base64Perfil = base64_encode($post['foto_perfil']);
+    $fotoPerfil = 'data:image/jpeg;base64,' . $base64Perfil;
+}
 
-// B. Imagen del Post (CAMBIO: Ahora es BLOB desde la BD)
+// B. Imagen del Post (BLOB -> Base64)
 $imgPost = '';
 if (!empty($post['imagen'])) {
-    // Convertimos los datos binarios a Base64
-    $base64 = base64_encode($post['imagen']);
-    $imgPost = 'data:image/jpeg;base64,' . $base64;
+    $base64Post = base64_encode($post['imagen']);
+    $imgPost = 'data:image/jpeg;base64,' . $base64Post;
 }
 
 // Estado del Like
@@ -84,7 +86,9 @@ $textoProcesado = preg_replace(
             <?php if ($fotoPerfil): ?>
                 <img src="<?php echo $fotoPerfil; ?>" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
             <?php else: ?>
-                <div style="width:48px; height:48px; border-radius:50%; background:var(--card2);"></div>
+                <div style="width:48px; height:48px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--text); font-size:1.2rem;">
+                    <?php echo strtoupper(substr($usuario, 0, 1)); ?>
+                </div>
             <?php endif; ?>
 
             <div style="display:flex; flex-direction:column; justify-content:center;">
@@ -143,12 +147,18 @@ $textoProcesado = preg_replace(
         </div>
 
         <div style="margin-top:20px; display:flex; gap:10px;">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden;">
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden; display:flex; align-items:center; justify-content:center;">
                 <?php
-                // NOTA: Asumimos que la foto de tu propio perfil (en sesión) sigue siendo un archivo normal.
-                // Si también cambiaste las fotos de perfil a BLOB, esto habría que cambiarlo.
-                $miFoto = $_SESSION['foto_perfil'] ?? '';
-                if ($miFoto) echo '<img src="../multimedia/' . rawurlencode($miFoto) . '" style="width:100%; height:100%; object-fit:cover;">';
+                // --- TU FOTO EN CAJA DE COMENTARIOS ---
+                // $_SESSION['foto_perfil'] ya contiene el Base64 limpio (gracias a editarPerfil.php)
+                $miFotoBase64 = $_SESSION['foto_perfil'] ?? '';
+                
+                if ($miFotoBase64) {
+                    // Usamos data:image... directamente
+                    echo '<img src="data:image/jpeg;base64,' . $miFotoBase64 . '" style="width:100%; height:100%; object-fit:cover;">';
+                } else {
+                    echo '<span style="font-size:1.2rem;">😊</span>';
+                }
                 ?>
             </div>
             <form id="formComentarioDetalle" data-id="<?php echo $pId; ?>" style="flex:1;">
