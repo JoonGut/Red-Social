@@ -11,6 +11,13 @@
     let lastNotiId = 0; 
     let pollingInterval = null;
 
+    // Helper para imágenes (Igual que en chat.js)
+    const MEDIA = (p) => {
+        if (!p) return "../multimedia/file.svg";
+        if (String(p).startsWith("data:")) return p; // Ya es Base64
+        return "../multimedia/" + p; // Legacy archivo
+    };
+
     // Esperar a que el HTML exista
     document.addEventListener('DOMContentLoaded', () => {
         console.log("🔔 DOM Cargado. Buscando elementos...");
@@ -59,8 +66,8 @@
 
         // 3. FUNCIÓN DE CARGA
         async function cargarDatos(marcarLeidas = false) {
-            if (!content) return;
-
+            // No requerimos 'content' para pedir datos (para el badge), pero sí para pintar lista
+            
             try {
                 // Si hay que marcar leídas, lanzamos petición en segundo plano
                 if (marcarLeidas) {
@@ -73,7 +80,15 @@
 
                 // Pedir datos
                 const res = await fetch('get_notificaciones.php');
-                const json = await res.json();
+                const text = await res.text(); // Leemos texto primero para depurar errores PHP
+                
+                let json;
+                try {
+                    json = JSON.parse(text);
+                } catch (e) {
+                    console.error("Error JSON Notificaciones:", text);
+                    return;
+                }
 
                 if (!json.ok) return;
 
@@ -87,17 +102,21 @@
                     }
                 }
 
-                // Popup Toast
-                if (json.items.length > 0) {
+                // Popup Toast (Solo si es nueva y no estamos marcando leídas)
+                if (json.items.length > 0 && !marcarLeidas) {
                     const latest = Number(json.items[0].id_notificacion);
+                    // Solo mostramos toast si hay una ID mayor que la última conocida y no es la primera carga (lastNotiId > 0)
                     if (lastNotiId > 0 && latest > lastNotiId) {
                         showToast(json.items[0]);
                     }
                     lastNotiId = latest;
+                } else if (json.items.length > 0) {
+                     // Primera carga o refresco, actualizamos ID pero no mostramos toast
+                     lastNotiId = Number(json.items[0].id_notificacion);
                 }
 
-                // Renderizar (Solo si está visible para ahorrar)
-                if (lista && lista.style.display === 'block') {
+                // Renderizar Lista (Solo si el contenedor existe y la lista está visible)
+                if (content && lista && lista.style.display === 'block') {
                     content.innerHTML = '';
                     if (json.items.length === 0) {
                         content.innerHTML = '<div style="padding:15px; text-align:center; color:#777">No hay notificaciones.</div>';
@@ -112,16 +131,23 @@
                             div.style.gap = '10px';
                             div.style.alignItems = 'center';
                             
-                            const foto = n.actor_foto ? `../multimedia/${n.actor_foto}` : '../multimedia/file.svg';
-                            const jsAction = n.link_accion ? n.link_accion.replace('javascript:', '') : '';
+                            // USAR LA FUNCIÓN MEDIA PARA BASE64
+                            const foto = MEDIA(n.actor_foto);
                             
-                            div.setAttribute('onclick', jsAction);
+                            // Limpiar javascript: del enlace por seguridad básica
+                            let action = n.link_accion || "";
+                            if(action.startsWith("javascript:")) {
+                                div.setAttribute('onclick', action); // Si es función JS global
+                            } else if (action) {
+                                div.onclick = () => window.location.href = action; // Si es URL
+                            }
+                            
                             div.innerHTML = `
-                                <img src="${foto}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
+                                <img src="${foto}" style="width:35px; height:35px; border-radius:50%; object-fit:cover; background:var(--card2);">
                                 <div>
-                                    <strong style="color:#fff">${n.actor_usuario}</strong> 
-                                    <span style="color:#ccc; font-size:0.9rem">${n.texto_formato}</span>
-                                    ${n.texto_extra ? `<div style="font-size:0.8rem; color:#777; font-style:italic">"${n.texto_extra}"</div>` : ''}
+                                    <strong style="color:var(--text)">${n.actor_usuario}</strong> 
+                                    <span style="color:var(--muted); font-size:0.9rem">${n.texto_formato}</span>
+                                    ${n.texto_extra ? `<div style="font-size:0.8rem; color:var(--muted); font-style:italic">"${n.texto_extra}"</div>` : ''}
                                 </div>
                             `;
                             content.appendChild(div);
@@ -137,11 +163,32 @@
         function showToast(n) {
             const container = document.getElementById('toastContainer');
             if(!container) return;
+            
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.innerHTML = `<strong>@${n.actor_usuario}</strong> ${n.texto_formato}`;
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.gap = '10px';
+            
+            // Foto en el toast también
+            const foto = MEDIA(n.actor_foto);
+            
+            toast.innerHTML = `
+                <img src="${foto}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                <div>
+                    <strong>@${n.actor_usuario}</strong> ${n.texto_formato}
+                </div>
+            `;
+            
             container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 4000);
+            
+            // Animación entrada
+            requestAnimationFrame(() => toast.classList.add('show'));
+            
+            setTimeout(() => { 
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300); // Esperar transición CSS
+            }, 4000);
         }
 
         // Arrancar ciclo

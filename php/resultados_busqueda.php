@@ -46,7 +46,14 @@ if (empty($busqueda)) {
                     if ($resUser->num_rows > 0) {
                         while ($u = $resUser->fetch_assoc()) {
                             $uNombre = htmlspecialchars($u['usuario']);
-                            $img = $u['foto_perfil'] ? '../multimedia/' . rawurlencode($u['foto_perfil']) : '';
+                            
+                            // --- CAMBIO 1: FOTO USUARIO A BASE64 ---
+                            $img = '';
+                            if (!empty($u['foto_perfil'])) {
+                                $base64 = base64_encode($u['foto_perfil']);
+                                $img = 'data:image/jpeg;base64,' . $base64;
+                            }
+                            
                             $inicial = strtoupper(substr($uNombre, 0, 1));
                             ?>
                             <div class="follow-row" style="background: var(--card2); padding: 0; border-radius: 10px; margin-bottom: 10px; overflow:hidden; border:1px solid var(--border);">
@@ -76,7 +83,7 @@ if (empty($busqueda)) {
             <h3 style="margin-top:30px; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px; color:var(--text);">📝 Publicaciones</h3>
             <div class="feed-busqueda">
                 <?php
-                // CONSULTA ACTUALIZADA: Busca por texto del post O por nombre de usuario
+                // CONSULTA DE PUBLICACIONES
                 $sqlPost = "
                     SELECT 
                         p.id_publicacion,
@@ -108,7 +115,6 @@ if (empty($busqueda)) {
                 $stmtP = $mysqli->prepare($sqlPost);
                 if ($stmtP) {
                     $paramPost = "%" . $busqueda . "%";
-                    // 'iss' => integer (miId), string (busqueda texto), string (busqueda usuario)
                     $stmtP->bind_param('iss', $miId, $paramPost, $paramPost);
                     $stmtP->execute();
                     $resPost = $stmtP->get_result();
@@ -118,25 +124,34 @@ if (empty($busqueda)) {
                             // Variables básicas
                             $postId = $row['id_publicacion'];
                             $pUser = htmlspecialchars($row['usuario']);
-                            
-                            // Texto: Crudo para data-attribute, Con br para visualización
                             $textoRaw = htmlspecialchars($row['texto'] ?? '');
                             $pContenido = nl2br($textoRaw);
-                            
                             $pFecha = date('d M H:i', strtotime($row['fecha_publicacion']));
                             
-                            // Imágenes
-                            $pFoto = $row['foto_perfil'] ? '../multimedia/' . rawurlencode($row['foto_perfil']) : '';
-                            $pImgPost = !empty($row['imagen']) ? '../multimedia/' . rawurlencode($row['imagen']) : '';
+                            // --- CAMBIO 2: IMÁGENES A BASE64 ---
                             
-                            // Lógica de Likes y Comentarios
+                            // A. Foto perfil autor
+                            $pFoto = '';
+                            if (!empty($row['foto_perfil'])) {
+                                $base64P = base64_encode($row['foto_perfil']);
+                                $pFoto = 'data:image/jpeg;base64,' . $base64P;
+                            }
+
+                            // B. Imagen del post
+                            $pImgPost = '';
+                            if (!empty($row['imagen'])) {
+                                $base64Img = base64_encode($row['imagen']);
+                                $pImgPost = 'data:image/jpeg;base64,' . $base64Img;
+                            }
+                            
+                            // Likes
                             $numLikes = $row['num_likes'] ?? 0;
                             $numComents = $row['num_comentarios'] ?? 0;
                             $isLiked = ($row['liked_by_me'] ?? 0) > 0;
                             $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart';
                             $colorStyle = $isLiked ? 'color: #e0245e;' : 'color: var(--muted);';
 
-                            // RENDERIZADO DEL POST
+                            // RENDERIZADO
                             ?>
                             <article class="publicaciones post" 
                                      style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border); cursor:pointer; transition: background 0.2s;"
