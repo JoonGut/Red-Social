@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
@@ -51,10 +52,10 @@ require __DIR__ . '/db.php';
         <a href="#" class="menu-item" data-page="perfil">Perfil</a>
 
         <?php if (isset($_SESSION['id_rol']) && (int)$_SESSION['id_rol'] === 2): ?>
-            <a href="#" class="menu-item" data-page="admin" style="color: #ff4757;">
-                <i class="fas fa-shield-alt"></i>
-                <span>Admin</span>
-            </a>
+          <a href="#" class="menu-item" data-page="admin" style="color: #ff4757;">
+            <i class="fas fa-shield-alt"></i>
+            <span>Admin</span>
+          </a>
         <?php endif; ?>
         <a href="#" id="btnThemeToggle" class="menu-item">
           <i class="fas fa-moon" id="themeIcon"></i>
@@ -91,18 +92,11 @@ require __DIR__ . '/db.php';
       <section class="crear-publicacion">
         <div class="composer">
           <div class="avatar" style="overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
-            <?php
-            // --- CORRECCIÓN 1: TU FOTO DE PERFIL ---
-            // $_SESSION['foto_perfil'] ya contiene el código Base64 limpio (gracias a editarPerfil.php)
-            // No hay que ponerle "../multimedia/" delante.
-            $miFotoBase64 = $_SESSION['foto_perfil'] ?? '';
-            
-            if ($miFotoBase64):
-            ?>
-              <img src="data:image/jpeg;base64,<?php echo $miFotoBase64; ?>" alt="Yo" style="width:100%; height:100%; object-fit:cover;">
-            <?php else: ?>
-              <span style="font-size:1.5rem;">😊</span>
-            <?php endif; ?>
+            <?php if (!empty($_SESSION['foto_perfil'])): ?>
+      <img src="data:image/jpeg;base64,<?php echo $_SESSION['foto_perfil']; ?>" style="width:100%; height:100%; object-fit:cover;">
+    <?php else: ?>
+      <span>😊</span>
+    <?php endif; ?>
           </div>
 
           <button class="composer-input" type="button" id="abrirModalQuick">
@@ -150,15 +144,15 @@ require __DIR__ . '/db.php';
               while ($sug = $resSug->fetch_assoc()) {
                 $sugId = (int)$sug['id_usuario'];
                 $sugUser = htmlspecialchars($sug['usuario']);
-                
+
                 // --- CORRECCIÓN 2: FOTOS DE SUGERENCIAS ---
                 // Aquí viene de la BD como BLOB binario, hay que convertirlo a Base64
                 $sugFoto = '';
                 if (!empty($sug['foto_perfil'])) {
-                    $base64 = base64_encode($sug['foto_perfil']);
-                    $sugFoto = 'data:image/jpeg;base64,' . $base64;
+                  $base64 = base64_encode($sug['foto_perfil']);
+                  $sugFoto = 'data:image/jpeg;base64,' . $base64;
                 }
-                
+
                 $inicial = strtoupper(substr($sugUser, 0, 1));
         ?>
                 <div class="follow-row">
@@ -203,11 +197,16 @@ require __DIR__ . '/db.php';
 
   <script>
     window.__MY_ID__ = <?php echo (int)($_SESSION['id_usuario'] ?? 0); ?>;
-    
+
     // --- CORRECCIÓN 3: VARIABLE JAVASCRIPT ---
     // Pasamos el Base64 limpio al JS para que pueda pintar el avatar en comentarios nuevos
-    window.USER_AVATAR = "<?php echo isset($_SESSION['foto_perfil']) ? 'data:image/jpeg;base64,' . $_SESSION['foto_perfil'] : ''; ?>";
-
+    window.USER_AVATAR = "<?php
+                          if (isset($_SESSION['foto_perfil']) && !empty($_SESSION['foto_perfil'])) {
+                            echo 'data:image/jpeg;base64,' . base64_encode($_SESSION['foto_perfil']);
+                          } else {
+                            echo '';
+                          }
+                          ?>";
     const cssMap = {
       explorar: '../css/explorar.css',
       chat: '../css/chat.css',
@@ -402,11 +401,11 @@ require __DIR__ . '/db.php';
       return true;
     }
 
-    // Cargar Páginas del Menú
+    // Cargar Páginas del Menú mejorado
     function loadPage(page) {
+      console.log("Intentando cargar página:", page); // DEBUG
       loadPageCSS(page);
 
-      // 1. Lógica para el MODO CHAT (Estilo Twitter)
       if (page === 'chat') {
         document.body.classList.add('modo-chat');
       } else {
@@ -415,18 +414,29 @@ require __DIR__ . '/db.php';
 
       fetch(`${page}.php`)
         .then(r => {
-          if (!r.ok) throw new Error('Página no encontrada');
+          if (!r.ok) throw new Error('No se encontró el archivo ' + page + '.php');
           return r.text();
         })
         .then(html => {
-          replaceMainFromHtml(html);
+          const success = replaceMainFromHtml(html);
+
+          // Si el archivo PHP no tiene la clase .contenido-principal, 
+          // lo metemos directamente en el main actual por si acaso
+          if (!success) {
+            console.warn("No se encontró .contenido-principal en el AJAX, inyectando directo...");
+            document.querySelector('.contenido-principal').innerHTML = html;
+          }
+
           if (page === 'chat') {
             setTimeout(() => {
               if (typeof window.__chatInit === 'function') window.__chatInit();
             }, 50);
           }
         })
-        .catch(error => console.error('Error cargando página:', error));
+        .catch(error => {
+          console.error('Error crítico cargando página:', error);
+          alert("Error al cargar " + page);
+        });
     }
 
     // Cargar Vista Detallada del Post
@@ -457,7 +467,7 @@ require __DIR__ . '/db.php';
       // Ajustar menú activo
       document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
       const perfilBtn = document.querySelector(`[data-page="perfil"]`);
-      
+
       fetch(`perfil_usuario.php?u=${encodeURIComponent(username)}`)
         .then(r => r.text())
         .then(html => replaceMainFromHtml(html));
@@ -662,7 +672,7 @@ require __DIR__ . '/db.php';
           const foto = u.foto_perfil ? `../multimedia/${u.foto_perfil}` : '../multimedia/file.svg';
 
           let botonHtml = '';
-          if (!u.soy_yo) { 
+          if (!u.soy_yo) {
             if (u.lo_sigo === 1) {
               botonHtml = `
                             <button class="btn-mini btn-lista-seguir" 
@@ -826,7 +836,7 @@ require __DIR__ . '/db.php';
       const foto = c.foto_perfil ? `../multimedia/${c.foto_perfil}` : '../multimedia/file.svg';
       const fechaObj = new Date(c.creado_en);
       const ahora = new Date();
-      const diff = Math.floor((ahora - fechaObj) / 1000); 
+      const diff = Math.floor((ahora - fechaObj) / 1000);
       let tiempo = '';
 
       if (diff < 60) tiempo = diff + 's';
@@ -926,7 +936,7 @@ require __DIR__ . '/db.php';
           method: 'POST',
           body: fd
         });
-        const data = await res.json(); 
+        const data = await res.json();
 
         if (data.ok) {
           input.value = '';
@@ -955,7 +965,7 @@ require __DIR__ . '/db.php';
 
       try {
         const datos = new URLSearchParams();
-        datos.append('id', idPublicacion); 
+        datos.append('id', idPublicacion);
 
         const respuesta = await fetch('eliminar_publicacion.php', {
           method: 'POST',
@@ -1012,7 +1022,7 @@ require __DIR__ . '/db.php';
       // 3. Evento Click (Solo si el botón existe)
       if (btnTheme) {
         btnTheme.addEventListener('click', (e) => {
-          e.preventDefault(); 
+          e.preventDefault();
 
           // Alternar clase
           body.classList.toggle('light-mode');

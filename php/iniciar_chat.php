@@ -1,8 +1,8 @@
 <?php
-// iniciar_chat.php
-ob_start();
+declare(strict_types=1); // ESTO DEBE IR SIEMPRE PRIMERO
+ob_start(); // El buffer va después
 
-declare(strict_types=1);
+// iniciar_chat.php
 session_start();
 require __DIR__ . '/db.php';
 header('Content-Type: application/json; charset=UTF-8');
@@ -82,4 +82,5 @@ try {
 
 ob_clean();
 echo json_encode($response);
+exit; // Buena práctica poner exit al final
 ?>

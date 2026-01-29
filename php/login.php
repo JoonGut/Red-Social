@@ -27,13 +27,14 @@ $stmt->bind_param('ss', $login, $login);
 $stmt->execute();
 
 $result = $stmt->get_result();
-$usuario = $result->fetch_assoc();
+$usuario = $result->fetch_assoc(); // Aquí guardas los datos en $usuario
 
 if (!$usuario) {
     header('Location: ../login.html?error=1');
     exit;
 }
 
+// Nota: Te recomiendo usar password_verify si las contraseñas están hasheadas
 if ($contraseña !== $usuario['password']) {
     header('Location: ../login.html?error=1');
     exit;
@@ -45,8 +46,14 @@ $_SESSION['usuario']    = $usuario['usuario'];
 $_SESSION['nombre']     = $usuario['nombre'];   
 $_SESSION['email']      = $usuario['email'];
 $_SESSION['id_rol']     = (int)$usuario['id_rol'];
-$_SESSION['foto_perfil'] = $usuario['foto_perfil'];
-$_SESSION['biografia'] = $usuario['biografia'];
+$_SESSION['biografia']  = $usuario['biografia'];
+
+// CORRECCIÓN AQUÍ: Usamos $usuario en lugar de $row y validamos si existe la foto
+if (!empty($usuario['foto_perfil'])) {
+    $_SESSION['foto_perfil'] = base64_encode($usuario['foto_perfil']);
+} else {
+    $_SESSION['foto_perfil'] = '';
+}
 
 header('Location: index.php');
 exit;
