@@ -31,10 +31,11 @@ $usuario  = (string)($user['usuario'] ?? '');
 $nombre   = (string)($user['nombre'] ?? '');
 $bio      = (string)($user['biografia'] ?? '');
 
-$foto     = trim((string)($user['foto_perfil'] ?? ''));
+// --- CAMBIO 1: PROCESAR FOTO DE PERFIL (BLOB -> Base64) ---
 $fotoUrl  = '';
-if ($foto !== '') {
-    $fotoUrl = '../multimedia/' . rawurlencode($foto);
+if (!empty($user['foto_perfil'])) {
+    $base64 = base64_encode($user['foto_perfil']);
+    $fotoUrl = 'data:image/jpeg;base64,' . $base64;
 }
 
 // Contadores
@@ -111,7 +112,7 @@ if ($yo > 0 && $yo !== $idPerfil) {
                     display:flex; align-items:center; justify-content:center;
                     flex-shrink: 0; /* Evita que se aplaste */">
                     <?php if ($fotoUrl): ?>
-                        <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="<?php echo $fotoUrl; ?>" alt="Foto" style="width:100%; height:100%; object-fit:cover;">
                     <?php else: ?>
                         <span style="font-size:2.5rem;">👤</span>
                     <?php endif; ?>
@@ -191,10 +192,14 @@ if ($yo > 0 && $yo !== $idPerfil) {
                 <div class="grid-publicaciones" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
                     <?php foreach ($pubs as $p):
                         $idp = (int)$p['id_publicacion'];
-                        $img = trim((string)($p['imagen'] ?? ''));
                         $txt = (string)($p['texto'] ?? '');
-                        $pie = (string)($p['pie_foto'] ?? '');
-                        $imgUrl = $img !== '' ? '../multimedia/' . rawurlencode($img) : '';
+                        
+                        // --- CAMBIO 2: PROCESAR IMAGEN POST (BLOB -> Base64) ---
+                        $imgUrl = '';
+                        if (!empty($p['imagen'])) {
+                            $base64Img = base64_encode($p['imagen']);
+                            $imgUrl = 'data:image/jpeg;base64,' . $base64Img;
+                        }
                     ?>
                         <div
                             class="grid-item post-preview-click"
@@ -202,7 +207,7 @@ if ($yo > 0 && $yo !== $idPerfil) {
                             style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: var(--card2); overflow: hidden; border-radius: 4px; border:1px solid var(--border);">
                             
                             <?php if ($imgUrl): ?>
-                                <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Publicación" style="width: 100%; height: 100%; object-fit: cover; display:block;">
+                                <img src="<?php echo $imgUrl; ?>" alt="Publicación" style="width: 100%; height: 100%; object-fit: cover; display:block;">
                             <?php else: ?>
                                 <div style="padding: 10px; font-size: 0.8rem; color: var(--text); height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
                                     <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>

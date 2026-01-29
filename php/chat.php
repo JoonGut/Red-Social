@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+ob_start();
 session_start();
 if (empty($_SESSION['id_usuario'])) {
     http_response_code(401);

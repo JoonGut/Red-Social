@@ -5,7 +5,16 @@
 
   const BASE = (window.__BASE__ || "").replace(/\/$/, "");
   const PHP = (p) => p; 
-  const MEDIA = (p) => "../multimedia/" + p;
+  
+  // --- CORRECCIÓN CLAVE: Función MEDIA inteligente ---
+  // Detecta si es Base64 o archivo normal
+  const MEDIA = (p) => {
+    if (!p) return "../multimedia/file.svg";
+    // Si empieza por data:, es Base64 (viene de la BD)
+    if (String(p).startsWith("data:")) return p;
+    // Si no, asumimos que es un archivo en la carpeta (Legacy)
+    return "../multimedia/" + p;
+  };
 
   const state = {
     chatId: 0,
@@ -14,7 +23,7 @@
     pollTimer: null,
     historyLoaded: false,
     otherReadId: 0,
-    currentMembers: [] // Para el selector de grupo
+    currentMembers: [] 
   };
 
   // --- UTILIDADES ---
@@ -23,9 +32,10 @@
       const res = await fetch(url, options);
       const text = await res.text();
       try {
+        // Intentamos parsear. Si falla, mostramos el error de PHP en consola
         return { ok: true, data: JSON.parse(text), status: res.status };
       } catch (e) {
-        console.error("Error parseando JSON:", text);
+        console.error("Error parseando JSON. Respuesta del servidor:", text);
         return { ok: false, status: 500 };
       }
     } catch (err) {
@@ -44,31 +54,30 @@
 
   // --- MODAL CREAR GRUPO (Dinámico) ---
   function buildGroupModal() {
-    if ($("modalGrupo")) return; // Ya existe
+    if ($("modalGrupo")) return; 
 
     const html = `
-    <div id="modalGrupo" class="modal-overlay" style="display:none; position:fixed; inset:0; bg:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-      <div class="modal-content" style="background:#000; border:1px solid #333; width:90%; max-width:400px; padding:20px; border-radius:10px;">
+    <div id="modalGrupo" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+      <div class="modal-content" style="background:var(--card); border:1px solid var(--border); width:90%; max-width:400px; padding:20px; border-radius:10px; color:var(--text);">
         <h2 style="margin-top:0;">Nuevo Grupo</h2>
         
         <label style="display:block; margin-bottom:5px;">Nombre del Grupo</label>
-        <input type="text" id="groupName" placeholder="Ej: Proyecto Final" maxlength="50" style="width:100%; padding:10px; margin-bottom:15px; background:#222; border:1px solid #333; color:#fff; border-radius:5px;">
+        <input type="text" id="groupName" placeholder="Ej: Proyecto Final" maxlength="50" style="width:100%; padding:10px; margin-bottom:15px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:5px;">
         
         <label style="display:block; margin-bottom:5px;">Añadir Participantes</label>
-        <div id="groupCandidates" style="max-height:200px; overflow-y:auto; border:1px solid #333; padding:5px; margin-bottom:15px; background:#111;">
-          <div style="padding:10px; color:#777;">Cargando amigos...</div>
+        <div id="groupCandidates" style="max-height:200px; overflow-y:auto; border:1px solid var(--border); padding:5px; margin-bottom:15px; background:var(--bg);">
+          <div style="padding:10px; color:var(--muted);">Cargando amigos...</div>
         </div>
         
         <div style="text-align:right; gap:10px; display:flex; justify-content:flex-end;">
-          <button id="btnCancelGroup" style="background:none; border:1px solid #555; color:#fff; padding:8px 15px; border-radius:20px; cursor:pointer;">Cancelar</button>
-          <button id="btnCreateGroup" style="background:#1d9bf0; border:none; color:#fff; padding:8px 15px; border-radius:20px; cursor:pointer;">Crear Grupo</button>
+          <button id="btnCancelGroup" style="background:none; border:1px solid var(--border); color:var(--text); padding:8px 15px; border-radius:20px; cursor:pointer;">Cancelar</button>
+          <button id="btnCreateGroup" style="background:var(--accent); border:none; color:#fff; padding:8px 15px; border-radius:20px; cursor:pointer;">Crear Grupo</button>
         </div>
       </div>
     </div>
     `;
     document.body.insertAdjacentHTML('beforeend', html);
 
-    // Eventos del modal
     $("btnCancelGroup").onclick = () => $("modalGrupo").style.display = "none";
     
     $("btnCreateGroup").onclick = async () => {
@@ -80,6 +89,7 @@
       if (ids.length === 0) return alert("Selecciona al menos un amigo");
 
       const btn = $("btnCreateGroup");
+      const txtOriginal = btn.textContent;
       btn.textContent = "Creando...";
       btn.disabled = true;
 
@@ -88,22 +98,26 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre: name, miembros: ids })
       });
-      const json = await r.json();
-
-      if (json.ok) {
-        $("modalGrupo").style.display = "none";
-        $("groupName").value = "";
-        // Recargar lista y abrir el nuevo chat
-        await loadChats();
-        openChat({ 
-           id_chat: json.id_chat, 
-           other: { nombre: name, usuario: "grupo" },
-           es_grupo: true 
-        });
-      } else {
-        alert(json.msg || "Error creando grupo");
+      // Aquí también usamos try/catch implícito o fetchJson mejorado, pero mantenemos tu estructura
+      try {
+        const json = await r.json();
+        if (json.ok) {
+            $("modalGrupo").style.display = "none";
+            $("groupName").value = "";
+            await loadChats();
+            openChat({ 
+               id_chat: json.id_chat, 
+               other_nombre: name, // Ajuste para que coincida con la estructura
+               es_grupo: true 
+            });
+          } else {
+            alert(json.msg || "Error creando grupo");
+          }
+      } catch (e) {
+          console.error("Error respuesta grupo", e);
       }
-      btn.textContent = "Crear Grupo";
+      
+      btn.textContent = txtOriginal;
       btn.disabled = false;
     };
   }
@@ -112,32 +126,31 @@
     buildGroupModal();
     const modal = $("modalGrupo");
     const list = $("groupCandidates");
-    modal.style.display = "flex"; // Usar flex para centrar
+    modal.style.display = "flex"; 
     
-    // Cargar amigos
     const r = await fetchJson(PHP("get_seguidos_chat.php"));
     if (r.ok && r.data.items) {
        if(r.data.items.length === 0) {
-           list.innerHTML = '<div style="padding:10px; color:#777;">No sigues a nadie aún.</div>';
+           list.innerHTML = '<div style="padding:10px; color:var(--muted);">No sigues a nadie aún.</div>';
            return;
        }
        let h = '';
        r.data.items.forEach(u => {
-           const foto = u.foto_perfil ? MEDIA(u.foto_perfil) : '../multimedia/file.svg';
+           // Usamos MEDIA() aquí también
+           const foto = MEDIA(u.foto_perfil);
            h += `
-           <label style="display:flex; align-items:center; padding:8px; border-bottom:1px solid #222; cursor:pointer;">
+           <label style="display:flex; align-items:center; padding:8px; border-bottom:1px solid var(--border); cursor:pointer;">
              <input type="checkbox" class="candidate-check" value="${u.id_usuario}" style="margin-right:10px;">
              <img src="${foto}" style="width:30px; height:30px; border-radius:50%; margin-right:10px; object-fit:cover;">
              <div>
                <div style="font-weight:bold;">${u.nombre || u.usuario}</div>
-               <small style="color:#777;">@${u.usuario}</small>
+               <small style="color:var(--muted);">@${u.usuario}</small>
              </div>
            </label>`;
        });
        list.innerHTML = h;
     }
   }
-
 
   // --- NOTIFICACIONES ---
   function tryRequestNotification() {
@@ -158,15 +171,29 @@
   function showView(open) {
     const empty = $("chatEmpty");
     const view = $("chatView");
+    const listContainer = document.querySelector(".chat-list-container"); // Ajusta el selector si es diferente en tu HTML
+
     if (!empty || !view) return;
     
+    // Lógica Móvil
     if(window.innerWidth < 768) {
-       // Móvil: Ocultar lista si abrimos chat
-       $("chatList").parentElement.style.display = open ? "none" : "block";
+       if (open) {
+           // Abrir Chat: Ocultar lista, mostrar chat
+           if(listContainer) listContainer.style.display = "none";
+           view.style.display = "flex";
+           empty.style.display = "none";
+       } else {
+           // Cerrar Chat: Mostrar lista, ocultar chat
+           if(listContainer) listContainer.style.display = "block";
+           view.style.display = "none";
+           empty.style.display = "none"; // O flex, según diseño
+       }
+    } else {
+       // Escritorio
+       empty.style.display = open ? "none" : "flex";
+       view.style.display = open ? "flex" : "none";
+       if(listContainer) listContainer.style.display = "block";
     }
-    
-    empty.style.display = open ? "none" : "";
-    view.style.display = open ? "flex" : "none";
   }
 
   function scrollBottom() {
@@ -182,7 +209,7 @@
       if (msgId <= state.otherReadId) {
         span.classList.add("leido");
         span.textContent = "✓✓";
-        span.style.color = "#1d9bf0"; // Azul
+        span.style.color = "#1d9bf0"; 
       }
     });
   }
@@ -236,7 +263,7 @@
   async function loadMessages(afterId) {
     if (state.chatId <= 0) return;
 
-    const url = PHP("chat_get.php") + // Asegúrate de que tu archivo se llame así o get_chat_mensajes.php
+    const url = PHP("chat_get.php") + 
       "?id_chat=" + encodeURIComponent(String(state.chatId)) +
       (afterId > 0 ? "&after_id=" + encodeURIComponent(String(afterId)) : "");
 
@@ -260,7 +287,6 @@
 
   async function markRead(ultimoId) {
     if (state.chatId <= 0) return;
-    // Asegúrate de que el nombre del PHP coincida con el que creaste (marcar_leido.php)
     await fetch(PHP("chat_mark_read.php"), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -269,7 +295,6 @@
   }
 
   async function loadChats() {
-    // Asegúrate de que el nombre coincida (chat_list.php)
     const r = await fetchJson(PHP("chat_list.php"), { credentials: "same-origin" });
     if (!r.ok || !r.data || !r.data.ok) return [];
     
@@ -282,57 +307,67 @@
     const list = $("chatList");
     if (!list) return;
     
-    // Inyectamos cabecera con botón "+"
     let htmlHeader = `
-       <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333;">
-          <h3 style="margin:0; font-size:1.1rem;">Chats</h3>
-          <button id="btnNewGroup" style="background:none; border:none; color:#1d9bf0; font-size:1.5rem; cursor:pointer;" title="Crear Grupo">+</button>
+       <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border);">
+          <h3 style="margin:0; font-size:1.1rem; color:var(--text);">Chats</h3>
+          <button id="btnNewGroup" style="background:none; border:none; color:var(--accent); font-size:1.5rem; cursor:pointer;" title="Crear Grupo">+</button>
        </div>
     `;
     
-    // Si la lista está vacía, mostramos el header igual
     list.innerHTML = htmlHeader;
 
-    // Listener para botón "+"
     const btn = $("btnNewGroup");
     if(btn) btn.onclick = showGroupModal;
+
+    if (items.length === 0) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.style.padding = "20px";
+        emptyMsg.style.color = "var(--muted)";
+        emptyMsg.style.textAlign = "center";
+        emptyMsg.textContent = "No tienes chats activos.";
+        list.appendChild(emptyMsg);
+        return;
+    }
 
     items.forEach((it) => {
       const cid = Number(it.id_chat);
       const row = document.createElement("div");
       row.className = "chat-item" + (cid === state.chatId ? " active" : "");
       
-      // LÓGICA DE AVATAR: Si es grupo, icono. Si es user, su foto.
       const avatarDiv = document.createElement("div");
       avatarDiv.className = "chat-avatar";
       
       if (it.es_grupo) {
-          avatarDiv.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#333; color:#fff; font-size:1.2rem;">👥</div>`;
+          avatarDiv.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--card2); color:var(--text); font-size:1.2rem;">👥</div>`;
       } else if (it.other_foto) {
           const img = document.createElement("img");
-          img.src = MEDIA(encodeURIComponent(it.other_foto));
+          // CAMBIO: NO usar encodeURIComponent aquí porque rompe el Base64 (data:image...)
+          // MEDIA() ya maneja si es base64 o archivo
+          img.src = MEDIA(it.other_foto); 
           avatarDiv.appendChild(img);
       } else {
-          // Inicial si no tiene foto
           avatarDiv.textContent = (it.other_usuario || "U")[0].toUpperCase();
           avatarDiv.style.display = "flex";
           avatarDiv.style.alignItems = "center";
           avatarDiv.style.justifyContent = "center";
+          avatarDiv.style.background = "var(--card2)";
       }
 
       const meta = document.createElement("div");
       meta.className = "chat-meta";
       
-      // Si es grupo, usamos nombre_grupo. Si es user, su nombre/usuario
       const displayName = it.es_grupo ? it.other_nombre : (it.other_nombre || it.other_usuario);
-      const displayHandle = it.es_grupo ? "Grupo" : "@" + it.other_usuario;
+      
+      // Limitar texto preview
+      let preview = it.last_texto || "Comienza a charlar...";
+      if(preview.length > 25) preview = preview.substring(0, 25) + "...";
 
       meta.innerHTML = `
         <div class="chat-name">
             <strong>${displayName}</strong>
         </div>
-        <div class="chat-preview" style="color:#71767b; font-size:0.9rem;">
-            ${it.last_texto ? (it.last_texto.length>25?it.last_texto.substring(0,25)+'...':it.last_texto) : "Comienza a charlar..."}
+        <div class="chat-preview" style="color:var(--muted); font-size:0.9rem;">
+            ${preview}
         </div>
       `;
 
@@ -343,8 +378,8 @@
         row.appendChild(badge);
       }
 
-      row.prepend(avatarDiv); // Añadir avatar al principio
-      row.insertBefore(meta, row.lastChild); // Insertar meta antes del badge (o al final)
+      row.prepend(avatarDiv); 
+      row.insertBefore(meta, row.lastChild); 
 
       row.addEventListener("click", () => {
         tryRequestNotification();
@@ -365,11 +400,10 @@
     
     if($("chatId")) $("chatId").value = cid;
     
-    // Actualizar cabecera del chat abierto
     const topName = $("chatTopName");
     const topUser = $("chatTopUser");
     
-    const displayName = chatData.es_grupo ? chatData.other_nombre : (chatData.other_nombre || chatData.other_usuario);
+    const displayName = chatData.es_grupo ? (chatData.other_nombre || chatData.nombre_grupo) : (chatData.other_nombre || chatData.other_usuario);
     const displayHandle = chatData.es_grupo ? (chatData.miembros + " miembros") : "@" + chatData.other_usuario;
 
     if(topName) topName.textContent = displayName;
@@ -383,11 +417,17 @@
     await loadMessages(0);
     state.historyLoaded = true;
 
-    // Quitamos badge localmente sin recargar todo
+    // Quitamos badge localmente
     renderChatList(state.chats.map(c => c.id_chat == cid ? {...c, unread_count:0} : c));
 
     if (state.pollTimer) clearInterval(state.pollTimer);
     state.pollTimer = setInterval(() => loadMessages(state.lastId).catch(()=>{}), 1500);
+    
+    // Botón volver en móvil (asegurarse que existe en el HTML o crearlo dinámicamente)
+    const btnBack = $("btnBackChat");
+    if(btnBack) {
+        btnBack.onclick = () => showView(false);
+    }
   }
 
   // --- ENVÍO ---
@@ -444,11 +484,9 @@
 
     await loadChats();
 
-    // Auto-abrir desde perfil
     const chatUser = sessionStorage.getItem("chatUser");
     if (chatUser) {
       sessionStorage.removeItem("chatUser");
-      // Llamamos a tu archivo de iniciar chat 1vs1
       const r = await fetchJson(PHP("iniciar_chat.php") + "?u=" + encodeURIComponent(chatUser));
       if (r.ok && r.data.ok) {
         openChat({ 
