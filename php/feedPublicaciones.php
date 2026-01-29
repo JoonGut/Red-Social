@@ -2,7 +2,7 @@
 declare(strict_types=1);
 // Verificar sesión si no está iniciada
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/db.php'; // Asegúrate de que la ruta a db.php es correcta desde donde se incluye este archivo
 
 $miId = (int)($_SESSION['id_usuario'] ?? 0);
 
@@ -31,6 +31,10 @@ $sql = "
     LIMIT 50
 ";
 
+// Usamos $mysqli asumiendo que db.php lo define. Si no, ajusta según tu conexión.
+// Si este archivo se incluye en index.php, $mysqli ya debería estar disponible.
+global $mysqli; 
+
 $stmt = $mysqli->prepare($sql);
 $stmt->bind_param('i', $miId);
 $stmt->execute();
@@ -43,23 +47,35 @@ if ($res->num_rows > 0) {
         $pUser = htmlspecialchars($row['usuario']);
         $pFecha = date('d M', strtotime($row['fecha_publicacion']));
         
-        // Imágenes
-        $pFoto = $row['foto_perfil'] ? '../multimedia/' . rawurlencode($row['foto_perfil']) : '';
-        $pImg = $row['imagen'] ? '../multimedia/' . rawurlencode($row['imagen']) : '';
+        // --- IMÁGENES (CORRECCIÓN BLOB) ---
+
+        // 1. FOTO DE PERFIL DEL AUTOR DEL POST
+        $pFoto = '';
+        if (!empty($row['foto_perfil'])) {
+            // Convertir BLOB a Base64
+            $base64Perfil = base64_encode($row['foto_perfil']);
+            $pFoto = 'data:image/jpeg;base64,' . $base64Perfil;
+        }
+
+        // 2. IMAGEN DE LA PUBLICACIÓN
+        $pImg = '';
+        if (!empty($row['imagen'])) {
+            // Convertir BLOB a Base64
+            $base64Img = base64_encode($row['imagen']);
+            $pImg = 'data:image/jpeg;base64,' . $base64Img;
+        }
         
         // Datos de Interacción
         $likes = $row['num_likes'];
         $coments = $row['num_comentarios'];
         $isLiked = $row['liked_by_me'] > 0;
         $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart'; 
-        // CAMBIO: Usamos variable para el rojo, o variable muted para el gris
         $heartColor = $isLiked ? 'color:#e0245e' : 'color:var(--muted)'; 
 
         // --- PROCESAMIENTO DE TEXTO Y ETIQUETAS ---
         $textoRaw = htmlspecialchars($row['texto'] ?? '');
         $textoFormat = nl2br($textoRaw);
         
-        // Enlaces de menciones con variables de color
         $textoFinal = preg_replace(
             '/@(\w+)/', 
             '<a href="#" class="user-link stop-prop" data-user="$1" style="color:var(--accent); text-decoration:none;">@$1</a>', 
@@ -75,7 +91,9 @@ if ($res->num_rows > 0) {
                     <?php if($pFoto): ?>
                         <img src="<?php echo $pFoto; ?>" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
                     <?php else: ?>
-                        <div style="width:40px; height:40px; border-radius:50%; background:var(--card2);"></div>
+                        <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--text);">
+                            <?php echo strtoupper(substr($pUser, 0, 1)); ?>
+                        </div>
                     <?php endif; ?>
                 </div>
                 
@@ -138,7 +156,6 @@ if ($res->num_rows > 0) {
         <?php
     }
 } else {
-    // Mensaje vacío
     echo '<div style="padding:40px; text-align:center; color:var(--muted);">';
     echo '<p style="font-size:1.2rem; font-weight:bold;">No hay publicaciones</p>';
     echo '<p>¡Sé el primero en publicar algo!</p>';

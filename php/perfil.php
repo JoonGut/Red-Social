@@ -1,9 +1,33 @@
 <?php
-
 declare(strict_types=1);
 // Si se carga vía AJAX la sesión ya existe, si entra directo la iniciamos
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
+
+// Asegurarnos de tener el ID
+$miId = (int)($_SESSION['id_usuario'] ?? 0);
+if ($miId === 0) { header('Location: index.php'); exit; }
+
+// --- CONSULTA PARA OBTENER FOTO DE PERFIL ACTUALIZADA (BLOB) ---
+// No confiamos solo en la sesión, buscamos en la BD por si cambió
+$stmtPerfil = $mysqli->prepare("SELECT foto_perfil, biografia FROM usuario WHERE id_usuario = ?");
+$stmtPerfil->bind_param('i', $miId);
+$stmtPerfil->execute();
+$resPerfil = $stmtPerfil->get_result();
+$datosUsuario = $resPerfil->fetch_assoc();
+
+// Procesar Foto de Perfil (BLOB -> Base64)
+$fotoUrl = '';
+if (!empty($datosUsuario['foto_perfil'])) {
+    $base64Perfil = base64_encode($datosUsuario['foto_perfil']);
+    $fotoUrl = 'data:image/jpeg;base64,' . $base64Perfil;
+    
+    // Actualizamos la sesión por si acaso se usa en otros lados
+    $_SESSION['foto_perfil'] = $base64Perfil; 
+}
+
+$bioActual = $datosUsuario['biografia'] ?? '';
+$_SESSION['biografia'] = $bioActual; // Sincronizar bio también
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -24,22 +48,17 @@ require_once __DIR__ . '/db.php';
       <section class="cabecera-perfil">
 
         <div class="banner" style="background-image: url('../multimedia/file.svg'); background-size: cover; background-position: center; height: 150px; position: relative; margin-bottom: -40px;">
-          <a href="#" class="volver" onclick="if(window.history.length > 1){ window.history.back(); return false; } else { window.location.href='index.php'; }" style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.5); color: white; padding: 5px 12px; border-radius: 20px; text-decoration: none; font-weight: bold; backdrop-filter: blur(4px);">← Volver</a>
+          <a href="#" class="volver" onclick="window.location.href='index.php'; return false;" style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.5); color: white; padding: 5px 12px; border-radius: 20px; text-decoration: none; font-weight: bold; backdrop-filter: blur(4px);">← Volver</a>
         </div>
 
         <div class="info-perfil" style="
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-end; /* Alinea todo abajo */
+            align-items: flex-end; 
             padding: 0 20px 20px; 
             position: relative; 
             z-index: 2;">
 
-          <?php
-          $foto = $_SESSION['foto_perfil'] ?? '';
-          $fotoUrl = ($foto !== '') ? '../multimedia/' . rawurlencode($foto) : '';
-          $bioActual = $_SESSION['biografia'] ?? '';
-          ?>
           <form id="formFotoPerfil" class="avatar-form" method="POST" action="subirFotoPerfil.php" enctype="multipart/form-data" style="margin-bottom: 0;">
             <label class="avatar avatar-click" for="inputFotoPerfil" title="Cambiar foto" style="
                 width: 100px; height: 100px; 
@@ -50,17 +69,18 @@ require_once __DIR__ . '/db.php';
                 display: flex; align-items: center; justify-content: center; 
                 cursor: pointer;
                 flex-shrink: 0;">
+              
               <?php if ($fotoUrl): ?>
-                <img src="<?php echo htmlspecialchars($fotoUrl); ?>" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="<?php echo $fotoUrl; ?>" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;">
               <?php else: ?>
                 <div style="font-size: 2.5rem;">👤</div>
               <?php endif; ?>
+
             </label>
             <input type="file" id="inputFotoPerfil" name="foto_perfil" accept="image/*" class="input-file-oculto" style="display: none;">
           </form>
 
           <div style="display: flex; gap: 10px; padding-bottom: 10px;">
-            
             <button id="botonEditarPerfil" class="boton-registrarse" style="
                 background: var(--card2); 
                 color: var(--text); 
@@ -166,17 +186,22 @@ require_once __DIR__ . '/db.php';
           <div class="grid-publicaciones" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
             <?php foreach ($pubs as $p):
               $idp = (int)$p['id_publicacion'];
-              $img = trim((string)($p['imagen'] ?? ''));
               $txt = (string)($p['texto'] ?? '');
-              $imgUrl = $img !== '' ? '../multimedia/' . rawurlencode($img) : '';
+              
+              // --- IMAGEN DE POST EN BLOB ---
+              $imgUrlPost = '';
+              if (!empty($p['imagen'])) {
+                  $base64Post = base64_encode($p['imagen']);
+                  $imgUrlPost = 'data:image/jpeg;base64,' . $base64Post;
+              }
             ?>
               <div
                 class="grid-item post-preview-click"
                 data-id="<?php echo $idp; ?>"
                 style="cursor: pointer; position: relative; aspect-ratio: 1/1; background: var(--card2); overflow: hidden; border-radius: 4px; border:1px solid var(--border);">
 
-                <?php if ($imgUrl): ?>
-                  <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Post" style="width: 100%; height: 100%; object-fit: cover; display:block;">
+                <?php if ($imgUrlPost): ?>
+                  <img src="<?php echo $imgUrlPost; ?>" alt="Post" style="width: 100%; height: 100%; object-fit: cover; display:block;">
                 <?php else: ?>
                   <div style="padding: 10px; font-size: 0.8rem; color: var(--text); height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;">
                     <?php echo htmlspecialchars(mb_strimwidth($txt, 0, 80, '...')); ?>
@@ -202,20 +227,16 @@ require_once __DIR__ . '/db.php';
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
 
   <script>
-    // 1. Detectar clic en el Grid y navegar
+    // 1. Detectar clic en el Grid
     document.addEventListener('click', (e) => {
       const postPreview = e.target.closest('.post-preview-click');
-
       if (postPreview) {
         e.preventDefault();
         e.stopPropagation();
         const id = postPreview.dataset.id;
-
-        // Si estamos dentro del sistema SPA (Index), usamos su función
         if (typeof window.cargarVistaPublicacion === 'function') {
           window.cargarVistaPublicacion(id);
         } else {
-          // Fallback: Si se entró directo a perfil.php, vamos al index con el post
           window.location.href = `index.php?post=${id}`;
         }
       }
@@ -233,13 +254,8 @@ require_once __DIR__ . '/db.php';
             method: 'POST',
             body: new FormData(form)
           });
-          // Recargar para ver cambios
-          const u = new URLSearchParams(window.location.search).get('u');
-          if (typeof window.loadUserProfile === 'function' && u) {
-            window.loadUserProfile(u);
-          } else {
-            location.reload();
-          }
+          // Al recargar, PHP leerá la nueva imagen de la BD
+          location.reload(); 
         } catch (err) {
           console.error(err);
           alert('Error al subir la imagen');
@@ -249,5 +265,4 @@ require_once __DIR__ . '/db.php';
   </script>
 
 </body>
-
 </html>

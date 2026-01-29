@@ -1,8 +1,29 @@
 <?php
+// Preparar variables visuales (BLOB/Base64)
 $nombreActual = $_SESSION['nombre'] ?? '';
-$bioActual = $_SESSION['biografia'] ?? '';
-$fotoActual = $_SESSION['foto_perfil'] ?? null;
-$portadaActual = $_SESSION['portada'] ?? 'file.svg';
+$bioActual    = $_SESSION['biografia'] ?? '';
+
+// 1. AVATAR
+$fotoSession = $_SESSION['foto_perfil'] ?? null;
+if ($fotoSession) {
+    // Asumimos que en sesión ya está guardado en Base64 (sin prefijo)
+    $srcAvatar = 'data:image/jpeg;base64,' . $fotoSession;
+} else {
+    $srcAvatar = '../multimedia/file.svg'; // Imagen por defecto
+}
+
+// 2. PORTADA
+$portadaSession = $_SESSION['portada'] ?? null;
+if ($portadaSession) {
+    // Si la portada es un archivo antiguo (texto corto), mantenemos compatibilidad, si es largo es Base64
+    if (strlen($portadaSession) < 255 && strpos($portadaSession, '.') !== false) {
+         $srcPortada = '../multimedia/' . $portadaSession;
+    } else {
+         $srcPortada = 'data:image/jpeg;base64,' . $portadaSession;
+    }
+} else {
+    $srcPortada = '../multimedia/file.svg'; // Imagen por defecto
+}
 ?>
 
 <div id="modalEditarPerfil" class="modal-overlay" aria-hidden="true">
@@ -14,16 +35,19 @@ $portadaActual = $_SESSION['portada'] ?? 'file.svg';
 
     <form id="formEditarPerfil" method="POST" action="../php/editarPerfil.php" enctype="multipart/form-data">
       <div class="edit-visuals">
+        
         <div class="edit-cover-wrap">
           <div class="edit-cover-overlay"><label for="inputPortada" class="camera-btn">📷</label></div>
-          <img id="previewPortada" src="../multimedia/<?php echo htmlspecialchars($portadaActual); ?>" class="edit-cover-img" onerror="this.src='../multimedia/file.svg';"> 
+          <img id="previewPortada" src="<?php echo $srcPortada; ?>" class="edit-cover-img" style="object-fit:cover;"> 
           <input type="file" id="inputPortada" name="portada" accept="image/*" hidden>
         </div>
+
         <div class="edit-avatar-wrap">
           <div class="edit-avatar-overlay"><label for="inputAvatar" class="camera-btn">📷</label></div>
-          <img id="previewAvatar" src="<?php echo $fotoActual ? '../multimedia/'.htmlspecialchars($fotoActual) : '../multimedia/file.svg'; ?>" class="edit-avatar-img">
+          <img id="previewAvatar" src="<?php echo $srcAvatar; ?>" class="edit-avatar-img" style="object-fit:cover;">
           <input type="file" id="inputAvatar" name="foto_perfil" accept="image/*" hidden>
         </div>
+
       </div>
 
       <div class="modal-body edit-body">
@@ -46,7 +70,7 @@ $portadaActual = $_SESSION['portada'] ?? 'file.svg';
 </div>
 
 <script>
-// FUNCIONES DE UI
+// UI: Abrir/Cerrar Modal
 function toggleModalEdit(show) {
     const m = document.getElementById('modalEditarPerfil');
     if(m) {
@@ -61,21 +85,24 @@ document.addEventListener('click', e => {
     if(e.target.closest('#cerrarModalEditarPerfil, #cancelarEditarPerfil') || e.target.id === 'modalEditarPerfil') toggleModalEdit(false);
 });
 
-// PREVIEW IMÁGENES
+// PREVIEW IMÁGENES (FileReader local)
 ['inputPortada', 'inputAvatar'].forEach(id => {
     const el = document.getElementById(id);
     if(el) {
         el.addEventListener('change', function() {
             if(this.files[0]) {
                 const reader = new FileReader();
-                reader.onload = e => document.getElementById(id === 'inputPortada' ? 'previewPortada' : 'previewAvatar').src = e.target.result;
+                reader.onload = e => {
+                    const imgId = id === 'inputPortada' ? 'previewPortada' : 'previewAvatar';
+                    document.getElementById(imgId).src = e.target.result;
+                };
                 reader.readAsDataURL(this.files[0]);
             }
         });
     }
 });
 
-// ENVÍO Y ACTUALIZACIÓN DOM
+// ENVÍO AJAX Y ACTUALIZACIÓN DOM
 const formEdit = document.getElementById('formEditarPerfil');
 if(formEdit) {
     formEdit.addEventListener('submit', async function(e) {
@@ -91,28 +118,31 @@ if(formEdit) {
             const data = await res.json();
 
             if(data.ok) {
-                // 1. ACTUALIZAR TEXTOS (Usamos el valor del input directamente para feedback inmediato)
+                // 1. ACTUALIZAR TEXTOS
                 const nuevoNombre = document.getElementById('ep-nombre').value;
                 const nuevaBio = document.getElementById('ep-bio').value;
 
-                // Actualizar en todas partes donde aparezca la clase .nombre-real
                 document.querySelectorAll('.nombre-real').forEach(el => el.textContent = nuevoNombre);
-                // Actualizar todas las bios
                 document.querySelectorAll('.bio-perfil, #perfilBio').forEach(el => el.textContent = nuevaBio);
 
-                // 2. ACTUALIZAR AVATAR (Solo si el servidor devuelve nueva imagen)
+                // 2. ACTUALIZAR AVATAR (Si volvió del servidor)
                 if(data.foto_perfil) {
-                    const newSrc = '../multimedia/' + data.foto_perfil + '?t=' + Date.now();
-                    // Actualiza avatar del perfil grande, cabecera y comentarios propios
+                    // Ahora data.foto_perfil es el string Base64, no una ruta
+                    const newSrc = 'data:image/jpeg;base64,' + data.foto_perfil;
+                    
                     document.querySelectorAll('.avatar img, .info-perfil img, .edit-avatar-img').forEach(img => img.src = newSrc);
-                    if(window.USER_AVATAR) window.USER_AVATAR = newSrc;
+                    // Actualizar variable global si existe
+                    if(typeof window.USER_AVATAR !== 'undefined') window.USER_AVATAR = newSrc;
                 }
 
-                // 3. ACTUALIZAR PORTADA
+                // 3. ACTUALIZAR PORTADA (Si volvió del servidor)
                 if(data.portada) {
-                    const newCover = '../multimedia/' + data.portada + '?t=' + Date.now();
+                    const newCover = 'data:image/jpeg;base64,' + data.portada;
                     const banner = document.querySelector('.banner');
                     if(banner) banner.style.backgroundImage = `url('${newCover}')`;
+                    // Actualizar también el preview del modal por si lo vuelve a abrir
+                    const previewP = document.getElementById('previewPortada');
+                    if(previewP) previewP.src = newCover;
                 }
 
                 toggleModalEdit(false);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
@@ -40,11 +41,20 @@ if (!$post) {
 $usuario  = htmlspecialchars($post['usuario']);
 $nombre   = htmlspecialchars($post['nombre']);
 $textoRaw = htmlspecialchars($post['texto']);
-$fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion'])); 
+$fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion']));
 
-// Rutas de imágenes
+// --- IMÁGENES ---
+
+// A. Foto de Perfil (Asumimos que sigue siendo archivo en carpeta)
 $fotoPerfil = $post['foto_perfil'] ? '../multimedia/' . rawurlencode($post['foto_perfil']) : '';
-$imgPost    = $post['imagen'] ? '../multimedia/' . rawurlencode($post['imagen']) : '';
+
+// B. Imagen del Post (CAMBIO: Ahora es BLOB desde la BD)
+$imgPost = '';
+if (!empty($post['imagen'])) {
+    // Convertimos los datos binarios a Base64
+    $base64 = base64_encode($post['imagen']);
+    $imgPost = 'data:image/jpeg;base64,' . $base64;
+}
 
 // Estado del Like
 $likes = $post['num_likes'];
@@ -54,30 +64,29 @@ $heartColor = $isLiked ? 'color:#e0245e' : 'color:var(--muted)';
 
 // Convertir menciones (@usuario) en enlaces
 $textoProcesado = preg_replace(
-    '/@(\w+)/', 
-    '<a href="#" class="user-link stop-prop" data-user="$1" style="color:var(--accent); text-decoration:none;">@$1</a>', 
+    '/@(\w+)/',
+    '<a href="#" class="user-link stop-prop" data-user="$1" style="color:var(--accent); text-decoration:none;">@$1</a>',
     nl2br($textoRaw)
 );
 ?>
 
-<div class="detalle-post-container" style="max-width:600px; margin:0 auto; border-right:1px solid var(--border); min-height:100vh;">
-    
+<div class="detalle-post-container" style="width:100%; border-right:1px solid var(--border); min-height:100vh;">
     <div style="padding:10px 15px; display:flex; align-items:center; gap:20px; position:sticky; top:0; background:var(--card); opacity:0.98; backdrop-filter:blur(10px); z-index:10; border-bottom:1px solid var(--border);">
-        <button onclick="window.history.back()" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">
+        <button onclick="window.location.href='index.php'" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">
             <i class="fas fa-arrow-left"></i>
         </button>
         <h2 style="font-size:1.2rem; margin:0; color:var(--text);">Publicación</h2>
     </div>
 
     <div style="padding:15px;">
-        
+
         <div style="display:flex; gap:12px; margin-bottom:15px;">
             <?php if ($fotoPerfil): ?>
                 <img src="<?php echo $fotoPerfil; ?>" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
             <?php else: ?>
                 <div style="width:48px; height:48px; border-radius:50%; background:var(--card2);"></div>
             <?php endif; ?>
-            
+
             <div style="display:flex; flex-direction:column; justify-content:center;">
                 <span style="font-weight:bold; font-size:1rem; color:var(--text);"><?php echo $nombre; ?></span>
                 <span style="color:var(--muted);">@<?php echo $usuario; ?></span>
@@ -111,34 +120,36 @@ $textoProcesado = preg_replace(
         <?php endif; ?>
 
         <div style="display:flex; justify-content:space-around; padding-bottom:15px; border-bottom:1px solid var(--border);">
-            
+
             <button onclick="document.getElementById('inputComentarioDetalle').focus()" style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;" title="Comentar">
                 <i class="far fa-comment"></i>
             </button>
-            
-            <button id="btnLikeBig" class="btn-like-inline" data-id="<?php echo $pId; ?>" data-liked="<?php echo $isLiked?'1':'0'; ?>" style="background:none; border:none; font-size:1.3rem; cursor:pointer; transition:transform 0.1s; <?php echo $heartColor; ?>" title="Me gusta">
+
+            <button id="btnLikeBig" class="btn-like-inline" data-id="<?php echo $pId; ?>" data-liked="<?php echo $isLiked ? '1' : '0'; ?>" style="background:none; border:none; font-size:1.3rem; cursor:pointer; transition:transform 0.1s; <?php echo $heartColor; ?>" title="Me gusta">
                 <i class="<?php echo $heartClass; ?> icon-heart"></i>
             </button>
-            
+
             <button style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;" title="Compartir">
                 <i class="fas fa-share"></i>
             </button>
 
-          <?php if ((int)$post['id_usuario'] === $miId): ?>
-                <button onclick="event.stopPropagation(); eliminarPublicacion(<?php echo $pId; ?>, this)" 
-                   style="background:none; border:none; color:#f4212e; font-size:1.3rem; cursor:pointer; display:flex; align-items:center;" 
-                   title="Eliminar publicación">
+            <?php if ((int)$post['id_usuario'] === $miId): ?>
+                <button onclick="event.stopPropagation(); eliminarPublicacion(<?php echo $pId; ?>, this)"
+                    style="background:none; border:none; color:#f4212e; font-size:1.3rem; cursor:pointer; display:flex; align-items:center;"
+                    title="Eliminar publicación">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             <?php endif; ?>
-            </div>
+        </div>
 
         <div style="margin-top:20px; display:flex; gap:10px;">
             <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden;">
-               <?php 
-                 $miFoto = $_SESSION['foto_perfil'] ?? '';
-                 if($miFoto) echo '<img src="../multimedia/'.rawurlencode($miFoto).'" style="width:100%; height:100%; object-fit:cover;">';
-               ?>
+                <?php
+                // NOTA: Asumimos que la foto de tu propio perfil (en sesión) sigue siendo un archivo normal.
+                // Si también cambiaste las fotos de perfil a BLOB, esto habría que cambiarlo.
+                $miFoto = $_SESSION['foto_perfil'] ?? '';
+                if ($miFoto) echo '<img src="../multimedia/' . rawurlencode($miFoto) . '" style="width:100%; height:100%; object-fit:cover;">';
+                ?>
             </div>
             <form id="formComentarioDetalle" data-id="<?php echo $pId; ?>" style="flex:1;">
                 <input type="text" id="inputComentarioDetalle" placeholder="Postea tu respuesta" style="width:100%; background:none; border:none; border-bottom:1px solid var(--border); padding:10px; color:var(--text); font-size:1.1rem; outline:none;">
@@ -151,12 +162,12 @@ $textoProcesado = preg_replace(
     </div>
 
     <div id="contenedor-comentarios" style="padding-bottom:100px;">
-        </div>
+    </div>
 </div>
 
 <script>
     // Cargar comentarios al iniciar
-    if(typeof loadCommentsForView === 'function') {
+    if (typeof loadCommentsForView === 'function') {
         loadCommentsForView(<?php echo $pId; ?>);
     }
 
@@ -167,7 +178,7 @@ $textoProcesado = preg_replace(
         const txt = input.value.trim();
         const btn = this.querySelector('button');
 
-        if(!txt) return;
+        if (!txt) return;
         btn.disabled = true;
         btn.textContent = 'Enviando...';
 
@@ -175,16 +186,19 @@ $textoProcesado = preg_replace(
             const fd = new URLSearchParams();
             fd.append('id_publicacion', this.dataset.id);
             fd.append('texto', txt);
-            
-            const res = await fetch('comentar.php', { method:'POST', body:fd });
+
+            const res = await fetch('comentar.php', {
+                method: 'POST',
+                body: fd
+            });
             const data = await res.json();
-            
-            if(data.ok) {
+
+            if (data.ok) {
                 input.value = '';
                 // Recargar comentarios
                 loadCommentsForView(this.dataset.id);
             }
-        } catch(err) {
+        } catch (err) {
             console.error(err);
         } finally {
             btn.disabled = false;

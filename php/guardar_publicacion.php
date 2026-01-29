@@ -21,81 +21,70 @@ $pie_foto   = trim($_POST['pie_foto'] ?? '');
 
 // Validación básica
 if ($texto === '' && empty($_FILES['imagen']['name'])) {
-    // No permitir post vacío (ni texto ni foto)
     header('Location: index.php?error=vacio');
     exit;
 }
 
-// 1. PROCESAR IMAGEN
-$nombreImagen = null;
+// 1. PROCESAR IMAGEN (MODIFICADO PARA BLOB)
+$imagenContenido = null; // Variable para guardar los datos binarios
+
 if (!empty($_FILES['imagen']['name'])) {
     if ($_FILES['imagen']['error'] !== UPLOAD_ERR_OK) { header('Location: index.php?error=imagen'); exit; }
+    
+    // Verificamos tamaño (5MB)
     if ($_FILES['imagen']['size'] > 5 * 1024 * 1024) { header('Location: index.php?error=imagen_size'); exit; }
 
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime  = $finfo->file($_FILES['imagen']['tmp_name']);
-    $permitidos = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $permitidos = ['image/jpeg', 'image/png', 'image/webp'];
 
-    if (!isset($permitidos[$mime])) { header('Location: index.php?error=imagen_tipo'); exit; }
+    if (!in_array($mime, $permitidos)) { header('Location: index.php?error=imagen_tipo'); exit; }
 
-    $extension = $permitidos[$mime];
-    $nombreImagen = uniqid('pub_', true) . '.' . $extension;
-    $rutaDestino = __DIR__ . '/../multimedia/' . $nombreImagen;
-
-    if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
-        header('Location: index.php?error=imagen_guardar');
-        exit;
-    }
+    // --- CAMBIO PRINCIPAL AQUI ---
+    // En lugar de mover el archivo, LEEMOS su contenido binario
+    $imagenContenido = file_get_contents($_FILES['imagen']['tmp_name']);
 }
 
 try {
     // 2. INSERTAR PUBLICACIÓN
+    // La consulta es igual, pero ahora el segundo ? recibirá los datos binarios
     $sql = "INSERT INTO publicacion (id_usuario, imagen, fecha_publicacion, ubicacion, pie_foto, texto) VALUES (?, ?, NOW(), ?, ?, ?)";
     $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param('issss', $id_usuario, $nombreImagen, $ubicacion, $pie_foto, $texto);
+
+    // Nota: 's' sirve para strings y también datos binarios en PHP/MySQLi básico.
+    // Si la imagen es muy grande, a veces se requiere send_long_data, pero para 5MB suele funcionar así.
+    $stmt->bind_param('issss', $id_usuario, $imagenContenido, $ubicacion, $pie_foto, $texto);
+    
     $stmt->execute();
     
-    // Obtener ID de la publicación recién creada
     $id_publicacion = $stmt->insert_id;
     $stmt->close();
 
     // 3. PROCESAR ETIQUETAS (@MENCIONES)
-    // Buscamos palabras que empiecen por @ (ej: @Pepe)
+    // (Esta parte no cambia, sigue igual)
     preg_match_all('/@(\w+)/', $texto, $coincidencias);
     
     if (!empty($coincidencias[1])) {
-        // $coincidencias[1] es un array con los nombres de usuario sin la arroba
         $nombresUnicos = array_unique($coincidencias[1]);
-        
-        // Preparamos consultas para buscar ID y para insertar etiqueta
         $stmtBuscar = $mysqli->prepare("SELECT id_usuario FROM usuario WHERE usuario = ?");
         $stmtEtiqueta = $mysqli->prepare("INSERT INTO etiquetas (id_usuario, id_publicacion) VALUES (?, ?)");
 
         foreach ($nombresUnicos as $nombreUser) {
-            // Buscar si el usuario existe
             $stmtBuscar->bind_param('s', $nombreUser);
             $stmtBuscar->execute();
             $res = $stmtBuscar->get_result();
             
             if ($row = $res->fetch_assoc()) {
                 $idEtiquetado = $row['id_usuario'];
-                
-                // Evitar auto-etiquetarse (opcional, pero recomendado)
                 if ($idEtiquetado !== $id_usuario) {
                     $stmtEtiqueta->bind_param('ii', $idEtiquetado, $id_publicacion);
-                    // Usamos try-catch por si ya existe la etiqueta (clave duplicada)
                     try {
                         $stmtEtiqueta->execute();
-                        
-                        // OPCIONAL: Crear Notificación aquí
-                        // "Te han etiquetado en una publicación"
+                        // Notificaciones (opcional)
                          $stmtNoti = $mysqli->prepare("INSERT INTO notificaciones (id_usuario, id_actor, tipo, referencia_id, texto_extra) VALUES (?, ?, 'etiqueta', ?, 'te etiquetó en un post')");
                          $stmtNoti->bind_param('iii', $idEtiquetado, $id_usuario, $id_publicacion);
                          $stmtNoti->execute();
-                        
-                    } catch (Exception $e) {
-                        // Ignorar error si ya estaba etiquetado
-                    }
+                    } catch (Exception $e) { }
                 }
             }
         }

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
@@ -93,10 +92,14 @@ require __DIR__ . '/db.php';
         <div class="composer">
           <div class="avatar" style="overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
             <?php
-            $miFoto = $_SESSION['foto_perfil'] ?? '';
-            if ($miFoto):
+            // --- CORRECCIÓN 1: TU FOTO DE PERFIL ---
+            // $_SESSION['foto_perfil'] ya contiene el código Base64 limpio (gracias a editarPerfil.php)
+            // No hay que ponerle "../multimedia/" delante.
+            $miFotoBase64 = $_SESSION['foto_perfil'] ?? '';
+            
+            if ($miFotoBase64):
             ?>
-              <img src="../multimedia/<?php echo rawurlencode($miFoto); ?>" alt="Yo" style="width:100%; height:100%; object-fit:cover;">
+              <img src="data:image/jpeg;base64,<?php echo $miFotoBase64; ?>" alt="Yo" style="width:100%; height:100%; object-fit:cover;">
             <?php else: ?>
               <span style="font-size:1.5rem;">😊</span>
             <?php endif; ?>
@@ -136,7 +139,6 @@ require __DIR__ . '/db.php';
             LIMIT 3
         ";
 
-        // Asumimos que $mysqli viene de db.php
         if (isset($mysqli)) {
           $stmtSug = $mysqli->prepare($sqlSugerencias);
           if ($stmtSug) {
@@ -148,7 +150,15 @@ require __DIR__ . '/db.php';
               while ($sug = $resSug->fetch_assoc()) {
                 $sugId = (int)$sug['id_usuario'];
                 $sugUser = htmlspecialchars($sug['usuario']);
-                $sugFoto = $sug['foto_perfil'] ? '../multimedia/' . rawurlencode($sug['foto_perfil']) : '';
+                
+                // --- CORRECCIÓN 2: FOTOS DE SUGERENCIAS ---
+                // Aquí viene de la BD como BLOB binario, hay que convertirlo a Base64
+                $sugFoto = '';
+                if (!empty($sug['foto_perfil'])) {
+                    $base64 = base64_encode($sug['foto_perfil']);
+                    $sugFoto = 'data:image/jpeg;base64,' . $base64;
+                }
+                
                 $inicial = strtoupper(substr($sugUser, 0, 1));
         ?>
                 <div class="follow-row">
@@ -193,8 +203,10 @@ require __DIR__ . '/db.php';
 
   <script>
     window.__MY_ID__ = <?php echo (int)($_SESSION['id_usuario'] ?? 0); ?>;
-    // Helper para avatar en JS
-    window.USER_AVATAR = "<?php echo isset($_SESSION['foto_perfil']) ? '../multimedia/' . rawurlencode($_SESSION['foto_perfil']) : ''; ?>";
+    
+    // --- CORRECCIÓN 3: VARIABLE JAVASCRIPT ---
+    // Pasamos el Base64 limpio al JS para que pueda pintar el avatar en comentarios nuevos
+    window.USER_AVATAR = "<?php echo isset($_SESSION['foto_perfil']) ? 'data:image/jpeg;base64,' . $_SESSION['foto_perfil'] : ''; ?>";
 
     const cssMap = {
       explorar: '../css/explorar.css',
@@ -301,7 +313,7 @@ require __DIR__ . '/db.php';
         return;
       }
 
-      // G) MENU DE NAVEGACIÓN (ESTO ES LO QUE TE FALLABA)
+      // G) MENU DE NAVEGACIÓN
       const menuItem = e.target.closest('.menu-item[data-page]');
       if (menuItem) {
         e.preventDefault();
@@ -445,9 +457,7 @@ require __DIR__ . '/db.php';
       // Ajustar menú activo
       document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('activo'));
       const perfilBtn = document.querySelector(`[data-page="perfil"]`);
-      // Solo marcar activo si es mi propio perfil
-      // (Opcional, pero visualmente correcto)
-
+      
       fetch(`perfil_usuario.php?u=${encodeURIComponent(username)}`)
         .then(r => r.text())
         .then(html => replaceMainFromHtml(html));
@@ -491,7 +501,7 @@ require __DIR__ . '/db.php';
           btn.dataset.sigo = nuevoEstado ? '1' : '0';
 
           if (btn.classList.contains('btn-mini')) {
-            // CAMBIO: Estilos dinámicos usando Variables CSS
+            // Estilos dinámicos usando Variables CSS
             if (nuevoEstado) {
               // Siguiendo (Transparente + Borde)
               btn.textContent = 'Siguiendo';
@@ -539,7 +549,7 @@ require __DIR__ . '/db.php';
         if (span) span.textContent = (parseInt(span.textContent || 0) + 1) || 1;
       } else {
         icon.classList.replace('fas', 'far');
-        btn.style.color = 'var(--muted)'; // CAMBIO: Usar variable gris
+        btn.style.color = 'var(--muted)';
         let n = (parseInt(span.textContent || 0) - 1);
         if (span) span.textContent = n > 0 ? n : '';
       }
@@ -599,15 +609,11 @@ require __DIR__ . '/db.php';
     }
     // --- 6.5 FUNCIONES DEL MODAL DE SEGUIDORES ---
 
-    // Variable para saber de qué usuario estamos viendo la lista
     let currentListUserId = 0;
 
     // 1. Abrir el modal
     window.abrirModalUsuarios = function(tipo, idUsuario) {
-      // Si nos pasan un ID, lo guardamos. Si no, usamos el global si existe.
       if (idUsuario) currentListUserId = idUsuario;
-
-      // Si por alguna razón no hay ID (ej: perfil propio sin pasar ID), usamos el de sesión
       if (!currentListUserId && window.__MY_ID__) currentListUserId = window.__MY_ID__;
 
       const modal = document.getElementById('modalListaUsuarios');
@@ -627,7 +633,6 @@ require __DIR__ . '/db.php';
 
     // 3. Cambiar pestaña y Cargar datos (AJAX)
     window.cambiarTab = async function(tipo) {
-      // ... (Tu código de gestión de pestañas sigue igual) ...
       const tabSeg = document.getElementById('tabSeguidores');
       const tabSig = document.getElementById('tabSiguiendo');
       if (tabSeg) tabSeg.classList.remove('active');
@@ -640,7 +645,6 @@ require __DIR__ . '/db.php';
       contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">Cargando...</p>';
 
       try {
-        // Llamamos a la API
         const url = `api_lista_usuarios.php?tipo=${tipo}&id_usuario=${currentListUserId}`;
         const res = await fetch(url);
         const data = await res.json();
@@ -652,14 +656,14 @@ require __DIR__ . '/db.php';
 
         let html = '';
         data.forEach(u => {
-          // 1. ARREGLO DE FOTOS: Usamos ../multimedia/ porque index.php está en php/
+          // CORRECCIÓN: Si en el futuro también devuelves BLOBs aquí, tendrás que adaptar la API
+          // Por ahora asumo que api_lista_usuarios.php devuelve nombre de archivo O NULL
+          // Si devuelve BLOB, esta línea fallará. (Idealmente api_lista_usuarios.php debe devolver Base64)
           const foto = u.foto_perfil ? `../multimedia/${u.foto_perfil}` : '../multimedia/file.svg';
 
-          // 2. LOGICA DEL BOTÓN SEGUIR
           let botonHtml = '';
-          if (!u.soy_yo) { // No mostrar botón si soy yo mismo
+          if (!u.soy_yo) { 
             if (u.lo_sigo === 1) {
-              // YA LO SIGUES -> Botón "Siguiendo" (transparente/borde)
               botonHtml = `
                             <button class="btn-mini btn-lista-seguir" 
                                     data-id="${u.id_usuario}" 
@@ -669,7 +673,6 @@ require __DIR__ . '/db.php';
                                 Siguiendo
                             </button>`;
             } else {
-              // NO LO SIGUES -> Botón "Seguir" (blanco/relleno)
               botonHtml = `
                             <button class="btn-mini btn-lista-seguir" 
                                     data-id="${u.id_usuario}" 
@@ -708,7 +711,6 @@ require __DIR__ . '/db.php';
       const id = btn.dataset.id;
       const sigo = btn.dataset.sigo === '1';
 
-      // Efecto visual inmediato
       btn.disabled = true;
       btn.textContent = '...';
 
@@ -728,7 +730,6 @@ require __DIR__ . '/db.php';
           const nuevoEstado = !sigo;
           btn.dataset.sigo = nuevoEstado ? '1' : '0';
 
-          // Cambiar estilo del botón dinámicamente
           if (nuevoEstado) {
             btn.textContent = 'Siguiendo';
             btn.style.background = 'transparent';
@@ -750,11 +751,11 @@ require __DIR__ . '/db.php';
       }
     };
 
-    // Cerrar al hacer clic fuera del modal
     window.addEventListener('click', (e) => {
       const modal = document.getElementById('modalListaUsuarios');
       if (e.target === modal) cerrarModalUsuarios();
     });
+
     // --- 7. HISTORIAL NAVEGADOR ---
     window.addEventListener('popstate', (e) => {
       const s = e.state;
@@ -775,20 +776,13 @@ require __DIR__ . '/db.php';
       }
     });
 
-    // Helper Comentarios Vista Detallada
     // --- GESTIÓN DE COMENTARIOS Y RESPUESTAS ---
-
-    // --- GESTIÓN DE COMENTARIOS Y RESPUESTAS (Rutas Corregidas) ---
-
-    // 1. Cargar y Pintar Comentarios
-    // --- GESTIÓN DE COMENTARIOS ESTILO TWITTER/X ---
 
     // 1. Cargar y Pintar Comentarios
     window.loadCommentsForView = function(id) {
       const cont = document.getElementById('contenedor-comentarios');
       if (!cont) return;
 
-      // Loader simple
       cont.innerHTML = '<div style="padding:20px; text-align:center;"><div class="spinner"></div></div>';
 
       fetch(`get_comentarios.php?id_publicacion=${id}`)
@@ -811,7 +805,6 @@ require __DIR__ . '/db.php';
                 const hijo = document.getElementById(`comentario-${c.id_comentario}`);
                 const padre = document.getElementById(`respuestas-${c.id_padre}`);
                 if (hijo && padre) {
-                  // Añadimos una línea vertical visual si quieres, o solo indentación
                   hijo.classList.add('es-respuesta');
                   padre.appendChild(hijo);
                 }
@@ -831,10 +824,9 @@ require __DIR__ . '/db.php';
     // 2. Generador de HTML (ESTILO TWITTER EXACTO)
     function renderComentarioHTML(c) {
       const foto = c.foto_perfil ? `../multimedia/${c.foto_perfil}` : '../multimedia/file.svg';
-      // Formato de tiempo estilo Twitter (ej: 4h o fecha corta)
       const fechaObj = new Date(c.creado_en);
       const ahora = new Date();
-      const diff = Math.floor((ahora - fechaObj) / 1000); // segundos
+      const diff = Math.floor((ahora - fechaObj) / 1000); 
       let tiempo = '';
 
       if (diff < 60) tiempo = diff + 's';
@@ -894,18 +886,15 @@ require __DIR__ . '/db.php';
         </div>`;
     }
 
-    // Nota: El CSS global necesita esto para que las respuestas anidadas se vean bien
-    // Puedes añadir esto al final de tu función o en tu archivo CSS
     const styleHilo = document.createElement('style');
     styleHilo.innerHTML = `
         .btn-reply-action:hover { color: var(--accent) !important; }
-        /* Las respuestas se indentan un poco y se conectan */
         .comentario-wrap .comentario-wrap { margin-left: 20px; border-left: 2px solid var(--border); border-bottom: none; }
         .comentario-wrap .comentario-wrap .comentario-body { border-bottom: none; padding-bottom: 8px; }
     `;
     document.head.appendChild(styleHilo);
 
-    // 3. Mostrar Formulario (Igual)
+    // 3. Mostrar Formulario
     window.mostrarFormResponder = function(idComentario) {
       const form = document.getElementById(`form-reply-${idComentario}`);
       if (form) {
@@ -933,12 +922,11 @@ require __DIR__ . '/db.php';
       fd.append('texto', texto);
 
       try {
-        // CORRECCIÓN AQUÍ: Quitamos 'php/'
         const res = await fetch('comentar.php', {
           method: 'POST',
           body: fd
         });
-        const data = await res.json(); // Si aquí falla, es que comentar.php tiene error PHP
+        const data = await res.json(); 
 
         if (data.ok) {
           input.value = '';
@@ -949,7 +937,6 @@ require __DIR__ . '/db.php';
         }
       } catch (err) {
         console.error("Error al enviar respuesta:", err);
-        // Si ves este alert, mira la pestaña Network en F12 para ver la respuesta roja
         alert("Error de conexión con comentar.php");
       } finally {
         btn.disabled = false;
@@ -957,24 +944,19 @@ require __DIR__ . '/db.php';
     };
     //5 Función para eliminar publicación
     window.eliminarPublicacion = async function(idPublicacion, btn) {
-      // 1. Confirmación de seguridad
       if (!confirm("¿Estás seguro de que quieres eliminar esta publicación? No se puede deshacer.")) {
         return;
       }
 
-      // 2. Desactivar botón para evitar doble click
       if (btn) {
         btn.disabled = true;
         btn.innerText = "...";
       }
 
       try {
-        // 3. Preparar los datos formato formulario (NO JSON)
         const datos = new URLSearchParams();
-        datos.append('id', idPublicacion); // La clave 'id' debe coincidir con $_POST['id']
+        datos.append('id', idPublicacion); 
 
-        // 4. Enviar petición (Ajusta la ruta si es necesario)
-        // Si index.php está en php/, la ruta es 'eliminar_publicacion.php'
         const respuesta = await fetch('eliminar_publicacion.php', {
           method: 'POST',
           body: datos
@@ -982,17 +964,13 @@ require __DIR__ . '/db.php';
 
         const resultado = await respuesta.text();
 
-        // 5. Manejar respuesta
         if (resultado.trim() === 'ok') {
           alert("Publicación eliminada.");
 
-          // Eliminar visualmente del HTML sin recargar
-          // Buscamos el elemento padre (post) y lo quitamos
           const postElement = document.querySelector(`article[data-id="${idPublicacion}"], .post-preview-click[data-id="${idPublicacion}"]`);
           if (postElement) {
             postElement.remove();
           } else {
-            // Si no lo encuentra (estás en vista detalle), vuelve al inicio
             window.location.href = 'index.php';
           }
         } else {
@@ -1034,7 +1012,7 @@ require __DIR__ . '/db.php';
       // 3. Evento Click (Solo si el botón existe)
       if (btnTheme) {
         btnTheme.addEventListener('click', (e) => {
-          e.preventDefault(); // Evita que la página salte al inicio
+          e.preventDefault(); 
 
           // Alternar clase
           body.classList.toggle('light-mode');
