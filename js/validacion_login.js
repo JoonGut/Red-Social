@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.querySelector('form');
     if (!form) return;
-    // Busca el span de error que sigue al input
     function getErrorSpan(el) {
         let sibling = el.nextElementSibling;
         while (sibling) {
@@ -37,23 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /*function validaDNI(val) {
-        if (!val){
-            return 'El DNI es obligatorio.';
-        } 
-        val = val.trim().toUpperCase();
-        let letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
-        if (!/^\d{7,8}[A-Z]$/.test(val)) {
-            return 'Formato de DNI inválido.';
-        }
-        let numberPart = val.substring(0, val.length - 1);
-        let number = parseInt(numberPart, 10);
-        let expected = letters[number % 23];
-        let letter = val.charAt(val.length - 1);
-        if (expected !== letter) {
-            return 'Letra del DNI incorrecta.';
-        }
-    }*/
    
 
 
