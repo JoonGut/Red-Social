@@ -51,7 +51,7 @@ $posts = $res->fetch_all(MYSQLI_ASSOC);
         </header>
 
         <section style="padding: 20px;">
-            <div onclick="window.location.href='../libreria/index.html'" 
+            <div onclick="window.location.href='http://localhost:8080/GestionBibleoteca/login.html'" 
                  style="
                     background: linear-gradient(135deg, #6c5ce7, #a29bfe); 
                     border-radius: 15px; 
