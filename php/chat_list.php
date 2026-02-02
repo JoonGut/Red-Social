@@ -1,5 +1,5 @@
 <?php
-// chat_list.php
+
 declare(strict_types=1);
 ob_start();
 session_start();
@@ -11,7 +11,7 @@ $items = [];
 
 try {
     if ($yo > 0) {
-        // SQL original
+
         $sql = "
             SELECT 
                 c.id_chat,
@@ -32,13 +32,13 @@ try {
         foreach ($listaBruta as $chat) {
             $idChat = (int)$chat['id_chat'];
             $esGrupo = !empty($chat['nombre_grupo']);
-            
+
             $otherUser = null;
-            $otherName = $chat['nombre_grupo']; 
+            $otherName = $chat['nombre_grupo'];
             $otherFoto = null;
-            
+
             if (!$esGrupo) {
-                // Buscar al otro usuario
+
                 $stmtOther = $mysqli->prepare("
                     SELECT u.usuario, u.nombre, u.foto_perfil 
                     FROM pertenece_chat pc
@@ -49,31 +49,31 @@ try {
                 $stmtOther->bind_param('ii', $idChat, $yo);
                 $stmtOther->execute();
                 $resOther = $stmtOther->get_result();
-                
+
                 if ($rowOther = $resOther->fetch_assoc()) {
                     $otherUser = $rowOther['usuario'];
                     $otherName = $rowOther['nombre'];
-                    
-                    // --- CONVERSIÓN BLOB A BASE64 ---
+
+
                     if (!empty($rowOther['foto_perfil'])) {
                         $otherFoto = 'data:image/jpeg;base64,' . base64_encode($rowOther['foto_perfil']);
                     }
                 } else {
-                    continue; 
+                    continue;
                 }
                 $stmtOther->close();
             } else {
                 $otherUser = 'grupo';
             }
 
-            // Último mensaje
+
             $stmtMsg = $mysqli->prepare("SELECT texto, creado_en FROM enviar_mensaje WHERE id_chat = ? ORDER BY id_mensaje DESC LIMIT 1");
             $stmtMsg->bind_param('i', $idChat);
             $stmtMsg->execute();
             $lastMsg = $stmtMsg->get_result()->fetch_assoc();
             $stmtMsg->close();
 
-            // Mensajes no leídos
+
             $stmtUnread = $mysqli->prepare("
                 SELECT COUNT(*) as c
                 FROM enviar_mensaje em
@@ -94,22 +94,20 @@ try {
                 'es_grupo' => $esGrupo,
                 'other_usuario' => $otherUser,
                 'other_nombre' => $otherName,
-                'other_foto' => $otherFoto, // Ahora es Base64 completo
+                'other_foto' => $otherFoto,
                 'miembros' => (int)$chat['miembros']
             ];
         }
 
-        // Ordenar por fecha PHP
-        usort($items, function($a, $b) {
+
+        usort($items, function ($a, $b) {
             return strcmp($b['last_fecha'], $a['last_fecha']);
         });
     }
 
-    ob_clean(); // 2. Limpiar basura
+    ob_clean();
     echo json_encode(['ok' => true, 'items' => $items]);
-
 } catch (Exception $e) {
     ob_clean();
     echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
 }
-?>

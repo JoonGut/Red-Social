@@ -13,7 +13,6 @@ if ($u === '' || !preg_match('/^[a-zA-Z0-9_]{3,30}$/', $u)) {
     exit;
 }
 
-// Obtener datos usuario
 $stmt = $mysqli->prepare("SELECT id_usuario, usuario, nombre, biografia, foto_perfil FROM usuario WHERE usuario = ? LIMIT 1");
 $stmt->bind_param('s', $u);
 $stmt->execute();
@@ -31,7 +30,6 @@ $usuario  = (string)($user['usuario'] ?? '');
 $nombre   = (string)($user['nombre'] ?? '');
 $bio      = (string)($user['biografia'] ?? '');
 
-// --- CAMBIO 1: PROCESAR FOTO DE PERFIL (BLOB -> Base64) ---
 $fotoUrl  = '';
 if (!empty($user['foto_perfil'])) {
     $base64 = base64_encode($user['foto_perfil']);
@@ -96,11 +94,11 @@ if ($yo > 0 && $yo !== $idPerfil) {
 
             <div class="info-perfil" style="
                 display: flex; 
-                justify-content: space-between; /* Separa Avatar a la izq y Botones a la der */
-                align-items: flex-end;          /* Alinea todo abajo */
-                padding: 0 20px 20px;           /* Espacio interno */
-                margin-top: -40px;              /* Sube la caja blanca sobre el banner */
-                position: relative;             /* Necesario para el z-index */
+                justify-content: space-between;
+                align-items: flex-end;          
+                padding: 0 20px 20px;           
+                margin-top: -40px;              
+                position: relative;             
                 z-index: 2;">
 
                 <div class="avatar" style="
@@ -121,8 +119,8 @@ if ($yo > 0 && $yo !== $idPerfil) {
                 <?php if ($yo > 0 && $yo !== $idPerfil): ?>
                     <div class="acciones-perfil" style="
                         display: flex; 
-                        gap: 10px;          /* Espacio entre botones */
-                        padding-bottom: 10px; /* Un poco de aire abajo */">
+                        gap: 10px;         
+                        padding-bottom: 10px; ">
                         
                         <button
                             id="btnChat"
@@ -194,7 +192,6 @@ if ($yo > 0 && $yo !== $idPerfil) {
                         $idp = (int)$p['id_publicacion'];
                         $txt = (string)($p['texto'] ?? '');
                         
-                        // --- CAMBIO 2: PROCESAR IMAGEN POST (BLOB -> Base64) ---
                         $imgUrl = '';
                         if (!empty($p['imagen'])) {
                             $base64Img = base64_encode($p['imagen']);

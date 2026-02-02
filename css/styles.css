@@ -1,4 +1,4 @@
-/* css/login.css (o registro.css) - Adaptado a Temas */
+
 
 * {
   box-sizing: border-box;
@@ -8,28 +8,28 @@
 }
 
 body {
-  /* CAMBIO: Usamos var(--bg) en lugar de gradiente fijo */
+ 
   background: var(--bg);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text); /* CAMBIO */
+  color: var(--text);
 }
 
-/* Tarjeta principal */
+
 .tarjeta-registro {
-  background: var(--card); /* CAMBIO: Fondo de tarjeta dinámico */
+  background: var(--card);
   width: 100%;
   max-width: 420px;
   padding: 2rem;
   border-radius: 16px;
-  /* CAMBIO: Sombra dinámica y borde sutil */
+ 
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
 }
 
-/* Logo */
+
 .logo-red {
   display: flex;
   justify-content: center;
@@ -38,25 +38,25 @@ body {
 
 .logo-red span {
   font-size: 2.5rem;
-  color: var(--accent); /* CAMBIO: Azul dinámico */
+  color: var(--accent);
 }
 
-/* Títulos */
+
 .titulo {
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
   text-align: center;
-  color: var(--text); /* Aseguramos color */
+  color: var(--text);
 }
 
 .subtitulo {
   text-align: center;
-  color: var(--muted); /* CAMBIO: Gris dinámico */
+  color: var(--muted);
   font-size: 0.95rem;
   margin-bottom: 1.8rem;
 }
 
-/* Formulario */
+
 .formulario-registro {
   display: flex;
   flex-direction: column;
@@ -65,7 +65,7 @@ body {
 
 .campo label {
   font-size: 0.85rem;
-  color: var(--muted); /* CAMBIO */
+  color: var(--muted);
   margin-bottom: 4px;
   display: block;
 }
@@ -74,7 +74,7 @@ body {
   width: 100%;
   padding: 0.75rem 0.9rem;
   border-radius: 8px;
-  /* CAMBIO CRÍTICO PARA INPUTS EN MODO OSCURO */
+ 
   background: var(--card2); 
   border: 1px solid var(--border);
   color: var(--text);
@@ -84,18 +84,18 @@ body {
 
 .campo input:focus {
   outline: none;
-  border-color: var(--accent); /* CAMBIO */
-  box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.2); /* Esto se puede dejar o ajustar */
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.2);
 }
 
-/* Botón */
+
 .boton-registrarse {
   margin-top: 0.5rem;
   padding: 0.8rem;
   border-radius: 999px;
   border: none;
-  background: var(--accent); /* CAMBIO */
-  color: #ffffff; /* El texto del botón suele ser blanco siempre */
+  background: var(--accent);
+  color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -103,23 +103,23 @@ body {
 }
 
 .boton-registrarse:hover {
-  filter: brightness(1.1); /* Efecto hover genérico */
+  filter: brightness(1.1);
 }
 
 .boton-registrarse:active {
   transform: scale(0.98);
 }
 
-/* Footer */
+
 .texto-footer {
   margin-top: 1.5rem;
   text-align: center;
   font-size: 0.85rem;
-  color: var(--muted); /* CAMBIO */
+  color: var(--muted);
 }
 
 .texto-footer a {
-  color: var(--accent); /* CAMBIO */
+  color: var(--accent);
   text-decoration: none;
   font-weight: 500;
 }
@@ -129,12 +129,12 @@ body {
 }
 
 .error-msg {
-  color: #ff4757; /* Rojo fijo o var(--error) si la creaste */
+  color: #ff4757;
   font-size: 0.85em;
   margin-top: 4px;
 }
 
-/* Responsive */
+
 @media (max-width: 480px) {
   .tarjeta-registro {
     border-radius: 0;
@@ -143,6 +143,6 @@ body {
     flex-direction: column;
     justify-content: center;
     border: none;
-    background: var(--bg); /* En móvil pantalla completa, usa el fondo base */
+    background: var(--bg);
   }
 }

@@ -1,7 +1,7 @@
-/* --- INICIO BLOQUE VARIABLES TEMA (Reemplazar tu :root actual) --- */
+
 
 :root {
-  /* TEMA OSCURO (Por defecto) */
+ 
   --bg: #0c1224;
   --card: #161c36;
   --card2: #101736;
@@ -17,21 +17,21 @@
   --hover-bg: rgba(255,255,255,.05);
 }
 
-/* TEMA CLARO (Se activa con JS) */
+
 body.light-mode {
-  --bg: #f3f4f6;              /* Gris muy claro de fondo */
-  --card: #ffffff;            /* Blanco puro para tarjetas */
-  --card2: #f9fafb;           /* Gris casi blanco para inputs */
-  --text: #111827;            /* Gris casi negro para texto */
-  --muted: #6b7280;           /* Gris medio para textos secundarios */
-  --border: #e5e7eb;          /* Gris claro para bordes */
-  --accent: #6366f1;          /* Índigo (más legible en blanco) */
-  --accent2: #0ea5e9;         /* Azul cielo */
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra más suave */
+  --bg: #f3f4f6;             
+  --card: #ffffff;           
+  --card2: #f9fafb;          
+  --text: #111827;           
+  --muted: #6b7280;          
+  --border: #e5e7eb;         
+  --accent: #6366f1;         
+  --accent2: #0ea5e9;        
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --hover-bg: rgba(0,0,0,.05);
 }
 
-/* --- FIN BLOQUE VARIABLES --- */
+
 
 *{
   box-sizing: border-box;
@@ -46,7 +46,7 @@ body{
   min-height: 100vh;
 }
 
-/* Layout */
+
 .contenedor-inicio{
   display: grid;
   grid-template-columns: 240px minmax(520px, 1fr) 300px;
@@ -57,7 +57,7 @@ body{
   min-height: 100vh;
 }
 
-/* Barra Lateral */
+
 .barra-lateral{
   padding: 16px;
   border-radius: var(--r1);
@@ -114,7 +114,7 @@ body{
   text-align: center; font-size: 12px;
 }
 
-/* Botones */
+
 .boton-registrarse{
   background: var(--accent); color: white; border: none;
   border-radius: 999px; padding: 0.72rem 1rem;
@@ -122,7 +122,7 @@ body{
 }
 .boton-registrarse:hover{ filter: brightness(1.05); }
 
-/* Contenido Principal */
+
 .contenido-principal{
   display: flex; flex-direction: column; gap: 14px;
   min-width: 0; background: transparent; border: none;
@@ -148,7 +148,7 @@ body{
 }
 .buscador input::placeholder{ color: rgba(255,255,255,.55); }
 
-/* Composer */
+
 .crear-publicacion{
   padding: 14px; border-radius: var(--r1);
   background: var(--card); border: 1px solid var(--border);
@@ -171,7 +171,7 @@ body{
 }
 .composer-input:hover{ border-color: rgba(124,92,255,.25); }
 
-/* Feed */
+
 .feed{ display: flex; flex-direction: column; gap: 12px; }
 
 .publicacion, .publicaciones{
@@ -190,7 +190,7 @@ body{
   margin-top: 10px; border: 1px solid var(--border);
 }
 
-/* Barra Derecha */
+
 .barra-derecha{
   padding: 0; background: transparent;
   display: flex; flex-direction: column; gap: 14px;
@@ -208,7 +208,7 @@ body{
   border-radius: 999px; background: #1a1f36;
 }
 
-/* Follow rows */
+
 .follow-row{
   display: flex; align-items: center; gap: 10px; padding: 10px;
   border-radius: 14px; border: 1px solid transparent;
@@ -230,7 +230,7 @@ body{
 }
 .btn-mini:hover{ border-color: rgba(0,212,255,.18); }
 
-/* PERFIL (Página de usuario) */
+
 .cabecera-perfil{
   border-radius: var(--r1); background: var(--card);
   border: 1px solid var(--border); box-shadow: var(--shadow);
@@ -338,7 +338,7 @@ a.user-link, a.user-link:visited, a.user-link:hover, a.user-link:active {
 }
 a.user-link:hover { text-decoration: underline; }
 
-/* Notificaciones */
+
 .noti-container { position: relative; margin-left: 15px; }
 .btn-noti { background: none; border: none; font-size: 1.5rem; cursor: pointer; position: relative; }
 .badge-noti {
@@ -362,7 +362,7 @@ a.user-link:hover { text-decoration: underline; }
 .noti-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 .noti-text small { color: #aaa; display: block; margin-top: 2px; }
 
-/* Toast */
+
 .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
 .toast {
   background: rgba(30, 30, 47, 0.95); border-left: 4px solid #00e676;
@@ -372,7 +372,7 @@ a.user-link:hover { text-decoration: underline; }
 }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-/* Responsive */
+
 @media (max-width: 1100px){
   .contenedor-inicio{ grid-template-columns: 240px 1fr; }
   .barra-derecha{ display: none; }
@@ -386,20 +386,20 @@ a.user-link:hover { text-decoration: underline; }
   .info-perfil{ flex-direction: column; align-items: flex-start; }
   .boton-editar{ width: 100%; }
 }
-/* --- Estilos para los contadores del perfil --- */
+
 .estadisticas > div {
   padding: 10px;
   border-radius: 10px;
   transition: background 0.3s ease;
-  cursor: pointer; /* Manita al pasar el ratón */
+  cursor: pointer;
 }
 
-/* Efecto al pasar el ratón: fondo suave */
+
 .estadisticas > div:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Que los números se vean grandes y claros */
+
 .estadisticas strong {
   display: block;
   font-size: 1.2rem;
@@ -408,7 +408,7 @@ a.user-link:hover { text-decoration: underline; }
 }
 
 .estadisticas span {
-  color: #aaa; /* Texto gris suave */
+  color: #aaa;
   font-size: 0.9rem;
 }
 .btn-reply-action:hover { color: #1d9bf0 !important; }
@@ -421,31 +421,31 @@ a.user-link:hover { text-decoration: underline; }
     border-bottom: none; 
     padding-bottom: 8px; 
 }
-/* Aseguramos que la cabecera use las variables */
+
 .cabecera {
-    background-color: var(--card); /* Blanco en Light, Azul en Dark */
+    background-color: var(--card);
     border-bottom: 1px solid var(--border);
 }
 
-/* El input del buscador */
+
 .buscador {
-    background-color: var(--card2) !important; /* Gris claro en Light */
+    background-color: var(--card2) !important;
     border: 1px solid var(--border) !important;
 }
 
 .buscador input {
-    color: var(--text) !important; /* Negro en Light, Blanco en Dark */
+    color: var(--text) !important;
 }
 
 .buscador input::placeholder {
     color: var(--muted);
 }
 
-/* El botón grande de "¿Qué quieres publicar?" */
+
 .composer-input {
     background-color: var(--card2) !important;
     border: 1px solid var(--border) !important;
-    color: var(--muted) !important; /* Texto gris suave */
+    color: var(--muted) !important;
     transition: all 0.2s;
 }
 
@@ -454,22 +454,22 @@ a.user-link:hover { text-decoration: underline; }
     color: var(--text) !important;
 }
 
-/* El contenedor de crear publicación */
+
 .crear-publicacion {
     background-color: var(--card);
     border: 1px solid var(--border);
 }
-/* Estilos básicos para tablas de admin */
+
 table { width: 100%; border-collapse: collapse; }
 th { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; }
 td { font-size: 0.95rem; }
 tr:last-child { border-bottom: none !important; }
-/* --- ESTILOS DEL BADGE (CONTADOR ROJO) --- */
+
 #badgeNoti {
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: #ff4757; /* Rojo */
+    background-color: #ff4757;
     color: white;
     border-radius: 50%;
     padding: 2px 6px;
@@ -479,10 +479,10 @@ tr:last-child { border-bottom: none !important; }
     text-align: center;
     border: 1px solid #fff;
     z-index: 10;
-    display: none; /* Se activa con JS */
+    display: none;
 }
 
-/* --- ESTILOS DEL TOAST (BURBUJA EMERGENTE) --- */
+
 #toastContainer {
     position: fixed;
     bottom: 20px;
@@ -505,13 +505,13 @@ tr:last-child { border-bottom: none !important; }
     min-width: 280px;
     max-width: 350px;
     
-    /* Animación de entrada */
+   
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Clase que JS añade para activar la animación */
+
 .toast.show {
     opacity: 1;
     transform: translateY(0);

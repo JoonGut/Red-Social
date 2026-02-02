@@ -1,33 +1,33 @@
 <?php
 declare(strict_types=1);
-// Si se carga vía AJAX la sesión ya existe, si entra directo la iniciamos
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
 
-// Asegurarnos de tener el ID
+
 $miId = (int)($_SESSION['id_usuario'] ?? 0);
 if ($miId === 0) { header('Location: index.php'); exit; }
 
-// --- CONSULTA PARA OBTENER FOTO DE PERFIL ACTUALIZADA (BLOB) ---
-// No confiamos solo en la sesión, buscamos en la BD por si cambió
+
+
 $stmtPerfil = $mysqli->prepare("SELECT foto_perfil, biografia FROM usuario WHERE id_usuario = ?");
 $stmtPerfil->bind_param('i', $miId);
 $stmtPerfil->execute();
 $resPerfil = $stmtPerfil->get_result();
 $datosUsuario = $resPerfil->fetch_assoc();
 
-// Procesar Foto de Perfil (BLOB -> Base64)
+
 $fotoUrl = '';
 if (!empty($datosUsuario['foto_perfil'])) {
     $base64Perfil = base64_encode($datosUsuario['foto_perfil']);
     $fotoUrl = 'data:image/jpeg;base64,' . $base64Perfil;
     
-    // Actualizamos la sesión por si acaso se usa en otros lados
+    
     $_SESSION['foto_perfil'] = $base64Perfil; 
 }
 
 $bioActual = $datosUsuario['biografia'] ?? '';
-$_SESSION['biografia'] = $bioActual; // Sincronizar bio también
+$_SESSION['biografia'] = $bioActual; 
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -166,7 +166,7 @@ $_SESSION['biografia'] = $bioActual; // Sincronizar bio también
         </div>
 
         <?php
-        // Obtener publicaciones del usuario
+        
         $idUsuario = (int)($_SESSION['id_usuario'] ?? 0);
         $stmt = $mysqli->prepare("
             SELECT id_publicacion, imagen, texto, pie_foto, fecha_publicacion
@@ -188,7 +188,7 @@ $_SESSION['biografia'] = $bioActual; // Sincronizar bio también
               $idp = (int)$p['id_publicacion'];
               $txt = (string)($p['texto'] ?? '');
               
-              // --- IMAGEN DE POST EN BLOB ---
+              
               $imgUrlPost = '';
               if (!empty($p['imagen'])) {
                   $base64Post = base64_encode($p['imagen']);
@@ -227,7 +227,7 @@ $_SESSION['biografia'] = $bioActual; // Sincronizar bio también
   <?php include __DIR__ . '/modal_EditarPerfil.php'; ?>
 
   <script>
-    // 1. Detectar clic en el Grid
+    
     document.addEventListener('click', (e) => {
       const postPreview = e.target.closest('.post-preview-click');
       if (postPreview) {
@@ -242,7 +242,7 @@ $_SESSION['biografia'] = $bioActual; // Sincronizar bio también
       }
     });
 
-    // 2. Subida de Foto de Perfil AJAX
+    
     document.addEventListener('change', async (e) => {
       if (e.target && e.target.id === 'inputFotoPerfil') {
         const input = e.target;
@@ -254,7 +254,7 @@ $_SESSION['biografia'] = $bioActual; // Sincronizar bio también
             method: 'POST',
             body: new FormData(form)
           });
-          // Al recargar, PHP leerá la nueva imagen de la BD
+          
           location.reload(); 
         } catch (err) {
           console.error(err);

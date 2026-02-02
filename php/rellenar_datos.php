@@ -1,12 +1,12 @@
 <?php
 require __DIR__ . '/db.php';
 
-// Aumentar tiempo de ejecución
+
 set_time_limit(300); 
 
 echo "<h1>⚙️ Generando datos aleatorios...</h1>";
 
-// 1. OBTENER TODOS LOS IDS DISPONIBLES
+
 $usuarios = $mysqli->query("SELECT id_usuario FROM usuario")->fetch_all(MYSQLI_ASSOC);
 $posts    = $mysqli->query("SELECT id_publicacion FROM publicacion")->fetch_all(MYSQLI_ASSOC);
 
@@ -14,7 +14,7 @@ if (count($usuarios) < 1 || count($posts) < 1) {
     die("❌ Necesitas tener al menos 1 usuario y 1 publicación creados.");
 }
 
-// 2. LISTA DE COMENTARIOS
+
 $textos = [
     "¡Qué buena foto! 📸", "Me encanta esto 😍", "Totalmente de acuerdo.", 
     "Increíble 🔥", "¿Dónde es esto?", "Jajaja buenísimo 😂", 
@@ -26,20 +26,20 @@ $textos = [
 $likesInsertados = 0;
 $comentsInsertados = 0;
 
-// 3. RECORRER CADA PUBLICACIÓN
+
 foreach ($posts as $p) {
     $idPost = $p['id_publicacion'];
 
-    // --- A) GENERAR LIKES (tipo_interaccion = 'LIKE') ---
-    $numLikes = rand(0, 8); // Entre 0 y 8 likes por post
-    shuffle($usuarios);     // Mezclar usuarios
+    
+    $numLikes = rand(0, 8); 
+    shuffle($usuarios);     
     
     for ($i = 0; $i < $numLikes; $i++) {
         if (!isset($usuarios[$i])) break;
         
         $idUser = $usuarios[$i]['id_usuario'];
         
-        // CORRECCIÓN: Usamos tus nombres de columna exactos
+        
         $sql = "INSERT IGNORE INTO interaccion (id_usuario, id_publicacion, tipo_interaccion, fecha_creacion) 
                 VALUES ($idUser, $idPost, 'LIKE', NOW() - INTERVAL FLOOR(RAND() * 10) DAY)";
         
@@ -48,12 +48,12 @@ foreach ($posts as $p) {
                 if ($mysqli->affected_rows > 0) $likesInsertados++;
             }
         } catch (Exception $e) {
-            // Ignorar duplicados
+            
         }
     }
 
-    // --- B) GENERAR COMENTARIOS (tipo_interaccion = 'COMENTARIO') ---
-    $numComents = rand(0, 3); // Entre 0 y 3 comentarios por post
+    
+    $numComents = rand(0, 3); 
     shuffle($usuarios);
 
     for ($j = 0; $j < $numComents; $j++) {
@@ -62,14 +62,14 @@ foreach ($posts as $p) {
         $idUser = $usuarios[$j]['id_usuario'];
         $textoRandom = $textos[array_rand($textos)];
         
-        // CORRECCIÓN: Usamos 'comentario' para el texto y 'tipo_interaccion' para el tipo
+        
         $sql = "INSERT INTO interaccion (id_usuario, id_publicacion, tipo_interaccion, comentario, fecha_creacion) 
                 VALUES ($idUser, $idPost, 'COMENTARIO', '$textoRandom', NOW() - INTERVAL FLOOR(RAND() * 5) DAY)";
         
         try {
             if ($mysqli->query($sql)) $comentsInsertados++;
         } catch (Exception $e) {
-            // Ignorar errores
+            
         }
     }
 }

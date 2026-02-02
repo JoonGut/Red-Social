@@ -4,15 +4,15 @@
   const $ = (id) => document.getElementById(id);
 
   const BASE = (window.__BASE__ || "").replace(/\/$/, "");
-  const PHP = (p) => p; 
-  
-  // --- CORRECCIÓN CLAVE: Función MEDIA inteligente ---
-  // Detecta si es Base64 o archivo normal
+  const PHP = (p) => p;
+
+
+
   const MEDIA = (p) => {
     if (!p) return "../multimedia/file.svg";
-    // Si empieza por data:, es Base64 (viene de la BD)
+
     if (String(p).startsWith("data:")) return p;
-    // Si no, asumimos que es un archivo en la carpeta (Legacy)
+
     return "../multimedia/" + p;
   };
 
@@ -23,16 +23,16 @@
     pollTimer: null,
     historyLoaded: false,
     otherReadId: 0,
-    currentMembers: [] 
+    currentMembers: []
   };
 
-  // --- UTILIDADES ---
+
   async function fetchJson(url, options) {
     try {
       const res = await fetch(url, options);
       const text = await res.text();
       try {
-        // Intentamos parsear. Si falla, mostramos el error de PHP en consola
+
         return { ok: true, data: JSON.parse(text), status: res.status };
       } catch (e) {
         console.error("Error parseando JSON. Respuesta del servidor:", text);
@@ -47,14 +47,14 @@
   function fmtTime(ts) {
     if (!ts) return "";
     const d = new Date(String(ts).replace(" ", "T"));
-    return isNaN(d.getTime()) 
-      ? String(ts).slice(11, 16) 
-      : d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return isNaN(d.getTime())
+      ? String(ts).slice(11, 16)
+      : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  // --- MODAL CREAR GRUPO (Dinámico) ---
+
   function buildGroupModal() {
-    if ($("modalGrupo")) return; 
+    if ($("modalGrupo")) return;
 
     const html = `
     <div id="modalGrupo" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
@@ -79,7 +79,7 @@
     document.body.insertAdjacentHTML('beforeend', html);
 
     $("btnCancelGroup").onclick = () => $("modalGrupo").style.display = "none";
-    
+
     $("btnCreateGroup").onclick = async () => {
       const name = $("groupName").value.trim();
       const checks = document.querySelectorAll(".candidate-check:checked");
@@ -98,25 +98,25 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre: name, miembros: ids })
       });
-      // Aquí también usamos try/catch implícito o fetchJson mejorado, pero mantenemos tu estructura
+
       try {
         const json = await r.json();
         if (json.ok) {
-            $("modalGrupo").style.display = "none";
-            $("groupName").value = "";
-            await loadChats();
-            openChat({ 
-               id_chat: json.id_chat, 
-               other_nombre: name, // Ajuste para que coincida con la estructura
-               es_grupo: true 
-            });
-          } else {
-            alert(json.msg || "Error creando grupo");
-          }
+          $("modalGrupo").style.display = "none";
+          $("groupName").value = "";
+          await loadChats();
+          openChat({
+            id_chat: json.id_chat,
+            other_nombre: name,
+            es_grupo: true
+          });
+        } else {
+          alert(json.msg || "Error creando grupo");
+        }
       } catch (e) {
-          console.error("Error respuesta grupo", e);
+        console.error("Error respuesta grupo", e);
       }
-      
+
       btn.textContent = txtOriginal;
       btn.disabled = false;
     };
@@ -126,19 +126,19 @@
     buildGroupModal();
     const modal = $("modalGrupo");
     const list = $("groupCandidates");
-    modal.style.display = "flex"; 
-    
+    modal.style.display = "flex";
+
     const r = await fetchJson(PHP("get_seguidos_chat.php"));
     if (r.ok && r.data.items) {
-       if(r.data.items.length === 0) {
-           list.innerHTML = '<div style="padding:10px; color:var(--muted);">No sigues a nadie aún.</div>';
-           return;
-       }
-       let h = '';
-       r.data.items.forEach(u => {
-           // Usamos MEDIA() aquí también
-           const foto = MEDIA(u.foto_perfil);
-           h += `
+      if (r.data.items.length === 0) {
+        list.innerHTML = '<div style="padding:10px; color:var(--muted);">No sigues a nadie aún.</div>';
+        return;
+      }
+      let h = '';
+      r.data.items.forEach(u => {
+
+        const foto = MEDIA(u.foto_perfil);
+        h += `
            <label style="display:flex; align-items:center; padding:8px; border-bottom:1px solid var(--border); cursor:pointer;">
              <input type="checkbox" class="candidate-check" value="${u.id_usuario}" style="margin-right:10px;">
              <img src="${foto}" style="width:30px; height:30px; border-radius:50%; margin-right:10px; object-fit:cover;">
@@ -147,12 +147,12 @@
                <small style="color:var(--muted);">@${u.usuario}</small>
              </div>
            </label>`;
-       });
-       list.innerHTML = h;
+      });
+      list.innerHTML = h;
     }
   }
 
-  // --- NOTIFICACIONES ---
+
   function tryRequestNotification() {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -167,32 +167,32 @@
     }
   }
 
-  // --- VISTAS ---
+
   function showView(open) {
     const empty = $("chatEmpty");
     const view = $("chatView");
-    const listContainer = document.querySelector(".chat-list-container"); // Ajusta el selector si es diferente en tu HTML
+    const listContainer = document.querySelector(".chat-list-container");
 
     if (!empty || !view) return;
-    
-    // Lógica Móvil
-    if(window.innerWidth < 768) {
-       if (open) {
-           // Abrir Chat: Ocultar lista, mostrar chat
-           if(listContainer) listContainer.style.display = "none";
-           view.style.display = "flex";
-           empty.style.display = "none";
-       } else {
-           // Cerrar Chat: Mostrar lista, ocultar chat
-           if(listContainer) listContainer.style.display = "block";
-           view.style.display = "none";
-           empty.style.display = "none"; // O flex, según diseño
-       }
+
+
+    if (window.innerWidth < 768) {
+      if (open) {
+
+        if (listContainer) listContainer.style.display = "none";
+        view.style.display = "flex";
+        empty.style.display = "none";
+      } else {
+
+        if (listContainer) listContainer.style.display = "block";
+        view.style.display = "none";
+        empty.style.display = "none";
+      }
     } else {
-       // Escritorio
-       empty.style.display = open ? "none" : "flex";
-       view.style.display = open ? "flex" : "none";
-       if(listContainer) listContainer.style.display = "block";
+
+      empty.style.display = open ? "none" : "flex";
+      view.style.display = open ? "flex" : "none";
+      if (listContainer) listContainer.style.display = "block";
     }
   }
 
@@ -201,7 +201,7 @@
     if (box) box.scrollTop = box.scrollHeight;
   }
 
-  // --- RENDERIZADO MENSAJES ---
+
   function updateReadStatus() {
     const myTicks = document.querySelectorAll(".msg-ticks[data-id]");
     myTicks.forEach(span => {
@@ -209,7 +209,7 @@
       if (msgId <= state.otherReadId) {
         span.classList.add("leido");
         span.textContent = "✓✓";
-        span.style.color = "#1d9bf0"; 
+        span.style.color = "#1d9bf0";
       }
     });
   }
@@ -234,7 +234,7 @@
 
     const meta = document.createElement("div");
     meta.className = "msg-meta";
-    
+
     const timeSpan = document.createElement("span");
     timeSpan.textContent = fmtTime(m.creado_en || "");
     meta.appendChild(timeSpan);
@@ -243,7 +243,7 @@
       const tickSpan = document.createElement("span");
       tickSpan.className = "msg-ticks";
       tickSpan.dataset.id = m.id_mensaje;
-      
+
       if (Number(m.id_mensaje) <= state.otherReadId) {
         tickSpan.textContent = "✓✓";
         tickSpan.classList.add("leido");
@@ -259,11 +259,11 @@
     state.lastId = Math.max(state.lastId, Number(m.id_mensaje || 0));
   }
 
-  // --- CARGA DE DATOS ---
+
   async function loadMessages(afterId) {
     if (state.chatId <= 0) return;
 
-    const url = PHP("chat_get.php") + 
+    const url = PHP("chat_get.php") +
       "?id_chat=" + encodeURIComponent(String(state.chatId)) +
       (afterId > 0 ? "&after_id=" + encodeURIComponent(String(afterId)) : "");
 
@@ -281,7 +281,7 @@
 
     if (items.length) {
       scrollBottom();
-      markRead(state.lastId).catch(() => {});
+      markRead(state.lastId).catch(() => { });
     }
   }
 
@@ -297,7 +297,7 @@
   async function loadChats() {
     const r = await fetchJson(PHP("chat_list.php"), { credentials: "same-origin" });
     if (!r.ok || !r.data || !r.data.ok) return [];
-    
+
     const items = r.data.items || [];
     state.chats = items;
     renderChatList(items);
@@ -306,61 +306,61 @@
   function renderChatList(items) {
     const list = $("chatList");
     if (!list) return;
-    
+
     let htmlHeader = `
        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border);">
           <h3 style="margin:0; font-size:1.1rem; color:var(--text);">Chats</h3>
           <button id="btnNewGroup" style="background:none; border:none; color:var(--accent); font-size:1.5rem; cursor:pointer;" title="Crear Grupo">+</button>
        </div>
     `;
-    
+
     list.innerHTML = htmlHeader;
 
     const btn = $("btnNewGroup");
-    if(btn) btn.onclick = showGroupModal;
+    if (btn) btn.onclick = showGroupModal;
 
     if (items.length === 0) {
-        const emptyMsg = document.createElement("div");
-        emptyMsg.style.padding = "20px";
-        emptyMsg.style.color = "var(--muted)";
-        emptyMsg.style.textAlign = "center";
-        emptyMsg.textContent = "No tienes chats activos.";
-        list.appendChild(emptyMsg);
-        return;
+      const emptyMsg = document.createElement("div");
+      emptyMsg.style.padding = "20px";
+      emptyMsg.style.color = "var(--muted)";
+      emptyMsg.style.textAlign = "center";
+      emptyMsg.textContent = "No tienes chats activos.";
+      list.appendChild(emptyMsg);
+      return;
     }
 
     items.forEach((it) => {
       const cid = Number(it.id_chat);
       const row = document.createElement("div");
       row.className = "chat-item" + (cid === state.chatId ? " active" : "");
-      
+
       const avatarDiv = document.createElement("div");
       avatarDiv.className = "chat-avatar";
-      
+
       if (it.es_grupo) {
-          avatarDiv.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--card2); color:var(--text); font-size:1.2rem;">👥</div>`;
+        avatarDiv.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--card2); color:var(--text); font-size:1.2rem;">👥</div>`;
       } else if (it.other_foto) {
-          const img = document.createElement("img");
-          // CAMBIO: NO usar encodeURIComponent aquí porque rompe el Base64 (data:image...)
-          // MEDIA() ya maneja si es base64 o archivo
-          img.src = MEDIA(it.other_foto); 
-          avatarDiv.appendChild(img);
+        const img = document.createElement("img");
+
+
+        img.src = MEDIA(it.other_foto);
+        avatarDiv.appendChild(img);
       } else {
-          avatarDiv.textContent = (it.other_usuario || "U")[0].toUpperCase();
-          avatarDiv.style.display = "flex";
-          avatarDiv.style.alignItems = "center";
-          avatarDiv.style.justifyContent = "center";
-          avatarDiv.style.background = "var(--card2)";
+        avatarDiv.textContent = (it.other_usuario || "U")[0].toUpperCase();
+        avatarDiv.style.display = "flex";
+        avatarDiv.style.alignItems = "center";
+        avatarDiv.style.justifyContent = "center";
+        avatarDiv.style.background = "var(--card2)";
       }
 
       const meta = document.createElement("div");
       meta.className = "chat-meta";
-      
+
       const displayName = it.es_grupo ? it.other_nombre : (it.other_nombre || it.other_usuario);
-      
-      // Limitar texto preview
+
+
       let preview = it.last_texto || "Comienza a charlar...";
-      if(preview.length > 25) preview = preview.substring(0, 25) + "...";
+      if (preview.length > 25) preview = preview.substring(0, 25) + "...";
 
       meta.innerHTML = `
         <div class="chat-name">
@@ -378,8 +378,8 @@
         row.appendChild(badge);
       }
 
-      row.prepend(avatarDiv); 
-      row.insertBefore(meta, row.lastChild); 
+      row.prepend(avatarDiv);
+      row.insertBefore(meta, row.lastChild);
 
       row.addEventListener("click", () => {
         tryRequestNotification();
@@ -397,40 +397,40 @@
     state.chatId = cid;
     state.historyLoaded = false;
     state.otherReadId = 0;
-    
-    if($("chatId")) $("chatId").value = cid;
-    
+
+    if ($("chatId")) $("chatId").value = cid;
+
     const topName = $("chatTopName");
     const topUser = $("chatTopUser");
-    
+
     const displayName = chatData.es_grupo ? (chatData.other_nombre || chatData.nombre_grupo) : (chatData.other_nombre || chatData.other_usuario);
     const displayHandle = chatData.es_grupo ? (chatData.miembros + " miembros") : "@" + chatData.other_usuario;
 
-    if(topName) topName.textContent = displayName;
-    if(topUser) topUser.textContent = displayHandle;
-    
+    if (topName) topName.textContent = displayName;
+    if (topUser) topUser.textContent = displayHandle;
+
     showView(true);
     const box = $("chatMessages");
-    if(box) box.innerHTML = "";
+    if (box) box.innerHTML = "";
     state.lastId = 0;
 
     await loadMessages(0);
     state.historyLoaded = true;
 
-    // Quitamos badge localmente
-    renderChatList(state.chats.map(c => c.id_chat == cid ? {...c, unread_count:0} : c));
+
+    renderChatList(state.chats.map(c => c.id_chat == cid ? { ...c, unread_count: 0 } : c));
 
     if (state.pollTimer) clearInterval(state.pollTimer);
-    state.pollTimer = setInterval(() => loadMessages(state.lastId).catch(()=>{}), 1500);
-    
-    // Botón volver en móvil (asegurarse que existe en el HTML o crearlo dinámicamente)
+    state.pollTimer = setInterval(() => loadMessages(state.lastId).catch(() => { }), 1500);
+
+
     const btnBack = $("btnBackChat");
-    if(btnBack) {
-        btnBack.onclick = () => showView(false);
+    if (btnBack) {
+      btnBack.onclick = () => showView(false);
     }
   }
 
-  // --- ENVÍO ---
+
   function wireSend() {
     const form = $("chatSendForm");
     const input = $("chatText");
@@ -441,7 +441,7 @@
       const txt = input.value.trim();
       if (!txt || state.chatId <= 0) return;
 
-      input.value = ""; 
+      input.value = "";
 
       const r = await fetchJson(PHP("chat_send.php"), {
         method: "POST",
@@ -461,24 +461,24 @@
     });
   }
 
-  // --- BUSCADOR LATERAL ---
+
   function wireSearch() {
     const s = $("chatSearch");
-    if(s) s.addEventListener("input", () => {
-        const q = s.value.toLowerCase();
-        document.querySelectorAll(".chat-item").forEach(row => {
-            const txt = row.innerText.toLowerCase();
-            row.style.display = txt.includes(q) ? "flex" : "none";
-        });
+    if (s) s.addEventListener("input", () => {
+      const q = s.value.toLowerCase();
+      document.querySelectorAll(".chat-item").forEach(row => {
+        const txt = row.innerText.toLowerCase();
+        row.style.display = txt.includes(q) ? "flex" : "none";
+      });
     });
   }
 
-  // --- INIT ---
+
   window.__chatInit = async function () {
     tryRequestNotification();
     showView(false);
     if (state.pollTimer) clearInterval(state.pollTimer);
-    
+
     wireSend();
     wireSearch();
 
@@ -489,12 +489,12 @@
       sessionStorage.removeItem("chatUser");
       const r = await fetchJson(PHP("iniciar_chat.php") + "?u=" + encodeURIComponent(chatUser));
       if (r.ok && r.data.ok) {
-        openChat({ 
-           id_chat: r.data.id_chat, 
-           other_usuario: r.data.other.usuario, 
-           other_nombre: r.data.other.nombre,
-           other_foto: r.data.other.foto_perfil,
-           es_grupo: false
+        openChat({
+          id_chat: r.data.id_chat,
+          other_usuario: r.data.other.usuario,
+          other_nombre: r.data.other.nombre,
+          other_foto: r.data.other.foto_perfil,
+          es_grupo: false
         });
       }
     }

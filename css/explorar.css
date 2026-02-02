@@ -1,7 +1,7 @@
-/* Ajuste opcional para móviles */
+
 @media (max-width: 600px) {
     .grid-publicaciones {
-        grid-template-columns: repeat(3, 1fr) !important; /* Mantiene 3 columnas en móvil */
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 2px !important;
     }
 }

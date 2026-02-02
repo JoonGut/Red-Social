@@ -1,9 +1,9 @@
 
-    document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.querySelector('form');
     if (!form) return;
-    // Busca el span de error que sigue al input
+
     function getErrorSpan(el) {
         let sibling = el.nextElementSibling;
         while (sibling) {
@@ -12,72 +12,72 @@
         }
         return null;
     }
- 
+
     function LimpiarError(el) {
         const span = getErrorSpan(el);
-        if (span){
+        if (span) {
             span.textContent = '';
-        } 
+        }
         el.classList.remove('invalid');
     }
 
     function setError(el, msg) {
         const span = getErrorSpan(el);
-        if (span){
+        if (span) {
             span.textContent = msg;
         }
         el.classList.add('invalid');
-        
+
     }
 
 
     function validaNombre(val) {
-        if (!val){
+        if (!val) {
             return 'El nombre es obligatorio.';
         }
     }
     function validaUsuario(val) {
-        if (!val){
+        if (!val) {
             return 'El usuario es obligatorio.';
         }
     }
 
-   
 
 
-   function validaPassword(val) {
-        if (!val){
+
+    function validaPassword(val) {
+        if (!val) {
             return 'La contraseña es obligatoria.';
-        }else{
-            if (val.length < 12){
+        } else {
+            if (val.length < 12) {
                 return 'Debe tener al menos 12 caracteres.';
-            }else{
-                //Debe contener números y símbolos
-                if (!/[0-9]/.test(val) || !/[!@#%^&*]/.test(val)){
+            } else {
+
+                if (!/[0-9]/.test(val) || !/[!@#%^&*]/.test(val)) {
                     return 'La contraseña debe contener números y símbolos.';
-                } 
+                }
             }
         }
-        
+
     }
 
     function validaPasswordConfirma(val, pass) {
-        if (!val){
+        if (!val) {
             return 'La confirmación de la contraseña es obligatoria.';
-        }else{
-            if (val !== pass){
+        } else {
+            if (val !== pass) {
                 return 'Las contraseñas no coinciden.';
-            } 
+            }
         }
 
     }
 
     function validaEmail(val) {
-        if (!val){
+        if (!val) {
             return 'El email es obligatorio.';
-        }else{
+        } else {
 
-            if (!/^[\w-.]+@[\w-_]+(\.[a-zA-Z]{2,4}){1,2}$/.test(val)){
+            if (!/^[\w-.]+@[\w-_]+(\.[a-zA-Z]{2,4}){1,2}$/.test(val)) {
                 return 'Email inválido.';
             }
         }
@@ -86,20 +86,20 @@
 
 
 
-const pass = document.getElementById('password');
-const confirm = document.getElementById('password_confirm');
+    const pass = document.getElementById('password');
+    const confirm = document.getElementById('password_confirm');
 
-confirm.addEventListener('input', () => {
-    if (pass.value !== confirm.value) {
-        confirm.style.borderColor = 'var(--error)'; // O rojo
-    } else {
-        confirm.style.borderColor = 'var(--ok)'; // O el color original
-    }
-});
+    confirm.addEventListener('input', () => {
+        if (pass.value !== confirm.value) {
+            confirm.style.borderColor = 'var(--error)';
+        } else {
+            confirm.style.borderColor = 'var(--ok)';
+        }
+    });
     form.addEventListener('submit', (e) => {
         let valido = true;
 
-        // Campos
+
         const campos = {
             nombre: form.querySelector('#nombre'),
             usuario: form.querySelector('#usuario'),
@@ -108,30 +108,30 @@ confirm.addEventListener('input', () => {
             email: form.querySelector('#email'),
         };
 
-        // Limpiar todos los errores
+
         Object.values(campos).forEach(campo => LimpiarError(campo));
 
 
         let msg;
-        
+
         if ((msg = validaNombre(campos.nombre.value))) {
-             setError(campos.nombre, msg); valido = false; 
+            setError(campos.nombre, msg); valido = false;
         }
         if ((msg = validaUsuario(campos.usuario.value))) {
-             setError(campos.usuario, msg); valido = false; 
+            setError(campos.usuario, msg); valido = false;
         }
         if ((msg = validaPassword(campos.password.value))) {
-             setError(campos.password, msg); valido = false; 
+            setError(campos.password, msg); valido = false;
         }
         if ((msg = validaPasswordConfirma(campos.password_confirm.value, campos.password.value))) {
-             setError(campos.password_confirm, msg); valido = false; 
+            setError(campos.password_confirm, msg); valido = false;
         }
         if ((msg = validaEmail(campos.email.value))) {
-            setError(campos.email, msg); valido = false; 
+            setError(campos.email, msg); valido = false;
         }
-        if (!valido){
+        if (!valido) {
             e.preventDefault();
-        }else{
+        } else {
             alert('Formulario enviado correctamente.');
         }
     });

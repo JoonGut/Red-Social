@@ -1,7 +1,7 @@
-/* css/perfil.css - Adaptado a Tema Claro/Oscuro */
 
-/* 1. LAYOUT GENERAL */
-/* El index.css usa un grid de 3 columnas. En perfil queremos 1 sola columna centrada */
+
+
+
 .contenedor-inicio.layout-solo-main{
   display: grid;
   grid-template-columns: minmax(320px, 980px);
@@ -9,20 +9,20 @@
   gap: 24px;
 }
 
-/* Esconder barra derecha en perfil */
+
 .layout-solo-main .barra-derecha{
   display: none !important;
 }
 
-/* Que el main use todo el ancho disponible */
+
 .layout-solo-main .contenido-principal{
   width: 100%;
 }
 
-/* 2. CABECERA Y DATOS */
+
 .cabecera-perfil{
   width: 100%;
-  /* Aseguramos que use las variables de tarjeta */
+ 
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--r1);
@@ -33,31 +33,31 @@
   align-items: center;
   justify-content: flex-start;
   padding: 18px 18px 10px;
-  border-bottom: 1px solid var(--border); /* Variable */
+  border-bottom: 1px solid var(--border);
 }
 
-/* Avatar + bio + botones */
+
 .info-perfil{
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 18px;
   flex-wrap: wrap;
-  color: var(--text); /* Variable */
+  color: var(--text);
 }
 
-/* css/perfil.css */
 
-/* --- BLOQUE CORREGIDO PARA ESTADÍSTICAS --- */
+
+
 
 .estadisticas {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin: 14px 0 10px;
 }
 
-/* Las cajitas individuales */
+
 .estadisticas > div {
   padding: 12px;
   border-radius: 14px;
@@ -65,42 +65,42 @@
   text-align: center;
   transition: background 0.2s, transform 0.1s;
   
-  /* AQUÍ ESTÁ LA SOLUCIÓN DE LOS COLORES: */
-  background-color: var(--card2);  /* Gris claro en tema claro / Azul oscuro en tema oscuro */
-  border: 1px solid var(--border); /* Borde dinámico */
-  color: var(--text);              /* Texto negro en tema claro / Blanco en tema oscuro */
+ 
+  background-color: var(--card2); 
+  border: 1px solid var(--border);
+  color: var(--text);             
 }
 
-/* Efecto al pasar el ratón */
+
 .estadisticas > div:hover {
   background-color: var(--hover-bg);
   transform: translateY(-2px);
 }
 
-/* El texto "Seguidores", "Siguiendo"... */
+
 .estadisticas span {
   display: block;
   font-size: 0.85rem;
-  color: var(--muted); /* Gris suave en ambos temas */
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
-/* Los NÚMEROS (El contador) */
+
 .estadisticas strong {
   display: block;
   font-size: 1.2rem;
   font-weight: 800;
-  color: var(--text); /* IMPORTANTE: Esto hace que el número se vea negro en modo claro */
+  color: var(--text);
 }
 
-/* Ajuste Responsive */
+
 @media (max-width: 520px){
   .estadisticas{
-    grid-template-columns: 1fr; /* En móviles una debajo de otra */
+    grid-template-columns: 1fr;
   }
 }
 
-/* 4. GRID DE PUBLICACIONES */
+
 .grid-publicaciones{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -112,11 +112,11 @@
   height: 140px;
   object-fit: cover;
   border-radius: 14px;
-  /* Borde sutil variable */
+ 
   border: 1px solid var(--border);
 }
 
-/* 5. AVATAR */
+
 .avatar{
   width: 96px;           
   height: 96px;
@@ -124,8 +124,8 @@
   overflow: hidden;      
   display: grid;
   place-items: center;
-  background: var(--card2); /* Variable */
-  border: 4px solid var(--card); /* Un borde del color del fondo para separar */
+  background: var(--card2);
+  border: 4px solid var(--card);
 }
 
 .avatar img{
@@ -136,7 +136,7 @@
   display: block;
 }
 
-/* 6. BOTONES */
+
 .acciones-perfil{
   display: flex;
   gap: 12px;
@@ -146,8 +146,8 @@
 
 .boton-secundario{
   background: transparent;
-  /* CAMBIO CRÍTICO: */
-  /* Antes tenías rgba(255,255,255,.2). En fondo blanco eso no se ve. */
+ 
+ 
   border: 1px solid var(--border); 
   color: var(--text);
   padding: 8px 16px;
@@ -157,23 +157,23 @@
 }
 
 .boton-secundario:hover {
-  background: var(--hover-bg); /* Variable definida en index.css */
+  background: var(--hover-bg);
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 520px){
   .estadisticas{
     grid-template-columns: 1fr;
   }
 }
-/* --- ARREGLO FINAL DE COLORES ESTADÍSTICAS --- */
 
-/* 1. La cajita contenedora */
+
+
 .estadisticas > div {
-    /* Forzamos el color de fondo variable (Gris en claro, Azul en oscuro) */
+   
     background-color: var(--card2) !important;
     border: 1px solid var(--border) !important;
-    /* Forzamos que el texto base sea variable */
+   
     color: var(--text) !important; 
     
     padding: 12px;
@@ -182,46 +182,46 @@
     transition: background 0.2s;
 }
 
-/* 2. El texto "Seguidores", "Siguiendo" */
+
 .estadisticas > div span {
-    /* Forzamos color gris variable */
+   
     color: var(--muted) !important; 
     font-size: 0.85rem;
     display: block;
     margin-bottom: 4px;
 }
 
-/* 3. Los números (negrita) */
+
 .estadisticas > div strong {
-    /* Forzamos color de texto principal (Negro en claro, Blanco en oscuro) */
+   
     color: var(--text) !important;
     font-size: 1.2rem;
     font-weight: 800;
     display: block;
 }
 
-/* Hover */
+
 .estadisticas > div:hover {
     background-color: var(--hover-bg) !important;
 }
 .banner {
-    height: 150px; /* Altura de la portada */
+    height: 150px;
     width: 100%;
-    background-color: var(--accent); /* Color de respaldo */
-    background-size: cover;          /* La imagen cubre todo el espacio */
-    background-position: center;     /* Centrar la imagen */
+    background-color: var(--accent);
+    background-size: cover;         
+    background-position: center;    
     position: relative;
-    /* Opcional: radio superior si quieres bordes redondos arriba */
+   
     border-top-left-radius: 16px;    
     border-top-right-radius: 16px;
 }
 
-/* Para que el botón 'Volver' se vea bien sobre cualquier imagen */
+
 .volver {
     position: absolute;
     top: 15px;
     left: 15px;
-    background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    background: rgba(0, 0, 0, 0.5);
     color: white;
     padding: 5px 12px;
     border-radius: 20px;

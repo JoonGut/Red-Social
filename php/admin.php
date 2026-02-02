@@ -6,12 +6,14 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <title>Admin</title>
 </head>
+
 <body>
     <main class="contenido-principal">
-        
+
         <div class="admin-container" style="padding:20px; max-width:1000px; margin:0 auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h1>🛡️ Panel de Administración</h1>
@@ -30,12 +32,12 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
             </div>
 
             <div style="margin-bottom:20px; display:flex; gap:10px;">
-                <input type="search" 
-                       id="inputBuscadorAdmin" 
-                       placeholder="Buscar usuario o email..." 
-                       style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--card2); color:var(--text); outline:none;"
-                       onkeypress="if(event.key === 'Enter') window.realizarBusquedaAdmin()">
-                
+                <input type="search"
+                    id="inputBuscadorAdmin"
+                    placeholder="Buscar usuario o email..."
+                    style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--card2); color:var(--text); outline:none;"
+                    onkeypress="if(event.key === 'Enter') window.realizarBusquedaAdmin()">
+
                 <button onclick="window.realizarBusquedaAdmin()" class="boton-registrarse" style="padding:0 20px;">
                     🔍
                 </button>
@@ -44,45 +46,52 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
             <div id="admin-view-content" style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; min-height:300px;">
                 <p style="text-align:center; color:var(--muted); margin-top:50px;">Cargando...</p>
             </div>
-            
+
             <div id="admin-pagination" style="display:flex; justify-content:center; gap:15px; margin-top:20px;"></div>
         </div>
 
         <script>
-            // Variables de estado
             window.paginaUsuariosActual = 1;
             window.paginaPostsActual = 1;
-            window.tabActual = 'usuarios'; // 'usuarios' o 'posts'
+            window.tabActual = 'usuarios';
             window.busquedaActual = '';
 
-            // --- GESTIÓN DE PESTAÑAS ---
+
             window.cambiarTabAdmin = function(tab) {
                 window.tabActual = tab;
-                window.busquedaActual = ''; // Limpiar búsqueda al cambiar
+                window.busquedaActual = '';
                 document.getElementById('inputBuscadorAdmin').value = '';
-                
-                // Actualizar estilos botones
+
+
                 const btnU = document.getElementById('btnTabUsuarios');
                 const btnP = document.getElementById('btnTabPosts');
-                
-                if(tab === 'usuarios') {
-                    btnU.style.background = 'var(--accent)'; btnU.style.color = 'white'; btnU.style.border = 'none';
-                    btnP.style.background = 'var(--card2)'; btnP.style.color = 'var(--text)'; btnP.style.border = '1px solid var(--border)';
+
+                if (tab === 'usuarios') {
+                    btnU.style.background = 'var(--accent)';
+                    btnU.style.color = 'white';
+                    btnU.style.border = 'none';
+                    btnP.style.background = 'var(--card2)';
+                    btnP.style.color = 'var(--text)';
+                    btnP.style.border = '1px solid var(--border)';
                     document.getElementById('inputBuscadorAdmin').placeholder = "Buscar usuario o email...";
                     window.cargarAdminUsuarios(1);
                 } else {
-                    btnP.style.background = 'var(--accent)'; btnP.style.color = 'white'; btnP.style.border = 'none';
-                    btnU.style.background = 'var(--card2)'; btnU.style.color = 'var(--text)'; btnU.style.border = '1px solid var(--border)';
+                    btnP.style.background = 'var(--accent)';
+                    btnP.style.color = 'white';
+                    btnP.style.border = 'none';
+                    btnU.style.background = 'var(--card2)';
+                    btnU.style.color = 'var(--text)';
+                    btnU.style.border = '1px solid var(--border)';
                     document.getElementById('inputBuscadorAdmin').placeholder = "Buscar contenido o autor...";
                     window.cargarAdminPosts(1);
                 }
             };
 
-            // --- BUSCADOR ---
+
             window.realizarBusquedaAdmin = function() {
                 const texto = document.getElementById('inputBuscadorAdmin').value.trim();
                 window.busquedaActual = texto;
-                
+
                 if (window.tabActual === 'usuarios') {
                     window.cargarAdminUsuarios(1);
                 } else {
@@ -90,22 +99,22 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 }
             };
 
-            // --- 1. CARGAR USUARIOS ---
+
             window.cargarAdminUsuarios = async function(pagina = 1) {
                 window.paginaUsuariosActual = pagina;
                 const div = document.getElementById('admin-view-content');
                 const pagDiv = document.getElementById('admin-pagination');
-                
+
                 div.innerHTML = '<div style="text-align:center; padding:20px;">Cargando usuarios...</div>';
                 pagDiv.innerHTML = '';
 
                 try {
-                    // Incluimos parámetro búsqueda
+
                     const searchParam = window.busquedaActual ? `&busqueda=${encodeURIComponent(window.busquedaActual)}` : '';
                     const res = await fetch(`api_admin.php?accion=listar_usuarios&pagina=${pagina}${searchParam}`);
                     const data = await res.json();
-                    
-                    if(data.items.length === 0) {
+
+                    if (data.items.length === 0) {
                         div.innerHTML = '<p style="text-align:center; padding:20px;">No se encontraron usuarios.</p>';
                         return;
                     }
@@ -121,13 +130,13 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                             </tr>
                         </thead>
                         <tbody>`;
-                    
+
                     data.items.forEach(u => {
                         const esAdmin = (u.id_rol == 2);
-                        const badge = esAdmin 
-                            ? '<span style="color:#ff4757; font-weight:bold;">ADMIN</span>' 
-                            : '<span style="color:var(--muted);">Usuario</span>';
-                        
+                        const badge = esAdmin ?
+                            '<span style="color:#ff4757; font-weight:bold;">ADMIN</span>' :
+                            '<span style="color:var(--muted);">Usuario</span>';
+
                         const btnBorrar = esAdmin ? '' : `
                             <button onclick="event.stopPropagation(); window.borrarUsuario(${u.id_usuario})" 
                                     style="background:transparent; border:1px solid #ff4757; color:#ff4757; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.8rem;">
@@ -153,18 +162,18 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
 
                     renderPagination(data.paginaActual, data.totalPaginas, 'usuarios');
 
-                } catch(e) {
+                } catch (e) {
                     console.error(e);
                     div.innerHTML = '<p style="color:red">Error cargando usuarios.</p>';
                 }
             };
 
-            // --- 2. CARGAR POSTS ---
+
             window.cargarAdminPosts = async function(pagina = 1) {
                 window.paginaPostsActual = pagina;
                 const div = document.getElementById('admin-view-content');
                 const pagDiv = document.getElementById('admin-pagination');
-                
+
                 div.innerHTML = '<div style="text-align:center; padding:20px;">Cargando posts...</div>';
                 pagDiv.innerHTML = '';
 
@@ -172,16 +181,16 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                     const searchParam = window.busquedaActual ? `&busqueda=${encodeURIComponent(window.busquedaActual)}` : '';
                     const res = await fetch(`api_admin.php?accion=listar_posts&pagina=${pagina}${searchParam}`);
                     const data = await res.json();
-                    
-                    if(data.items.length === 0) {
+
+                    if (data.items.length === 0) {
                         div.innerHTML = '<p style="text-align:center; padding:20px;">No se encontraron posts.</p>';
                         return;
                     }
 
                     let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
                     data.items.forEach(p => {
-                        // Resaltar texto buscado si existe
-                        let textoPost = p.texto; // Podrías añadir lógica de resaltado aquí
+
+                        let textoPost = p.texto;
 
                         html += `
                         <div onclick="window.cargarVistaPublicacion(${p.id_publicacion})"
@@ -204,14 +213,14 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
 
                     renderPagination(data.paginaActual, data.totalPaginas, 'posts');
 
-                } catch(e) {
+                } catch (e) {
                     div.innerHTML = '<p style="color:red">Error cargando posts.</p>';
                 }
             };
 
-            // --- HELPER PAGINACIÓN ---
+
             function renderPagination(actual, total, tipo) {
-                if (total <= 1) return; 
+                if (total <= 1) return;
 
                 const pagDiv = document.getElementById('admin-pagination');
                 const fn = tipo === 'usuarios' ? 'window.cargarAdminUsuarios' : 'window.cargarAdminPosts';
@@ -231,24 +240,33 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 pagDiv.innerHTML = html;
             }
 
-            // --- ACCIONES BORRAR ---
+
             window.borrarUsuario = async function(id) {
-                if(!confirm('¿Eliminar usuario y TODOS sus datos?')) return;
-                const fd = new URLSearchParams(); fd.append('id', id);
-                await fetch('api_admin.php?accion=borrar_usuario', { method:'POST', body:fd });
+                if (!confirm('¿Eliminar usuario y TODOS sus datos?')) return;
+                const fd = new URLSearchParams();
+                fd.append('id', id);
+                await fetch('api_admin.php?accion=borrar_usuario', {
+                    method: 'POST',
+                    body: fd
+                });
                 window.cargarAdminUsuarios(window.paginaUsuariosActual);
             };
 
             window.borrarPostAdmin = async function(id) {
-                if(!confirm('¿Eliminar post?')) return;
-                const fd = new URLSearchParams(); fd.append('id', id);
-                await fetch('api_admin.php?accion=borrar_post', { method:'POST', body:fd });
+                if (!confirm('¿Eliminar post?')) return;
+                const fd = new URLSearchParams();
+                fd.append('id', id);
+                await fetch('api_admin.php?accion=borrar_post', {
+                    method: 'POST',
+                    body: fd
+                });
                 window.cargarAdminPosts(window.paginaPostsActual);
             };
 
-            // INICIO
+
             window.cargarAdminUsuarios(1);
         </script>
     </main>
 </body>
+
 </html>

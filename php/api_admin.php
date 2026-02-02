@@ -3,7 +3,7 @@ session_start();
 require __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-// SEGURIDAD
+
 if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
     http_response_code(403);
     echo json_encode(['error' => 'Acceso denegado']);
@@ -13,18 +13,18 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
 $accion = $_GET['accion'] ?? '';
 $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 if ($pagina < 1) $pagina = 1;
-$limite = 10; 
+$limite = 10;
 $offset = ($pagina - 1) * $limite;
 $busqueda = isset($_GET['busqueda']) ? trim($_GET['busqueda']) : '';
 
-// --- LISTAR USUARIOS (Con Buscador) ---
+
 if ($accion === 'listar_usuarios') {
-    
-    // Preparar filtro SQL
+
+
     $filtroSql = "";
     $types = "";
     $params = [];
-    
+
     if ($busqueda !== '') {
         $filtroSql = "WHERE (usuario LIKE ? OR email LIKE ?)";
         $types = "ss";
@@ -33,7 +33,7 @@ if ($accion === 'listar_usuarios') {
         $params[] = $term;
     }
 
-    // 1. Contar total (con filtro)
+
     $sqlTotal = "SELECT COUNT(*) as total FROM usuario $filtroSql";
     $stmtT = $mysqli->prepare($sqlTotal);
     if ($busqueda !== '') {
@@ -45,14 +45,14 @@ if ($accion === 'listar_usuarios') {
 
     $totalPaginas = ceil($totalItems / $limite);
 
-    // 2. Obtener datos (con filtro + paginación)
+
     $sql = "SELECT id_usuario, usuario, nombre, email, id_rol 
             FROM usuario 
             $filtroSql
             ORDER BY id_usuario DESC 
             LIMIT ? OFFSET ?";
-    
-    // Añadimos limit y offset a los parámetros
+
+
     $types .= "ii";
     $params[] = $limite;
     $params[] = $offset;
@@ -61,9 +61,9 @@ if ($accion === 'listar_usuarios') {
     $stmt->bind_param($types, ...$params);
     $stmt->execute();
     $res = $stmt->get_result();
-    
+
     $usuarios = [];
-    while($row = $res->fetch_assoc()) {
+    while ($row = $res->fetch_assoc()) {
         $usuarios[] = $row;
     }
 
@@ -76,10 +76,10 @@ if ($accion === 'listar_usuarios') {
     exit;
 }
 
-// --- LISTAR POSTS (Con Buscador) ---
+
 if ($accion === 'listar_posts') {
-    
-    // Filtro: Busca en el texto del post O en el nombre de usuario
+
+
     $filtroSql = "";
     $types = "";
     $params = [];
@@ -92,12 +92,12 @@ if ($accion === 'listar_posts') {
         $params[] = $term;
     }
 
-    // 1. Contar total
+
     $sqlTotal = "SELECT COUNT(*) as total 
                  FROM publicacion p 
                  JOIN usuario u ON p.id_usuario = u.id_usuario 
                  $filtroSql";
-    
+
     $stmtT = $mysqli->prepare($sqlTotal);
     if ($busqueda !== '') {
         $stmtT->bind_param($types, ...$params);
@@ -108,14 +108,14 @@ if ($accion === 'listar_posts') {
 
     $totalPaginas = ceil($totalItems / $limite);
 
-    // 2. Obtener posts
+
     $sql = "SELECT p.id_publicacion, p.texto, p.fecha_publicacion, u.usuario 
             FROM publicacion p 
             JOIN usuario u ON p.id_usuario = u.id_usuario 
             $filtroSql
             ORDER BY p.fecha_publicacion DESC 
             LIMIT ? OFFSET ?";
-            
+
     $types .= "ii";
     $params[] = $limite;
     $params[] = $offset;
@@ -126,7 +126,7 @@ if ($accion === 'listar_posts') {
     $res = $stmt->get_result();
 
     $posts = [];
-    while($row = $res->fetch_assoc()) {
+    while ($row = $res->fetch_assoc()) {
         $posts[] = $row;
     }
 
@@ -138,7 +138,7 @@ if ($accion === 'listar_posts') {
     exit;
 }
 
-// --- BORRAR USUARIO ---
+
 if ($accion === 'borrar_usuario' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['id'] ?? 0);
     if ($id === (int)$_SESSION['id_usuario']) {
@@ -153,7 +153,7 @@ if ($accion === 'borrar_usuario' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// --- BORRAR POST ---
+
 if ($accion === 'borrar_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['id'] ?? 0);
     $mysqli->query("DELETE FROM interaccion WHERE id_publicacion = $id");
@@ -161,4 +161,3 @@ if ($accion === 'borrar_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     echo json_encode(['ok' => true]);
     exit;
 }
-?>

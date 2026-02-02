@@ -1,54 +1,54 @@
-// js/notificaciones.js
 
-(function() { 
-    if (window.NotificacionesIniciadas) return; 
+
+(function () {
+    if (window.NotificacionesIniciadas) return;
     window.NotificacionesIniciadas = true;
 
     console.log("🔔 Script de notificaciones cargado.");
 
-    let lastNotiId = 0; 
-    
+    let lastNotiId = 0;
+
     const BASE_URL_PHP = window.location.pathname.includes('/php/') ? 'get_notificaciones.php' : 'php/get_notificaciones.php';
 
     const MEDIA = (p) => {
-        if (!p) return "../multimedia/file.svg"; 
-        if (String(p).startsWith("data:")) return p; 
-        return "../multimedia/" + p; 
+        if (!p) return "../multimedia/file.svg";
+        if (String(p).startsWith("data:")) return p;
+        return "../multimedia/" + p;
     };
 
-    // --- FUNCIÓN DE TIEMPO CON CORRECCIÓN HORARIA ---
+
     function timeAgo(fechaMysql) {
         if (!fechaMysql) return "";
-        
-        // 1. Convertimos la fecha MySQL (2023-10-27 10:30:00) a formato ISO (2023-10-27T10:30:00)
-        // 2. Le añadimos una 'Z' al final para decirle al navegador que esa hora es UTC (Universal)
-        // Esto hace que el navegador sume automáticamente tu hora local (ej: +1h en España)
+
+
+
+
         let isoDate = fechaMysql.replace(' ', 'T') + 'Z';
-        
+
         const fecha = new Date(isoDate);
         const ahora = new Date();
         const segundos = Math.floor((ahora - fecha) / 1000);
 
-        // Si la diferencia es negativa (el servidor tiene una hora futura o el ajuste UTC se pasó),
-        // mostramos "Hace un momento" para que no quede raro.
+
+
         if (segundos < 0) return "Hace un momento";
 
         let intervalo = Math.floor(segundos / 31536000);
         if (intervalo >= 1) return "Hace " + intervalo + " años";
-        
+
         intervalo = Math.floor(segundos / 2592000);
         if (intervalo >= 1) return "Hace " + intervalo + " meses";
-        
+
         intervalo = Math.floor(segundos / 86400);
         if (intervalo >= 1) return "Hace " + intervalo + " días";
-        
+
         intervalo = Math.floor(segundos / 3600);
         if (intervalo >= 1) return "Hace " + intervalo + " h";
-        
+
         intervalo = Math.floor(segundos / 60);
         if (intervalo >= 1) return "Hace " + intervalo + " min";
-        
-        // Si son menos de 60 segundos
+
+
         return "Hace un momento";
     }
 
@@ -63,19 +63,19 @@
             return;
         }
 
-        // 1. CLIC EN EL BOTÓN
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (lista.style.display === 'block') {
                 lista.style.display = 'none';
             } else {
                 lista.style.display = 'block';
-                if(badge) badge.style.display = 'none'; 
-                cargarDatos(true); 
+                if (badge) badge.style.display = 'none';
+                cargarDatos(true);
             }
         });
 
-        // 2. CERRAR AL CLIC FUERA
+
         document.addEventListener('click', (e) => {
             if (lista.style.display === 'block') {
                 if (!lista.contains(e.target) && !btn.contains(e.target)) {
@@ -85,20 +85,20 @@
         });
         lista.addEventListener('click', (e) => e.stopPropagation());
 
-        // 3. CARGAR DATOS
+
         async function cargarDatos(marcarLeidas = false) {
             try {
                 if (marcarLeidas) {
                     fetch(BASE_URL_PHP, {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: 'marcar_leidas=1'
                     }).catch(console.error);
                 }
 
                 const res = await fetch(BASE_URL_PHP);
                 if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                
+
                 const text = await res.text();
                 let json;
                 try {
@@ -107,11 +107,11 @@
 
                 if (!json.ok) return;
 
-                // Actualizar Badge
+
                 if (badge && !marcarLeidas) {
                     const cantidad = parseInt(json.sin_leer);
                     if (cantidad > 0) {
-                        badge.style.display = 'flex'; 
+                        badge.style.display = 'flex';
                         badge.style.alignItems = 'center';
                         badge.style.justifyContent = 'center';
                         badge.style.backgroundColor = '#ff4757';
@@ -122,7 +122,7 @@
                     }
                 }
 
-                // Toast
+
                 if (json.items.length > 0 && !marcarLeidas) {
                     const latest = Number(json.items[0].id_notificacion);
                     if (lastNotiId > 0 && latest > lastNotiId) {
@@ -133,7 +133,7 @@
                     lastNotiId = Number(json.items[0].id_notificacion);
                 }
 
-                // Renderizar Lista
+
                 if (content && lista.style.display === 'block') {
                     content.innerHTML = '';
                     if (json.items.length === 0) {
@@ -142,22 +142,22 @@
                         json.items.forEach(n => {
                             const div = document.createElement('div');
                             div.className = `noti-item ${n.leido == 0 ? 'sin-leer' : ''}`;
-                            
+
                             const bgColor = n.leido == 0 ? 'rgba(255, 71, 87, 0.08)' : 'transparent';
                             div.style.cssText = `padding:10px; border-bottom:1px solid #333; cursor:pointer; display:flex; gap:10px; align-items:center; background:${bgColor}`;
-                            
+
                             const foto = MEDIA(n.actor_foto);
-                            
-                            // Usamos la nueva lógica de tiempo
+
+
                             const tiempoTexto = timeAgo(n.creado_en);
 
                             let action = n.link_accion || "";
-                            if(action.startsWith("javascript:")) {
+                            if (action.startsWith("javascript:")) {
                                 div.setAttribute('onclick', action);
                             } else if (action) {
                                 div.onclick = () => window.location.href = action;
                             }
-                            
+
                             div.innerHTML = `
                                 <img src="${foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:#ccc;">
                                 <div style="font-size:14px; color:var(--text, #fff);">
@@ -177,8 +177,8 @@
 
         function showToast(n) {
             const container = document.getElementById('toastContainer');
-            if(!container) return;
-            
+            if (!container) return;
+
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.style.cssText = `
@@ -197,7 +197,7 @@
                 transform: translateY(20px);
                 transition: all 0.3s ease;
             `;
-            
+
             const foto = MEDIA(n.actor_foto);
             toast.innerHTML = `
                 <img src="${foto}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">

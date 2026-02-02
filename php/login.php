@@ -29,21 +29,29 @@ $stmt->execute();
 $result = $stmt->get_result();
 $usuario = $result->fetch_assoc();
 
-// 1. Verificamos si el usuario existe
+
 if (!$usuario) {
     header('Location: ../login.html?error=1');
     exit;
 }
 
-// 2. CAMBIO CLAVE: Verificación segura de la contraseña
-// password_verify devuelve true si la contraseña coincide con el hash
-if (!password_verify($contraseña, $usuario['password'])) {
+
+
+if ($usuario && password_verify($contraseña, $usuario['password'])) {
+    
+    session_regenerate_id(true);
+    $_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
+    
+    header('Location: ../php/index.php'); 
+    exit;
+} else {
+    
     header('Location: ../login.html?error=1');
     exit;
 }
 
-// 3. Si llegamos aquí, las credenciales son correctas
-session_regenerate_id(true); // Seguridad contra fijación de sesiones
+
+session_regenerate_id(true); 
 
 $_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
 $_SESSION['usuario']    = $usuario['usuario'];
@@ -52,12 +60,12 @@ $_SESSION['email']      = $usuario['email'];
 $_SESSION['id_rol']     = (int)$usuario['id_rol'];
 $_SESSION['biografia']  = $usuario['biografia'];
 
-// Manejo de la foto de perfil en sesión
+
 if (!empty($usuario['foto_perfil'])) {
     $_SESSION['foto_perfil'] = base64_encode($usuario['foto_perfil']);
 } else {
     $_SESSION['foto_perfil'] = '';
 }
 
-header('Location: ../php/index.php'); // Asegúrate de que la ruta sea correcta
+header('Location: ../php/index.php'); 
 exit;

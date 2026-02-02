@@ -1,5 +1,4 @@
 <?php
-// crear_grupo.php
 ob_start();
 
 declare(strict_types=1);
@@ -25,7 +24,6 @@ try {
 
     $mysqli->begin_transaction();
 
-    // Crear chat
     $numMiembros = count($todosLosMiembros);
     $stmt = $mysqli->prepare("INSERT INTO chat (miembros, nombre) VALUES (?, ?)");
     $stmt->bind_param('is', $numMiembros, $nombreGrupo);
@@ -33,7 +31,6 @@ try {
     $idChat = (int)$stmt->insert_id;
     $stmt->close();
 
-    // Añadir miembros
     $stmtPertenece = $mysqli->prepare("INSERT INTO pertenece_chat (id_chat, id_usuario) VALUES (?, ?)");
     $stmtLectura   = $mysqli->prepare("INSERT INTO chat_lectura (id_chat, id_usuario, ultimo_leido_id_mensaje) VALUES (?, ?, 0)");
 
@@ -48,7 +45,6 @@ try {
     $stmtPertenece->close();
     $stmtLectura->close();
 
-    // Mensaje sistema
     $msgSistema = "Bienvenidos al grupo: " . $nombreGrupo;
     $stmtMsg = $mysqli->prepare("INSERT INTO enviar_mensaje (id_chat, id_usuario, texto) VALUES (?, ?, ?)");
     $stmtMsg->bind_param('iis', $idChat, $yo, $msgSistema);

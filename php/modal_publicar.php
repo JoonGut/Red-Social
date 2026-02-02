@@ -53,7 +53,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Referencias a elementos
+    
     var abrir = document.getElementById('abrirModal'); 
     var overlay = document.getElementById('modalOverlay');
     var cerrar = document.getElementById('cerrarModal');
@@ -61,7 +61,7 @@
     var sugerencias = document.getElementById('sugerenciasMencion');
     var fileInput = document.getElementById('file-upload');
     
-    // --- 1. LÓGICA PARA ABRIR Y CERRAR EL MODAL ---
+    
     if (abrir) {
         abrir.onclick = function() {
             overlay.style.display = 'flex';
@@ -75,7 +75,7 @@
         if (e.target === overlay) overlay.style.display = 'none';
     };
 
-    // --- 2. Contador de caracteres ---
+    
     if (texto) {
         texto.oninput = function() {
           document.getElementById('contador').innerText = texto.value.length + '/250';
@@ -83,7 +83,7 @@
         };
     }
 
-    // --- 3. Mostrar nombre de archivo al subir ---
+    
     if (fileInput) {
         fileInput.onchange = function() {
             if(this.files && this.files[0]) {
@@ -92,7 +92,7 @@
         };
     }
 
-    // --- 4. Lógica de Menciones (@) ---
+    
     function detectarMencion(input) {
         const val = input.value;
         const cursorPos = input.selectionStart;
@@ -112,14 +112,14 @@
     }
 
     function buscarUsuarios(q) {
-        // Fetch al buscador simple
+        
         fetch(`ajax_buscar_usuarios_simple.php?q=${q}`)
             .then(r => r.json())
             .then(users => {
                 if(users.length > 0) {
                     let html = '';
                     users.forEach(u => {
-                        // CAMBIO: Estilos dinámicos en JS
+                        
                         html += `<div class="sug-item" onclick="insertarMencion('${u.usuario}')" 
                                       style="padding:10px; cursor:pointer; border-bottom:1px solid var(--border); color:var(--text); display:flex; align-items:center;">
                                     <img src="${u.foto ? '../multimedia/'+u.foto : '../multimedia/file.svg'}" style="width:20px; height:20px; border-radius:50%; margin-right:8px; object-fit:cover;"> 
@@ -135,7 +135,7 @@
             .catch(() => sugerencias.style.display = 'none');
     }
 
-    // Función global para insertar la mención
+    
     window.insertarMencion = function(username) {
         const val = texto.value;
         const cursorPos = texto.selectionStart;

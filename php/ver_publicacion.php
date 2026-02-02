@@ -11,7 +11,7 @@ if ($pId <= 0) {
     exit;
 }
 
-// 1. OBTENER DATOS DE LA PUBLICACIÓN
+
 $sql = "
     SELECT 
         p.*, 
@@ -36,35 +36,35 @@ if (!$post) {
     exit;
 }
 
-// 2. PROCESAR DATOS VISUALES
+
 $usuario  = htmlspecialchars($post['usuario']);
 $nombre   = htmlspecialchars($post['nombre']);
 $textoRaw = htmlspecialchars($post['texto']);
 $fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion']));
 
-// --- IMÁGENES (CORRECCIÓN BLOB) ---
 
-// A. Foto de Perfil (BLOB -> Base64)
+
+
 $fotoPerfil = '';
 if (!empty($post['foto_perfil'])) {
     $base64Perfil = base64_encode($post['foto_perfil']);
     $fotoPerfil = 'data:image/jpeg;base64,' . $base64Perfil;
 }
 
-// B. Imagen del Post (BLOB -> Base64)
+
 $imgPost = '';
 if (!empty($post['imagen'])) {
     $base64Post = base64_encode($post['imagen']);
     $imgPost = 'data:image/jpeg;base64,' . $base64Post;
 }
 
-// Estado del Like
+
 $likes = $post['num_likes'];
 $isLiked = $post['liked_by_me'] > 0;
 $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart';
 $heartColor = $isLiked ? 'color:#e0245e' : 'color:var(--muted)';
 
-// Convertir menciones (@usuario) en enlaces
+
 $textoProcesado = preg_replace(
     '/@(\w+)/',
     '<a href="#" class="user-link stop-prop" data-user="$1" style="color:var(--accent); text-decoration:none;">@$1</a>',
@@ -149,12 +149,12 @@ $textoProcesado = preg_replace(
         <div style="margin-top:20px; display:flex; gap:10px;">
             <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden; display:flex; align-items:center; justify-content:center;">
                 <?php
-                // --- TU FOTO EN CAJA DE COMENTARIOS ---
-                // $_SESSION['foto_perfil'] ya contiene el Base64 limpio (gracias a editarPerfil.php)
+                
+                
                 $miFotoBase64 = $_SESSION['foto_perfil'] ?? '';
                 
                 if ($miFotoBase64) {
-                    // Usamos data:image... directamente
+                    
                     echo '<img src="data:image/jpeg;base64,' . $miFotoBase64 . '" style="width:100%; height:100%; object-fit:cover;">';
                 } else {
                     echo '<span style="font-size:1.2rem;">😊</span>';
@@ -176,12 +176,12 @@ $textoProcesado = preg_replace(
 </div>
 
 <script>
-    // Cargar comentarios al iniciar
+    
     if (typeof loadCommentsForView === 'function') {
         loadCommentsForView(<?php echo $pId; ?>);
     }
 
-    // Manejar envío de comentario en esta vista
+    
     document.getElementById('formComentarioDetalle').addEventListener('submit', async function(e) {
         e.preventDefault();
         const input = document.getElementById('inputComentarioDetalle');
@@ -205,7 +205,7 @@ $textoProcesado = preg_replace(
 
             if (data.ok) {
                 input.value = '';
-                // Recargar comentarios
+                
                 loadCommentsForView(this.dataset.id);
             }
         } catch (err) {

@@ -3,10 +3,10 @@ declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
 
-// Cabecera JSON
+
 header('Content-Type: application/json; charset=UTF-8');
 
-// Limpiamos cualquier salida previa accidental
+
 if (ob_get_length()) ob_clean();
 
 $response = ['ok' => false];
@@ -26,7 +26,7 @@ try {
         throw new Exception('Datos insuficientes');
     }
 
-    // 1. INSERTAR EL COMENTARIO
+    
     $stmt = $mysqli->prepare("INSERT INTO interaccion (id_publicacion, id_usuario, comentario, id_padre, tipo_interaccion, fecha_creacion) VALUES (?, ?, ?, ?, 'COMENTARIO', NOW())");
     $stmt->bind_param('iisi', $idPub, $yo, $texto, $idPadre);
     
@@ -37,7 +37,7 @@ try {
     $newId = $stmt->insert_id;
     $stmt->close();
 
-    // 2. OBTENER DATOS DEL USUARIO (Para actualizar la UI sin recargar)
+    
     $stmt = $mysqli->prepare("SELECT usuario, nombre, foto_perfil FROM usuario WHERE id_usuario = ?");
     $stmt->bind_param('i', $yo);
     $stmt->execute();
@@ -48,11 +48,11 @@ try {
         $userData['foto_perfil'] = base64_encode($userData['foto_perfil']);
     }
 
-    // 3. LÓGICA DE NOTIFICACIÓN
+    
     $idDestino = 0;
     
     if ($idPadre) {
-        // Si es una respuesta, notificamos al dueño del comentario padre
+        
         $q = $mysqli->prepare("SELECT id_usuario FROM interaccion WHERE id_interaccion = ?");
         $q->bind_param('i', $idPadre);
         $q->execute();
@@ -61,7 +61,7 @@ try {
         }
         $q->close();
     } else {
-        // Si es comentario directo, notificamos al dueño de la publicación
+        
         $q = $mysqli->prepare("SELECT id_usuario FROM publicacion WHERE id_publicacion = ?");
         $q->bind_param('i', $idPub);
         $q->execute();
@@ -71,7 +71,7 @@ try {
         $q->close();
     }
 
-    // Insertar notificación si el destino es otro usuario
+    
     if ($idDestino > 0 && $idDestino !== $yo) {
         $resumen = mb_strlen($texto) > 30 ? mb_substr($texto, 0, 30) . '...' : $texto;
         $tipoNoti = 'comentario';
@@ -85,7 +85,7 @@ try {
         $stmtN->close();
     }
 
-    // Respuesta final exitosa
+    
     echo json_encode([
         'ok' => true,
         'id_comentario' => $newId,

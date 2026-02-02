@@ -3,11 +3,11 @@ declare(strict_types=1);
 session_start();
 require __DIR__ . '/db.php';
 
-// Obtener término de búsqueda y ID del usuario actual
+
 $busqueda = $_GET['q'] ?? '';
 $miId = (int)($_SESSION['id_usuario'] ?? 0);
 
-// Si no hay búsqueda, redirigir al inicio
+
 if (empty($busqueda)) {
     header('Location: index.php');
     exit;
@@ -33,7 +33,7 @@ if (empty($busqueda)) {
             <h3 style="margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px; color:var(--text);">👥 Usuarios</h3>
             <div class="lista-usuarios-busqueda">
                 <?php
-                // Busca usuarios que coincidan con el nombre y NO seas tú
+                
                 $sqlUser = "SELECT id_usuario, usuario, foto_perfil FROM usuario WHERE usuario LIKE ? AND id_usuario != ? LIMIT 5";
                 $stmt = $mysqli->prepare($sqlUser);
                 
@@ -47,7 +47,7 @@ if (empty($busqueda)) {
                         while ($u = $resUser->fetch_assoc()) {
                             $uNombre = htmlspecialchars($u['usuario']);
                             
-                            // --- CAMBIO 1: FOTO USUARIO A BASE64 ---
+                            
                             $img = '';
                             if (!empty($u['foto_perfil'])) {
                                 $base64 = base64_encode($u['foto_perfil']);
@@ -83,7 +83,7 @@ if (empty($busqueda)) {
             <h3 style="margin-top:30px; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px; color:var(--text);">📝 Publicaciones</h3>
             <div class="feed-busqueda">
                 <?php
-                // CONSULTA DE PUBLICACIONES
+                
                 $sqlPost = "
                     SELECT 
                         p.id_publicacion,
@@ -121,37 +121,37 @@ if (empty($busqueda)) {
 
                     if ($resPost->num_rows > 0) {
                         while ($row = $resPost->fetch_assoc()) {
-                            // Variables básicas
+                            
                             $postId = $row['id_publicacion'];
                             $pUser = htmlspecialchars($row['usuario']);
                             $textoRaw = htmlspecialchars($row['texto'] ?? '');
                             $pContenido = nl2br($textoRaw);
                             $pFecha = date('d M H:i', strtotime($row['fecha_publicacion']));
                             
-                            // --- CAMBIO 2: IMÁGENES A BASE64 ---
                             
-                            // A. Foto perfil autor
+                            
+                            
                             $pFoto = '';
                             if (!empty($row['foto_perfil'])) {
                                 $base64P = base64_encode($row['foto_perfil']);
                                 $pFoto = 'data:image/jpeg;base64,' . $base64P;
                             }
 
-                            // B. Imagen del post
+                            
                             $pImgPost = '';
                             if (!empty($row['imagen'])) {
                                 $base64Img = base64_encode($row['imagen']);
                                 $pImgPost = 'data:image/jpeg;base64,' . $base64Img;
                             }
                             
-                            // Likes
+                            
                             $numLikes = $row['num_likes'] ?? 0;
                             $numComents = $row['num_comentarios'] ?? 0;
                             $isLiked = ($row['liked_by_me'] ?? 0) > 0;
                             $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart';
                             $colorStyle = $isLiked ? 'color: #e0245e;' : 'color: var(--muted);';
 
-                            // RENDERIZADO
+                            
                             ?>
                             <article class="publicaciones post" 
                                      style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border); cursor:pointer; transition: background 0.2s;"

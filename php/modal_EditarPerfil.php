@@ -1,28 +1,28 @@
 <?php
-// Preparar variables visuales (BLOB/Base64)
+
 $nombreActual = $_SESSION['nombre'] ?? '';
 $bioActual    = $_SESSION['biografia'] ?? '';
 
-// 1. AVATAR
+
 $fotoSession = $_SESSION['foto_perfil'] ?? null;
 if ($fotoSession) {
-    // Asumimos que en sesión ya está guardado en Base64 (sin prefijo)
+    
     $srcAvatar = 'data:image/jpeg;base64,' . $fotoSession;
 } else {
-    $srcAvatar = '../multimedia/file.svg'; // Imagen por defecto
+    $srcAvatar = '../multimedia/file.svg'; 
 }
 
-// 2. PORTADA
+
 $portadaSession = $_SESSION['portada'] ?? null;
 if ($portadaSession) {
-    // Si la portada es un archivo antiguo (texto corto), mantenemos compatibilidad, si es largo es Base64
+    
     if (strlen($portadaSession) < 255 && strpos($portadaSession, '.') !== false) {
          $srcPortada = '../multimedia/' . $portadaSession;
     } else {
          $srcPortada = 'data:image/jpeg;base64,' . $portadaSession;
     }
 } else {
-    $srcPortada = '../multimedia/file.svg'; // Imagen por defecto
+    $srcPortada = '../multimedia/file.svg'; 
 }
 ?>
 
@@ -70,7 +70,7 @@ if ($portadaSession) {
 </div>
 
 <script>
-// UI: Abrir/Cerrar Modal
+
 function toggleModalEdit(show) {
     const m = document.getElementById('modalEditarPerfil');
     if(m) {
@@ -79,13 +79,13 @@ function toggleModalEdit(show) {
     }
 }
 
-// LISTENERS
+
 document.addEventListener('click', e => {
     if(e.target.closest('#botonEditarPerfil')) toggleModalEdit(true);
     if(e.target.closest('#cerrarModalEditarPerfil, #cancelarEditarPerfil') || e.target.id === 'modalEditarPerfil') toggleModalEdit(false);
 });
 
-// PREVIEW IMÁGENES (FileReader local)
+
 ['inputPortada', 'inputAvatar'].forEach(id => {
     const el = document.getElementById(id);
     if(el) {
@@ -102,7 +102,7 @@ document.addEventListener('click', e => {
     }
 });
 
-// ENVÍO AJAX Y ACTUALIZACIÓN DOM
+
 const formEdit = document.getElementById('formEditarPerfil');
 if(formEdit) {
     formEdit.addEventListener('submit', async function(e) {
@@ -118,29 +118,29 @@ if(formEdit) {
             const data = await res.json();
 
             if(data.ok) {
-                // 1. ACTUALIZAR TEXTOS
+                
                 const nuevoNombre = document.getElementById('ep-nombre').value;
                 const nuevaBio = document.getElementById('ep-bio').value;
 
                 document.querySelectorAll('.nombre-real').forEach(el => el.textContent = nuevoNombre);
                 document.querySelectorAll('.bio-perfil, #perfilBio').forEach(el => el.textContent = nuevaBio);
 
-                // 2. ACTUALIZAR AVATAR (Si volvió del servidor)
+                
                 if(data.foto_perfil) {
-                    // Ahora data.foto_perfil es el string Base64, no una ruta
+                    
                     const newSrc = 'data:image/jpeg;base64,' + data.foto_perfil;
                     
                     document.querySelectorAll('.avatar img, .info-perfil img, .edit-avatar-img').forEach(img => img.src = newSrc);
-                    // Actualizar variable global si existe
+                    
                     if(typeof window.USER_AVATAR !== 'undefined') window.USER_AVATAR = newSrc;
                 }
 
-                // 3. ACTUALIZAR PORTADA (Si volvió del servidor)
+                
                 if(data.portada) {
                     const newCover = 'data:image/jpeg;base64,' + data.portada;
                     const banner = document.querySelector('.banner');
                     if(banner) banner.style.backgroundImage = `url('${newCover}')`;
-                    // Actualizar también el preview del modal por si lo vuelve a abrir
+                    
                     const previewP = document.getElementById('previewPortada');
                     if(previewP) previewP.src = newCover;
                 }
