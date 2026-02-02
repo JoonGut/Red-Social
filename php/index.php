@@ -833,7 +833,9 @@ require __DIR__ . '/db.php';
 
     // 2. Generador de HTML (ESTILO TWITTER EXACTO)
     function renderComentarioHTML(c) {
-      const foto = c.foto_perfil ? `../multimedia/${c.foto_perfil}` : '../multimedia/file.svg';
+const foto = c.foto_perfil 
+        ? `data:image/jpeg;base64,${c.foto_perfil}` 
+        : '../multimedia/file.svg';      
       const fechaObj = new Date(c.creado_en);
       const ahora = new Date();
       const diff = Math.floor((ahora - fechaObj) / 1000);
