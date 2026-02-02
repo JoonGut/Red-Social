@@ -59,5 +59,5 @@ if (!empty($usuario['foto_perfil'])) {
     $_SESSION['foto_perfil'] = '';
 }
 
-header('Location: ../index.php'); // Asegúrate de que la ruta sea correcta
+header('Location: ../php/index.php'); // Asegúrate de que la ruta sea correcta
 exit;

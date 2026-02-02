@@ -86,7 +86,16 @@
 
 
 
+const pass = document.getElementById('password');
+const confirm = document.getElementById('password_confirm');
 
+confirm.addEventListener('input', () => {
+    if (pass.value !== confirm.value) {
+        confirm.style.borderColor = 'var(--error)'; // O rojo
+    } else {
+        confirm.style.borderColor = 'var(--ok)'; // O el color original
+    }
+});
     form.addEventListener('submit', (e) => {
         let valido = true;
 
