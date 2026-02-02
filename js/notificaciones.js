@@ -1,153 +1,169 @@
 // js/notificaciones.js
 
-(function() { // Función de aislamiento (IIFE)
-    
-    // Evita que el script corra dos veces si se incluye múltiple
+(function() { 
     if (window.NotificacionesIniciadas) return; 
     window.NotificacionesIniciadas = true;
 
     console.log("🔔 Script de notificaciones cargado.");
 
     let lastNotiId = 0; 
-    let pollingInterval = null;
+    
+    const BASE_URL_PHP = window.location.pathname.includes('/php/') ? 'get_notificaciones.php' : 'php/get_notificaciones.php';
 
-    // Helper para imágenes (Igual que en chat.js)
     const MEDIA = (p) => {
-        if (!p) return "../multimedia/file.svg";
-        if (String(p).startsWith("data:")) return p; // Ya es Base64
-        return "../multimedia/" + p; // Legacy archivo
+        if (!p) return "../multimedia/file.svg"; 
+        if (String(p).startsWith("data:")) return p; 
+        return "../multimedia/" + p; 
     };
 
-    // Esperar a que el HTML exista
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("🔔 DOM Cargado. Buscando elementos...");
+    // --- FUNCIÓN DE TIEMPO CON CORRECCIÓN HORARIA ---
+    function timeAgo(fechaMysql) {
+        if (!fechaMysql) return "";
+        
+        // 1. Convertimos la fecha MySQL (2023-10-27 10:30:00) a formato ISO (2023-10-27T10:30:00)
+        // 2. Le añadimos una 'Z' al final para decirle al navegador que esa hora es UTC (Universal)
+        // Esto hace que el navegador sume automáticamente tu hora local (ej: +1h en España)
+        let isoDate = fechaMysql.replace(' ', 'T') + 'Z';
+        
+        const fecha = new Date(isoDate);
+        const ahora = new Date();
+        const segundos = Math.floor((ahora - fecha) / 1000);
 
+        // Si la diferencia es negativa (el servidor tiene una hora futura o el ajuste UTC se pasó),
+        // mostramos "Hace un momento" para que no quede raro.
+        if (segundos < 0) return "Hace un momento";
+
+        let intervalo = Math.floor(segundos / 31536000);
+        if (intervalo >= 1) return "Hace " + intervalo + " años";
+        
+        intervalo = Math.floor(segundos / 2592000);
+        if (intervalo >= 1) return "Hace " + intervalo + " meses";
+        
+        intervalo = Math.floor(segundos / 86400);
+        if (intervalo >= 1) return "Hace " + intervalo + " días";
+        
+        intervalo = Math.floor(segundos / 3600);
+        if (intervalo >= 1) return "Hace " + intervalo + " h";
+        
+        intervalo = Math.floor(segundos / 60);
+        if (intervalo >= 1) return "Hace " + intervalo + " min";
+        
+        // Si son menos de 60 segundos
+        return "Hace un momento";
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnNoti');
         const lista = document.getElementById('listaNoti');
         const badge = document.getElementById('badgeNoti');
         const content = document.getElementById('contenidoNoti');
 
-        if (!btn) console.error("❌ ERROR CRÍTICO: No encuentro el botón con id='btnNoti'");
-        if (!lista) console.error("❌ ERROR CRÍTICO: No encuentro el div con id='listaNoti'");
-
-        if (btn && lista) {
-            // 1. CLIC EN EL BOTÓN
-            btn.addEventListener('click', (e) => {
-                console.log("🔔 Click en campana.");
-                e.stopPropagation(); // Evita que el clic llegue al documento
-                
-                // Toggle simple
-                if (lista.style.display === 'block') {
-                    lista.style.display = 'none';
-                } else {
-                    lista.style.display = 'block';
-                    console.log("🔔 Abriendo menú...");
-                    
-                    // Ocultar badge visualmente
-                    if(badge) badge.style.display = 'none';
-                    
-                    // Llamar al servidor
-                    cargarDatos(true); // true = marcar como leídas
-                }
-            });
-
-            // 2. CLIC FUERA (Cerrar)
-            document.addEventListener('click', (e) => {
-                if (lista.style.display === 'block') {
-                    if (!lista.contains(e.target) && !btn.contains(e.target)) {
-                        lista.style.display = 'none';
-                    }
-                }
-            });
-
-            // Evitar que clic dentro de la lista la cierre
-            lista.addEventListener('click', (e) => e.stopPropagation());
+        if (!btn || !lista) {
+            console.error("❌ ERROR: Faltan elementos HTML.");
+            return;
         }
 
-        // 3. FUNCIÓN DE CARGA
+        // 1. CLIC EN EL BOTÓN
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (lista.style.display === 'block') {
+                lista.style.display = 'none';
+            } else {
+                lista.style.display = 'block';
+                if(badge) badge.style.display = 'none'; 
+                cargarDatos(true); 
+            }
+        });
+
+        // 2. CERRAR AL CLIC FUERA
+        document.addEventListener('click', (e) => {
+            if (lista.style.display === 'block') {
+                if (!lista.contains(e.target) && !btn.contains(e.target)) {
+                    lista.style.display = 'none';
+                }
+            }
+        });
+        lista.addEventListener('click', (e) => e.stopPropagation());
+
+        // 3. CARGAR DATOS
         async function cargarDatos(marcarLeidas = false) {
-            // No requerimos 'content' para pedir datos (para el badge), pero sí para pintar lista
-            
             try {
-                // Si hay que marcar leídas, lanzamos petición en segundo plano
                 if (marcarLeidas) {
-                    fetch('get_notificaciones.php', {
+                    fetch(BASE_URL_PHP, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                         body: 'marcar_leidas=1'
-                    }).catch(e => console.log(e));
+                    }).catch(console.error);
                 }
 
-                // Pedir datos
-                const res = await fetch('get_notificaciones.php');
-                const text = await res.text(); // Leemos texto primero para depurar errores PHP
+                const res = await fetch(BASE_URL_PHP);
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 
+                const text = await res.text();
                 let json;
                 try {
                     json = JSON.parse(text);
-                } catch (e) {
-                    console.error("Error JSON Notificaciones:", text);
-                    return;
-                }
+                } catch (e) { return; }
 
                 if (!json.ok) return;
 
-                // Badge
+                // Actualizar Badge
                 if (badge && !marcarLeidas) {
-                    if (json.sin_leer > 0) {
-                        badge.style.display = 'block';
-                        badge.textContent = json.sin_leer;
+                    const cantidad = parseInt(json.sin_leer);
+                    if (cantidad > 0) {
+                        badge.style.display = 'flex'; 
+                        badge.style.alignItems = 'center';
+                        badge.style.justifyContent = 'center';
+                        badge.style.backgroundColor = '#ff4757';
+                        badge.style.color = '#fff';
+                        badge.textContent = cantidad > 99 ? '+99' : cantidad;
                     } else {
                         badge.style.display = 'none';
                     }
                 }
 
-                // Popup Toast (Solo si es nueva y no estamos marcando leídas)
+                // Toast
                 if (json.items.length > 0 && !marcarLeidas) {
                     const latest = Number(json.items[0].id_notificacion);
-                    // Solo mostramos toast si hay una ID mayor que la última conocida y no es la primera carga (lastNotiId > 0)
                     if (lastNotiId > 0 && latest > lastNotiId) {
                         showToast(json.items[0]);
                     }
                     lastNotiId = latest;
                 } else if (json.items.length > 0) {
-                     // Primera carga o refresco, actualizamos ID pero no mostramos toast
-                     lastNotiId = Number(json.items[0].id_notificacion);
+                    lastNotiId = Number(json.items[0].id_notificacion);
                 }
 
-                // Renderizar Lista (Solo si el contenedor existe y la lista está visible)
-                if (content && lista && lista.style.display === 'block') {
+                // Renderizar Lista
+                if (content && lista.style.display === 'block') {
                     content.innerHTML = '';
                     if (json.items.length === 0) {
-                        content.innerHTML = '<div style="padding:15px; text-align:center; color:#777">No hay notificaciones.</div>';
+                        content.innerHTML = '<div style="padding:15px; text-align:center; color:#777">Sin novedades.</div>';
                     } else {
                         json.items.forEach(n => {
                             const div = document.createElement('div');
                             div.className = `noti-item ${n.leido == 0 ? 'sin-leer' : ''}`;
-                            div.style.padding = '10px';
-                            div.style.borderBottom = '1px solid #333';
-                            div.style.cursor = 'pointer';
-                            div.style.display = 'flex'; 
-                            div.style.gap = '10px';
-                            div.style.alignItems = 'center';
                             
-                            // USAR LA FUNCIÓN MEDIA PARA BASE64
+                            const bgColor = n.leido == 0 ? 'rgba(255, 71, 87, 0.08)' : 'transparent';
+                            div.style.cssText = `padding:10px; border-bottom:1px solid #333; cursor:pointer; display:flex; gap:10px; align-items:center; background:${bgColor}`;
+                            
                             const foto = MEDIA(n.actor_foto);
                             
-                            // Limpiar javascript: del enlace por seguridad básica
+                            // Usamos la nueva lógica de tiempo
+                            const tiempoTexto = timeAgo(n.creado_en);
+
                             let action = n.link_accion || "";
                             if(action.startsWith("javascript:")) {
-                                div.setAttribute('onclick', action); // Si es función JS global
+                                div.setAttribute('onclick', action);
                             } else if (action) {
-                                div.onclick = () => window.location.href = action; // Si es URL
+                                div.onclick = () => window.location.href = action;
                             }
                             
                             div.innerHTML = `
-                                <img src="${foto}" style="width:35px; height:35px; border-radius:50%; object-fit:cover; background:var(--card2);">
-                                <div>
-                                    <strong style="color:var(--text)">${n.actor_usuario}</strong> 
-                                    <span style="color:var(--muted); font-size:0.9rem">${n.texto_formato}</span>
-                                    ${n.texto_extra ? `<div style="font-size:0.8rem; color:var(--muted); font-style:italic">"${n.texto_extra}"</div>` : ''}
+                                <img src="${foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:#ccc;">
+                                <div style="font-size:14px; color:var(--text, #fff);">
+                                    <strong>${n.actor_usuario}</strong> 
+                                    <span style="color:var(--muted, #aaa)">${n.texto_formato}</span>
+                                    <div style="font-size:11px; color:#666; margin-top:4px;">${tiempoTexto}</div>
                                 </div>
                             `;
                             content.appendChild(div);
@@ -155,45 +171,56 @@
                     }
                 }
             } catch (e) {
-                console.error("Error cargando notificaciones:", e);
+                console.error("❌ Error JS Notificaciones:", e);
             }
         }
 
-        // 4. TOAST
         function showToast(n) {
             const container = document.getElementById('toastContainer');
             if(!container) return;
             
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.style.display = 'flex';
-            toast.style.alignItems = 'center';
-            toast.style.gap = '10px';
-            
-            // Foto en el toast también
-            const foto = MEDIA(n.actor_foto);
-            
-            toast.innerHTML = `
-                <img src="${foto}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
-                <div>
-                    <strong>@${n.actor_usuario}</strong> ${n.texto_formato}
-                </div>
+            toast.style.cssText = `
+                background: #222; 
+                color: #fff; 
+                padding: 12px 15px; 
+                margin-top: 10px; 
+                border-radius: 8px; 
+                display: flex; 
+                align-items: center; 
+                gap: 12px; 
+                min-width: 250px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+                border-left: 4px solid #ff4757;
+                opacity: 0; 
+                transform: translateY(20px);
+                transition: all 0.3s ease;
             `;
             
+            const foto = MEDIA(n.actor_foto);
+            toast.innerHTML = `
+                <img src="${foto}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                <div>
+                    <strong>@${n.actor_usuario}</strong> 
+                    <span style="display:block; font-size:0.9em; opacity:0.9">${n.texto_formato}</span>
+                </div>
+            `;
             container.appendChild(toast);
-            
-            // Animación entrada
-            requestAnimationFrame(() => toast.classList.add('show'));
-            
-            setTimeout(() => { 
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300); // Esperar transición CSS
+
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 50);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
 
-        // Arrancar ciclo
         cargarDatos();
         setInterval(() => cargarDatos(), 5000);
     });
-
 })();

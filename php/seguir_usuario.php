@@ -1,8 +1,11 @@
 <?php
 declare(strict_types=1);
+// php/seguir_usuario.php
+
 session_start();
 require __DIR__ . '/db.php';
 
+// Ocultar errores HTML para no ensuciar la respuesta AJAX
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
@@ -20,13 +23,25 @@ if ($idDestino <= 0 || $idDestino === $idYo) {
 }
 
 try {
-    $stmt = $mysqli->prepare("INSERT INTO seguidores (id_usuario, id_seguidor) VALUES (?, ?)");
+    // 1. Insertar el seguimiento
+    // Asegúrate de que las columnas coincidan con tu tabla (id_usuario = seguido, id_seguidor = quien sigue)
+    $stmt = $mysqli->prepare("INSERT INTO seguidores (id_usuario, id_seguidor, fecha_seguimiento) VALUES (?, ?, NOW())");
+    
+    // Si tu tabla no tiene columna 'fecha_seguimiento', borra ", fecha_seguimiento" y ", NOW()"
+    // Pero para la notificación SIEMPRE usaremos NOW()
+    
     $stmt->bind_param('ii', $idDestino, $idYo);
     
     if ($stmt->execute()) {
         $stmt->close();
         
-        $stmtNoti = $mysqli->prepare("INSERT INTO notificaciones (id_usuario, id_actor, tipo, texto_extra) VALUES (?, ?, 'seguir', 'Te ha empezado a seguir')");
+        // 2. Insertar la NOTIFICACIÓN (Corregido)
+        // Añadimos: referencia_id (0), leido (0) y creado_en (NOW())
+        $stmtNoti = $mysqli->prepare("
+            INSERT INTO notificaciones (id_usuario, id_actor, tipo, referencia_id, leido, creado_en) 
+            VALUES (?, ?, 'seguir', 0, 0, NOW())
+        ");
+        
         if ($stmtNoti) {
             $stmtNoti->bind_param('ii', $idDestino, $idYo);
             $stmtNoti->execute();
@@ -39,6 +54,7 @@ try {
     }
 
 } catch (mysqli_sql_exception $e) {
+    // Código 1062 = Duplicate entry (Ya lo seguías)
     if ($e->getCode() === 1062) {
         echo 'ok'; 
     } else {

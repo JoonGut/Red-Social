@@ -1,21 +1,32 @@
 <?php
+// php/get_notificaciones.php
 declare(strict_types=1);
-ob_start(); // Buffer para proteger el JSON
+
+// Desactivar visualización de errores HTML para no romper el JSON
+ini_set('display_errors', '0'); 
+error_reporting(E_ALL);
+
+ob_start(); // Iniciar buffer de salida
 
 session_start();
-require __DIR__ . '/db.php';
-
 header('Content-Type: application/json; charset=UTF-8');
 
-$response = ['ok' => false, 'items' => [], 'sin_leer' => 0];
+// Ajusta la ruta si 'db.php' está en otra carpeta, según tu imagen está en la misma carpeta 'php/'
+require __DIR__ . '/db.php'; 
+
+$response = ['ok' => false, 'items' => [], 'sin_leer' => 0, 'error' => ''];
 
 try {
     $yo = (int)($_SESSION['id_usuario'] ?? 0);
+    
+    // Si no hay sesión, devolvemos ok=false pero sin error grave
     if ($yo <= 0) {
-        throw new Exception('no-login');
+        $response['error'] = 'no-login';
+        echo json_encode($response);
+        exit;
     }
 
-    // 1. MARCAR LEIDAS (Si se solicita)
+    // 1. MARCAR LEIDAS
     if (isset($_POST['marcar_leidas'])) {
         $stmt = $mysqli->prepare("UPDATE notificaciones SET leido = 1 WHERE id_usuario = ?");
         $stmt->bind_param('i', $yo);
@@ -32,7 +43,7 @@ try {
     $stmtCount->close();
 
     // 3. OBTENER NOTIFICACIONES
-    // CAMBIO REALIZADO: 'n.fecha' -> 'n.creado_en'
+    // NOTA IMPORTANTE: Asegúrate que tu tabla tenga la columna 'creado_en'. Si usas 'fecha', cámbialo aquí.
     $sql = "
         SELECT 
             n.id_notificacion, 
@@ -51,24 +62,27 @@ try {
     ";
 
     $stmt = $mysqli->prepare($sql);
+    if (!$stmt) {
+        throw new Exception("Error en SQL (Revisa nombres de columnas): " . $mysqli->error);
+    }
+    
     $stmt->bind_param('i', $yo);
     $stmt->execute();
     $res = $stmt->get_result();
 
     $items = [];
     while ($row = $res->fetch_assoc()) {
-        
-        // CONVERTIR FOTO BLOB A BASE64
+        // Convertir BLOB a Base64 si existe
         if (!empty($row['actor_foto'])) {
             $row['actor_foto'] = 'data:image/jpeg;base64,' . base64_encode($row['actor_foto']);
         } else {
             $row['actor_foto'] = null; 
         }
 
-        // GENERAR TEXTOS
+        // Lógica de textos
         $tipo = $row['tipo'];
-        $texto = "";
-        $link = "";
+        $texto = "nueva notificación";
+        $link = "#";
 
         switch ($tipo) {
             case 'like':
@@ -84,37 +98,32 @@ try {
                 $link = "javascript:loadUserProfile('" . htmlspecialchars($row['actor_usuario']) . "')";
                 break;
             case 'etiqueta':
-                $texto = "te etiquetó en una publicación";
+                $texto = "te etiquetó";
                 $link = "javascript:cargarVistaPublicacion(" . (int)$row['referencia_id'] . ")";
                 break;
             case 'mensaje':
                 $texto = "te envió un mensaje";
                 $link = "javascript:sessionStorage.setItem('chatUser', '" . htmlspecialchars($row['actor_usuario']) . "'); loadPage('chat');";
                 break;
-            default:
-                $texto = "nueva notificación";
-                $link = "#";
         }
 
         $row['texto_formato'] = $texto;
         $row['link_accion'] = $link;
-        
         $items[] = $row;
     }
     $stmt->close();
 
-    $response = [
-        'ok' => true,
-        'items' => $items,
-        'sin_leer' => $sinLeer
-    ];
+    $response['ok'] = true;
+    $items_utf8 = mb_convert_encoding($items, 'UTF-8', 'UTF-8'); // Asegurar UTF8
+    $response['items'] = $items_utf8;
+    $response['sin_leer'] = $sinLeer;
 
 } catch (Exception $e) {
-    // Si hay error SQL, lo enviamos en el JSON para depurar
     $response['error'] = $e->getMessage();
 }
 
-ob_clean(); // Limpiar cualquier salida previa
+// Limpiamos cualquier echo accidental antes de enviar JSON
+ob_clean(); 
 echo json_encode($response);
 exit;
 ?>
