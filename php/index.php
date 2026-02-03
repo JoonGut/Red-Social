@@ -642,9 +642,27 @@ require __DIR__ . '/db.php';
     };
 
     // 3. Cambiar pestaña y Cargar datos (AJAX)
+   // --- LÓGICA DE COMPARTIR ---
+    window.postParaCompartirID = 0; 
+
+    // 1. Al pulsar compartir en un post
+    window.compartirPost = function(idPublicacion) {
+        window.postParaCompartirID = idPublicacion;
+        // Abrimos lista de gente que seguimos
+        window.abrirModalUsuarios('siguiendo', window.__MY_ID__);
+        
+        // Cambiar título visualmente
+        setTimeout(() => {
+            const titulo = document.querySelector('#modalListaUsuarios h2');
+            if(titulo) titulo.textContent = "Enviar a...";
+        }, 100);
+    };
+
+    // 2. Función de carga de usuarios
     window.cambiarTab = async function(tipo) {
       const tabSeg = document.getElementById('tabSeguidores');
       const tabSig = document.getElementById('tabSiguiendo');
+      
       if (tabSeg) tabSeg.classList.remove('active');
       if (tabSig) tabSig.classList.remove('active');
       if (tipo === 'seguidores' && tabSeg) tabSeg.classList.add('active');
@@ -652,50 +670,65 @@ require __DIR__ . '/db.php';
 
       const contenedor = document.getElementById('contenedorLista');
       if (!contenedor) return;
-      contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">Cargando...</p>';
+      contenedor.innerHTML = '<div class="spinner" style="margin:20px auto;"></div>';
 
       try {
         const url = `api_lista_usuarios.php?tipo=${tipo}&id_usuario=${currentListUserId}`;
         const res = await fetch(url);
-        const data = await res.json();
+        
+        if (!res.ok) throw new Error("Error HTTP");
+
+        const data = await res.json(); // Ahora esto funcionará porque el PHP está arreglado
 
         if (data.length === 0) {
-          contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">La lista está vacía.</p>';
+          contenedor.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">Lista vacía.</p>';
           return;
         }
 
         let html = '';
         data.forEach(u => {
-          // CORRECCIÓN: Si en el futuro también devuelves BLOBs aquí, tendrás que adaptar la API
-          // Por ahora asumo que api_lista_usuarios.php devuelve nombre de archivo O NULL
-          // Si devuelve BLOB, esta línea fallará. (Idealmente api_lista_usuarios.php debe devolver Base64)
-          const foto = u.foto_perfil ? `../multimedia/${u.foto_perfil}` : '../multimedia/file.svg';
+          // LÓGICA DE FOTO BASE64
+          let foto = '../multimedia/file.svg';
+          if (u.foto_perfil) {
+              foto = `data:image/jpeg;base64,${u.foto_perfil}`;
+          }
 
           let botonHtml = '';
-          if (!u.soy_yo) {
-            if (u.lo_sigo === 1) {
-              botonHtml = `
-                            <button class="btn-mini btn-lista-seguir" 
-                                    data-id="${u.id_usuario}" 
-                                    data-sigo="1"
-                                    onclick="event.stopPropagation(); toggleFollowList(this)"
-                                    style="background:transparent; border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:20px; cursor:pointer;">
-                                Siguiendo
-                            </button>`;
-            } else {
-              botonHtml = `
-                            <button class="btn-mini btn-lista-seguir" 
-                                    data-id="${u.id_usuario}" 
-                                    data-sigo="0"
-                                    onclick="event.stopPropagation(); toggleFollowList(this)"
-                                    style="background:var(--text); border:none; color:var(--bg); padding:5px 12px; border-radius:20px; cursor:pointer; font-weight:bold;">
-                                Seguir
-                            </button>`;
-            }
+
+          // SI ESTAMOS COMPARTIENDO (Muestra botón Enviar)
+          if (window.postParaCompartirID > 0) {
+              if(!u.soy_yo) {
+                  botonHtml = `
+                    <button class="boton-registrarse" 
+                            onclick="event.stopPropagation(); window.enviarEnlaceChat('${u.usuario}')"
+                            style="padding:5px 15px; font-size:0.8rem; background:var(--accent); border:none; color:white;">
+                        ✈️ Enviar
+                    </button>`;
+              }
+          } 
+          // SI ES MODO NORMAL (Muestra botón Seguir)
+          else {
+              if (!u.soy_yo) {
+                if (u.lo_sigo === 1) {
+                  botonHtml = `
+                    <button class="btn-mini btn-lista-seguir" data-id="${u.id_usuario}" data-sigo="1"
+                            onclick="event.stopPropagation(); toggleFollowList(this)"
+                            style="background:transparent; border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:20px; cursor:pointer;">
+                        Siguiendo
+                    </button>`;
+                } else {
+                  botonHtml = `
+                    <button class="btn-mini btn-lista-seguir" data-id="${u.id_usuario}" data-sigo="0"
+                            onclick="event.stopPropagation(); toggleFollowList(this)"
+                            style="background:var(--text); border:none; color:var(--bg); padding:5px 12px; border-radius:20px; cursor:pointer; font-weight:bold;">
+                        Seguir
+                    </button>`;
+                }
+              }
           }
 
           html += `
-                <div class="user-row" onclick="window.loadUserProfile('${u.usuario}'); cerrarModalUsuarios();" style="cursor:pointer; display:flex; align-items:center; padding:10px; border-bottom:1px solid var(--border);">
+                <div class="user-row" onclick="if(window.postParaCompartirID === 0){ window.loadUserProfile('${u.usuario}'); cerrarModalUsuarios(); }" style="cursor:pointer; display:flex; align-items:center; padding:10px; border-bottom:1px solid var(--border);">
                     <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--card2); margin-right:10px; flex-shrink:0;">
                         <img src="${foto}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
@@ -703,17 +736,46 @@ require __DIR__ . '/db.php';
                         <h4 style="color:var(--text); margin:0; font-size:0.95rem;">${u.nombre}</h4>
                         <span style="color:var(--muted); font-size:0.85rem;">@${u.usuario}</span>
                     </div>
-                    <div>
-                        ${botonHtml}
-                    </div>
+                    <div>${botonHtml}</div>
                 </div>`;
         });
         contenedor.innerHTML = html;
 
       } catch (error) {
         console.error(error);
-        contenedor.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error.</p>';
+        contenedor.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error al cargar datos.</p>';
       }
+    };
+
+    // 3. Función para realizar el envío y redirigir al chat
+   window.enviarEnlaceChat = function(usuarioDestino) {
+        // 1. Obtener la base de la URL (ej: http://localhost/red-social/php/)
+        // Usamos location.href para asegurar la ruta correcta, quitando parámetros
+        const currentUrl = window.location.href.split('?')[0]; 
+        
+        // 2. CAMBIO CLAVE: Apuntamos a index.php con el parámetro ?post=ID
+        // Antes: .../ver_publicacion.php?id=... (MAL para el usuario)
+        // Ahora: .../index.php?post=... (BIEN, carga la web entera)
+        const enlace = `${currentUrl}?post=${window.postParaCompartirID}`;
+        
+        window.cerrarModalUsuarios();
+        window.postParaCompartirID = 0;
+
+        // Redirigir al chat
+        const urlChat = `?chatUser=${encodeURIComponent(usuarioDestino)}&autoMsg=${encodeURIComponent(enlace)}`;
+        history.pushState({ type: 'chatUser', u: usuarioDestino }, '', urlChat);
+        loadPage('chat');
+    };
+
+    // 4. Restaurar el modal al cerrar
+    const originalCerrar = window.cerrarModalUsuarios;
+    window.cerrarModalUsuarios = function() {
+        window.postParaCompartirID = 0; 
+        const titulo = document.querySelector('#modalListaUsuarios h2');
+        if(titulo) titulo.textContent = "Usuarios"; 
+        
+        const modal = document.getElementById('modalListaUsuarios');
+        if (modal) modal.style.display = 'none';
     };
 
     // 4. NUEVA FUNCIÓN PARA SEGUIR DESDE LA LISTA
@@ -1049,36 +1111,31 @@ const foto = c.foto_perfil
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Elementos
+      // ----------------------------------------------------
+      // 1. GESTIÓN DEL TEMA (CLARO/OSCURO)
+      // ----------------------------------------------------
       const btnTheme = document.getElementById('btnThemeToggle');
       const themeIcon = document.getElementById('themeIcon');
       const body = document.body;
 
-      // 2. Verificar preferencia guardada al cargar
+      // Verificar preferencia guardada
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'light') {
         body.classList.add('light-mode');
         updateIcon(true);
       }
 
-      // 3. Evento Click (Solo si el botón existe)
+      // Evento Click
       if (btnTheme) {
         btnTheme.addEventListener('click', (e) => {
           e.preventDefault();
-
-          // Alternar clase
           body.classList.toggle('light-mode');
-
-          // Guardar estado
           const isLight = body.classList.contains('light-mode');
           localStorage.setItem('theme', isLight ? 'light' : 'dark');
-
-          // Cambiar icono
           updateIcon(isLight);
         });
       }
 
-      // Función auxiliar para el icono
       function updateIcon(isLight) {
         if (!themeIcon) return;
         if (isLight) {
@@ -1088,6 +1145,44 @@ const foto = c.foto_perfil
           themeIcon.classList.remove('fa-sun');
           themeIcon.classList.add('fa-moon');
         }
+      }
+
+      // ----------------------------------------------------
+      // 2. ROUTER: GESTIÓN DE URLS (EL CAMBIO CLAVE)
+      // ----------------------------------------------------
+      const params = new URLSearchParams(window.location.search);
+
+      // CASO A: Venimos de un enlace de compartir (?post=123)
+      if (params.has('post')) {
+          const idPost = params.get('post');
+          // Cargamos la vista detallada dentro del index
+          cargarVistaPublicacion(idPost);
+      } 
+      // CASO B: Venimos de un enlace de perfil (?u=usuario)
+      else if (params.has('u')) {
+          loadUserProfile(params.get('u'));
+      }
+      // CASO C: Venimos de compartir al chat (?chatUser=...)
+      else if (params.has('chatUser')) {
+          // Cargamos la sección chat
+          loadPage('chat');
+
+          // Si además hay mensaje automático (?autoMsg=...)
+          if (params.has('autoMsg')) {
+              setTimeout(() => {
+                  // Intentamos buscar el input del chat (ajusta el selector si es distinto)
+                  const chatInput = document.querySelector('.chat-input input') || document.getElementById('chatText') || document.getElementById('msgInput');
+                  
+                  if(chatInput) {
+                      chatInput.value = params.get('autoMsg') + " ";
+                      chatInput.focus();
+                      
+                      // Limpiamos la URL para que no moleste
+                      const newUrl = window.location.href.split('&autoMsg=')[0];
+                      history.replaceState(history.state, '', newUrl);
+                  }
+              }, 1000); 
+          }
       }
     });
   </script>

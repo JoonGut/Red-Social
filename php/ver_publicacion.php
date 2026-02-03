@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
@@ -133,7 +134,9 @@ $textoProcesado = preg_replace(
                 <i class="<?php echo $heartClass; ?> icon-heart"></i>
             </button>
 
-            <button style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;" title="Compartir">
+            <button onclick="window.compartirPost(<?php echo $pId; ?>)"
+                style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;"
+                title="Compartir">
                 <i class="fas fa-share"></i>
             </button>
 
@@ -149,12 +152,12 @@ $textoProcesado = preg_replace(
         <div style="margin-top:20px; display:flex; gap:10px;">
             <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden; display:flex; align-items:center; justify-content:center;">
                 <?php
-                
-                
+
+
                 $miFotoBase64 = $_SESSION['foto_perfil'] ?? '';
-                
+
                 if ($miFotoBase64) {
-                    
+
                     echo '<img src="data:image/jpeg;base64,' . $miFotoBase64 . '" style="width:100%; height:100%; object-fit:cover;">';
                 } else {
                     echo '<span style="font-size:1.2rem;">😊</span>';
@@ -176,12 +179,11 @@ $textoProcesado = preg_replace(
 </div>
 
 <script>
-    
     if (typeof loadCommentsForView === 'function') {
         loadCommentsForView(<?php echo $pId; ?>);
     }
 
-    
+
     document.getElementById('formComentarioDetalle').addEventListener('submit', async function(e) {
         e.preventDefault();
         const input = document.getElementById('inputComentarioDetalle');
@@ -205,7 +207,7 @@ $textoProcesado = preg_replace(
 
             if (data.ok) {
                 input.value = '';
-                
+
                 loadCommentsForView(this.dataset.id);
             }
         } catch (err) {

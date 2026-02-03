@@ -6,16 +6,28 @@
   const BASE = (window.__BASE__ || "").replace(/\/$/, "");
   const PHP = (p) => p;
 
-
-
   const MEDIA = (p) => {
     if (!p) return "../multimedia/file.svg";
-
     if (String(p).startsWith("data:")) return p;
-
     return "../multimedia/" + p;
   };
+// Función para detectar enlaces y convertirlos en HTML
+  const LINKIFY = (text) => {
+    // 1. Primero escapamos el HTML para evitar XSS (Hackeos)
+    let safeText = String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
+    // 2. Buscamos URLs (http/https) y las envolvemos en etiquetas <a>
+    // La expresión regular busca http:// o https:// seguido de cualquier cosa que no sea un espacio
+    return safeText.replace(
+        /(https?:\/\/[^\s]+)/g, 
+        '<a href="$1"  style="color:#1d9bf0; text-decoration:underline; word-break:break-all;">$1</a>'
+    );
+  };
   const state = {
     chatId: 0,
     lastId: 0,
@@ -26,13 +38,11 @@
     currentMembers: []
   };
 
-
   async function fetchJson(url, options) {
     try {
       const res = await fetch(url, options);
       const text = await res.text();
       try {
-
         return { ok: true, data: JSON.parse(text), status: res.status };
       } catch (e) {
         console.error("Error parseando JSON. Respuesta del servidor:", text);
@@ -51,7 +61,6 @@
       ? String(ts).slice(11, 16)
       : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
-
 
   function buildGroupModal() {
     if ($("modalGrupo")) return;
@@ -136,7 +145,6 @@
       }
       let h = '';
       r.data.items.forEach(u => {
-
         const foto = MEDIA(u.foto_perfil);
         h += `
            <label style="display:flex; align-items:center; padding:8px; border-bottom:1px solid var(--border); cursor:pointer;">
@@ -152,7 +160,6 @@
     }
   }
 
-
   function tryRequestNotification() {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -167,7 +174,6 @@
     }
   }
 
-
   function showView(open) {
     const empty = $("chatEmpty");
     const view = $("chatView");
@@ -175,21 +181,17 @@
 
     if (!empty || !view) return;
 
-
     if (window.innerWidth < 768) {
       if (open) {
-
         if (listContainer) listContainer.style.display = "none";
         view.style.display = "flex";
         empty.style.display = "none";
       } else {
-
         if (listContainer) listContainer.style.display = "block";
         view.style.display = "none";
         empty.style.display = "none";
       }
     } else {
-
       empty.style.display = open ? "none" : "flex";
       view.style.display = open ? "flex" : "none";
       if (listContainer) listContainer.style.display = "block";
@@ -200,7 +202,6 @@
     const box = $("chatMessages");
     if (box) box.scrollTop = box.scrollHeight;
   }
-
 
   function updateReadStatus() {
     const myTicks = document.querySelectorAll(".msg-ticks[data-id]");
@@ -230,9 +231,9 @@
     const div = document.createElement("div");
     div.id = "msg-" + m.id_mensaje;
     div.className = "msg" + (isMe ? " me" : "");
-    div.textContent = String(m.texto || "");
-
+div.innerHTML = LINKIFY(m.texto);
     const meta = document.createElement("div");
+    div.appendChild(meta);
     meta.className = "msg-meta";
 
     const timeSpan = document.createElement("span");
@@ -253,12 +254,10 @@
       }
       meta.appendChild(tickSpan);
     }
-
-    div.appendChild(meta);
+    
     box.appendChild(div);
     state.lastId = Math.max(state.lastId, Number(m.id_mensaje || 0));
   }
-
 
   async function loadMessages(afterId) {
     if (state.chatId <= 0) return;
@@ -333,6 +332,9 @@
       const cid = Number(it.id_chat);
       const row = document.createElement("div");
       row.className = "chat-item" + (cid === state.chatId ? " active" : "");
+      
+      // Asignar dataset para facilitar búsqueda
+      row.dataset.user = it.other_usuario;
 
       const avatarDiv = document.createElement("div");
       avatarDiv.className = "chat-avatar";
@@ -341,8 +343,6 @@
         avatarDiv.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--card2); color:var(--text); font-size:1.2rem;">👥</div>`;
       } else if (it.other_foto) {
         const img = document.createElement("img");
-
-
         img.src = MEDIA(it.other_foto);
         avatarDiv.appendChild(img);
       } else {
@@ -357,17 +357,15 @@
       meta.className = "chat-meta";
 
       const displayName = it.es_grupo ? it.other_nombre : (it.other_nombre || it.other_usuario);
-
-
       let preview = it.last_texto || "Comienza a charlar...";
       if (preview.length > 25) preview = preview.substring(0, 25) + "...";
 
       meta.innerHTML = `
         <div class="chat-name">
-            <strong>${displayName}</strong>
+           <strong>${displayName}</strong>
         </div>
         <div class="chat-preview" style="color:var(--muted); font-size:0.9rem;">
-            ${preview}
+           ${preview}
         </div>
       `;
 
@@ -417,19 +415,16 @@
     await loadMessages(0);
     state.historyLoaded = true;
 
-
     renderChatList(state.chats.map(c => c.id_chat == cid ? { ...c, unread_count: 0 } : c));
 
     if (state.pollTimer) clearInterval(state.pollTimer);
     state.pollTimer = setInterval(() => loadMessages(state.lastId).catch(() => { }), 1500);
-
 
     const btnBack = $("btnBackChat");
     if (btnBack) {
       btnBack.onclick = () => showView(false);
     }
   }
-
 
   function wireSend() {
     const form = $("chatSendForm");
@@ -461,7 +456,6 @@
     });
   }
 
-
   function wireSearch() {
     const s = $("chatSearch");
     if (s) s.addEventListener("input", () => {
@@ -473,7 +467,7 @@
     });
   }
 
-
+  // --- FUNCIÓN DE INICIO PRINCIPAL (MODIFICADA PARA COMPARTIR) ---
   window.__chatInit = async function () {
     tryRequestNotification();
     showView(false);
@@ -484,11 +478,24 @@
 
     await loadChats();
 
-    const chatUser = sessionStorage.getItem("chatUser");
-    if (chatUser) {
+    // 1. LEER PARÁMETROS DE URL (Prioridad para compartir)
+    const params = new URLSearchParams(window.location.search);
+    const urlUser = params.get('chatUser');
+    const autoMsg = params.get('autoMsg');
+
+    // 2. LEER SESSION STORAGE (Fallback)
+    const sessionUser = sessionStorage.getItem("chatUser");
+    const targetUser = urlUser || sessionUser;
+
+    if (targetUser) {
+      // Limpiamos session storage para no volver a abrirlo por error en futuro
       sessionStorage.removeItem("chatUser");
-      const r = await fetchJson(PHP("iniciar_chat.php") + "?u=" + encodeURIComponent(chatUser));
+
+      // Llamamos a iniciar_chat.php que busca el chat existente o crea uno
+      const r = await fetchJson(PHP("iniciar_chat.php") + "?u=" + encodeURIComponent(targetUser));
+      
       if (r.ok && r.data.ok) {
+        // Abrimos el chat visualmente
         openChat({
           id_chat: r.data.id_chat,
           other_usuario: r.data.other.usuario,
@@ -496,6 +503,18 @@
           other_foto: r.data.other.foto_perfil,
           es_grupo: false
         });
+
+        // SI HAY MENSAJE AUTOMÁTICO (COMPARTIR)
+        if (autoMsg) {
+            const input = $("chatText"); // Usamos el ID correcto de tu input
+            if (input) {
+                input.value = autoMsg + " "; // Añadimos espacio
+                input.focus();
+            }
+            // Limpiamos la URL para que si recargas no pegue el enlace otra vez
+            const cleanUrl = window.location.pathname + '?chatUser=' + encodeURIComponent(targetUser);
+            window.history.replaceState({}, '', cleanUrl);
+        }
       }
     }
   };
