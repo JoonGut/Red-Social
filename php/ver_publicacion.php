@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
@@ -12,7 +11,7 @@ if ($pId <= 0) {
     exit;
 }
 
-
+// Prepare and execute query
 $sql = "
     SELECT 
         p.*, 
@@ -37,35 +36,37 @@ if (!$post) {
     exit;
 }
 
-
+// Sanitize output
 $usuario  = htmlspecialchars($post['usuario']);
 $nombre   = htmlspecialchars($post['nombre']);
 $textoRaw = htmlspecialchars($post['texto']);
-$fecha    = date('g:i A · d M. Y', strtotime($post['fecha_publicacion']));
 
+// Date Formatting in Spanish
+$meses = ['Jan'=>'Ene', 'Feb'=>'Feb', 'Mar'=>'Mar', 'Apr'=>'Abr', 'May'=>'May', 'Jun'=>'Jun', 'Jul'=>'Jul', 'Aug'=>'Ago', 'Sep'=>'Sep', 'Oct'=>'Oct', 'Nov'=>'Nov', 'Dec'=>'Dic'];
+$fechaRaw = date('g:i A · d M. Y', strtotime($post['fecha_publicacion']));
+$fecha    = strtr($fechaRaw, $meses);
 
-
-
+// Profile Picture of Post Author
 $fotoPerfil = '';
 if (!empty($post['foto_perfil'])) {
     $base64Perfil = base64_encode($post['foto_perfil']);
     $fotoPerfil = 'data:image/jpeg;base64,' . $base64Perfil;
 }
 
-
+// Post Image
 $imgPost = '';
 if (!empty($post['imagen'])) {
     $base64Post = base64_encode($post['imagen']);
     $imgPost = 'data:image/jpeg;base64,' . $base64Post;
 }
 
-
+// Likes Logic
 $likes = $post['num_likes'];
 $isLiked = $post['liked_by_me'] > 0;
 $heartClass = $isLiked ? 'fas fa-heart' : 'far fa-heart';
 $heartColor = $isLiked ? 'color:#e0245e' : 'color:var(--muted)';
 
-
+// Process Mentions
 $textoProcesado = preg_replace(
     '/@(\w+)/',
     '<a href="#" class="user-link stop-prop" data-user="$1" style="color:var(--accent); text-decoration:none;">@$1</a>',
@@ -75,7 +76,7 @@ $textoProcesado = preg_replace(
 
 <div class="detalle-post-container" style="width:100%; border-right:1px solid var(--border); min-height:100vh;">
     <div style="padding:10px 15px; display:flex; align-items:center; gap:20px; position:sticky; top:0; background:var(--card); opacity:0.98; backdrop-filter:blur(10px); z-index:10; border-bottom:1px solid var(--border);">
-        <button onclick="window.location.href='index.php'" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">
+        <button onclick="if(window.history.length > 1){window.history.back();}else{window.location.href='index.php';}" style="background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer;">
             <i class="fas fa-arrow-left"></i>
         </button>
         <h2 style="font-size:1.2rem; margin:0; color:var(--text);">Publicación</h2>
@@ -134,9 +135,9 @@ $textoProcesado = preg_replace(
                 <i class="<?php echo $heartClass; ?> icon-heart"></i>
             </button>
 
-            <button onclick="window.compartirPost(<?php echo $pId; ?>)"
-                style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;"
-                title="Compartir">
+            <button onclick="window.compartirPost(<?php echo $pId; ?>)" 
+                    style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;" 
+                    title="Compartir">
                 <i class="fas fa-share"></i>
             </button>
 
@@ -152,13 +153,13 @@ $textoProcesado = preg_replace(
         <div style="margin-top:20px; display:flex; gap:10px;">
             <div style="width:40px; height:40px; border-radius:50%; background:var(--card2); overflow:hidden; display:flex; align-items:center; justify-content:center;">
                 <?php
-
-
-                $miFotoBase64 = $_SESSION['foto_perfil'] ?? '';
-
-                if ($miFotoBase64) {
-
-                    echo '<img src="data:image/jpeg;base64,' . $miFotoBase64 . '" style="width:100%; height:100%; object-fit:cover;">';
+                // --- CORRECCIÓN FOTO PERFIL USUARIO ACTUAL ---
+                // Leemos el binario de sesión y lo convertimos a Base64 para mostrar
+                $misDatosFoto = $_SESSION['foto_perfil'] ?? '';
+                
+                if (!empty($misDatosFoto)) {
+                    $miBase64 = base64_encode($misDatosFoto);
+                    echo '<img src="data:image/jpeg;base64,' . $miBase64 . '" style="width:100%; height:100%; object-fit:cover;">';
                 } else {
                     echo '<span style="font-size:1.2rem;">😊</span>';
                 }
@@ -183,7 +184,6 @@ $textoProcesado = preg_replace(
         loadCommentsForView(<?php echo $pId; ?>);
     }
 
-
     document.getElementById('formComentarioDetalle').addEventListener('submit', async function(e) {
         e.preventDefault();
         const input = document.getElementById('inputComentarioDetalle');
@@ -207,7 +207,6 @@ $textoProcesado = preg_replace(
 
             if (data.ok) {
                 input.value = '';
-
                 loadCommentsForView(this.dataset.id);
             }
         } catch (err) {
