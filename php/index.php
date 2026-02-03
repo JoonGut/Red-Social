@@ -32,7 +32,7 @@ require __DIR__ . '/db.php';
         </div>
         <div class="noti-container">
           <button id="btnNoti" class="btn-noti">
-            🔔
+            
             <span id="badgeNoti" class="badge-noti" style="display:none">0</span>
           </button>
 
