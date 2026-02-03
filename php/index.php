@@ -93,10 +93,11 @@ require __DIR__ . '/db.php';
         <div class="composer">
           <div class="avatar" style="overflow:hidden; background:var(--card2); display:flex; align-items:center; justify-content:center;">
             <?php if (!empty($_SESSION['foto_perfil'])): ?>
-      <img src="data:image/jpeg;base64,<?php echo $_SESSION['foto_perfil']; ?>" style="width:100%; height:100%; object-fit:cover;">
-    <?php else: ?>
-      <span>😊</span>
-    <?php endif; ?>
+  <img src="data:image/jpeg;base64,<?php echo base64_encode($_SESSION['foto_perfil']); ?>" 
+       style="width:100%; height:100%; object-fit:cover;">
+<?php else: ?>
+  <span>😊</span>
+<?php endif; ?>
           </div>
 
           <button class="composer-input" type="button" id="abrirModalQuick">
