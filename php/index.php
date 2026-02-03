@@ -48,7 +48,7 @@ require __DIR__ . '/db.php';
       <nav class="menu">
         <a href="index.php" class="menu-item activo" data-page="index">Inicio</a>
         <a href="#" class="menu-item" data-page="explorar">Explorar</a>
-        <a href="#" class="menu-item" data-page="chat">Mensajes</a>
+        <a href="#" class="menu-item" data-page="chat">chat</a>
         <a href="#" class="menu-item" data-page="perfil">Perfil</a>
 
         <?php if (isset($_SESSION['id_rol']) && (int)$_SESSION['id_rol'] === 2): ?>
