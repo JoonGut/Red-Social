@@ -37,35 +37,40 @@ if (!$usuario) {
 
 
 
-if ($usuario && password_verify($contraseña, $usuario['password'])) {
+if (password_verify($contraseña, $usuario['password'])) {
+    
     
     session_regenerate_id(true);
+
+    
     $_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
+    $_SESSION['usuario']    = $usuario['usuario'];
+    $_SESSION['nombre']     = $usuario['nombre'];   
+    $_SESSION['email']      = $usuario['email'];
+    $_SESSION['id_rol']     = (int)$usuario['id_rol']; 
+    $_SESSION['biografia']  = $usuario['biografia'];
+
+    
+    
+    if (!empty($usuario['foto_perfil'])) {
+        
+        
+        $_SESSION['foto_perfil'] = $usuario['foto_perfil']; 
+        
+        
+        
+        
+    } else {
+        $_SESSION['foto_perfil'] = '';
+    }
+    
     
     header('Location: ../php/index.php'); 
     exit;
+
 } else {
     
     header('Location: ../login.html?error=1');
     exit;
 }
-
-
-session_regenerate_id(true); 
-
-$_SESSION['id_usuario'] = (int)$usuario['id_usuario'];
-$_SESSION['usuario']    = $usuario['usuario'];
-$_SESSION['nombre']     = $usuario['nombre'];   
-$_SESSION['email']      = $usuario['email'];
-$_SESSION['id_rol']     = (int)$usuario['id_rol'];
-$_SESSION['biografia']  = $usuario['biografia'];
-
-
-if (!empty($usuario['foto_perfil'])) {
-    $_SESSION['foto_perfil'] = base64_encode($usuario['foto_perfil']);
-} else {
-    $_SESSION['foto_perfil'] = '';
-}
-
-header('Location: ../php/index.php'); 
-exit;
+?>

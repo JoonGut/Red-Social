@@ -1,5 +1,16 @@
 <?php
 session_start();
+
+// --- ZONA DE DIAGNÓSTICO (Descomenta esto si sigue saliendo Acceso Restringido) ---
+/*
+echo "<div style='background:white; padding:20px; z-index:9999; position:relative;'>";
+echo "<h3>DEBUG SESIÓN:</h3>";
+echo "ID ROL: " . (isset($_SESSION['id_rol']) ? $_SESSION['id_rol'] : 'No definido') . "<br>";
+echo "Datos completos: "; var_dump($_SESSION);
+echo "</div>";
+*/
+// ----------------------------------------------------------------------------------
+
 if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
     die("<h2 style='color:red; text-align:center; padding:50px;'>⛔ Acceso restringido</h2>");
 }
@@ -29,9 +40,12 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 <button onclick="window.cambiarTabAdmin('posts')" id="btnTabPosts" class="boton-registrarse" style="flex:1; background:var(--card2); color:var(--text); border:1px solid var(--border);">
                     📝 Posts
                 </button>
+                <button onclick="window.cambiarTabAdmin('sistema')" id="btnTabSistema" class="boton-registrarse" style="flex:1; background:var(--card2); color:var(--text); border:1px solid var(--border);">
+                    💻 Sistema
+                </button>
             </div>
 
-            <div style="margin-bottom:20px; display:flex; gap:10px;">
+            <div id="containerBuscadorAdmin" style="margin-bottom:20px; display:flex; gap:10px;">
                 <input type="search"
                     id="inputBuscadorAdmin"
                     placeholder="Buscar usuario o email..."
@@ -56,60 +70,133 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
             window.tabActual = 'usuarios';
             window.busquedaActual = '';
 
-
+            // --- 1. GESTIÓN DE TABS ---
             window.cambiarTabAdmin = function(tab) {
                 window.tabActual = tab;
                 window.busquedaActual = '';
-                document.getElementById('inputBuscadorAdmin').value = '';
+                const inputBusq = document.getElementById('inputBuscadorAdmin');
+                const divBusq = document.getElementById('containerBuscadorAdmin');
+                if (inputBusq) inputBusq.value = '';
 
+                // Reset estilos botones
+                const btns = ['btnTabUsuarios', 'btnTabPosts', 'btnTabSistema'];
+                btns.forEach(id => {
+                    const b = document.getElementById(id);
+                    b.style.background = 'var(--card2)';
+                    b.style.color = 'var(--text)';
+                    b.style.border = '1px solid var(--border)';
+                });
 
-                const btnU = document.getElementById('btnTabUsuarios');
-                const btnP = document.getElementById('btnTabPosts');
+                // Estilo Activo
+                let activeBtn;
+                if (tab === 'usuarios') activeBtn = document.getElementById('btnTabUsuarios');
+                else if (tab === 'posts') activeBtn = document.getElementById('btnTabPosts');
+                else if (tab === 'sistema') activeBtn = document.getElementById('btnTabSistema');
 
+                if (activeBtn) {
+                    activeBtn.style.background = 'var(--accent)';
+                    activeBtn.style.color = 'white';
+                    activeBtn.style.border = 'none';
+                }
+
+                // Lógica por Tab
                 if (tab === 'usuarios') {
-                    btnU.style.background = 'var(--accent)';
-                    btnU.style.color = 'white';
-                    btnU.style.border = 'none';
-                    btnP.style.background = 'var(--card2)';
-                    btnP.style.color = 'var(--text)';
-                    btnP.style.border = '1px solid var(--border)';
-                    document.getElementById('inputBuscadorAdmin').placeholder = "Buscar usuario o email...";
+                    divBusq.style.display = 'flex';
+                    inputBusq.placeholder = "Buscar usuario o email...";
                     window.cargarAdminUsuarios(1);
-                } else {
-                    btnP.style.background = 'var(--accent)';
-                    btnP.style.color = 'white';
-                    btnP.style.border = 'none';
-                    btnU.style.background = 'var(--card2)';
-                    btnU.style.color = 'var(--text)';
-                    btnU.style.border = '1px solid var(--border)';
-                    document.getElementById('inputBuscadorAdmin').placeholder = "Buscar contenido o autor...";
+                } else if (tab === 'posts') {
+                    divBusq.style.display = 'flex';
+                    inputBusq.placeholder = "Buscar contenido o autor...";
                     window.cargarAdminPosts(1);
+                } else if (tab === 'sistema') {
+                    divBusq.style.display = 'none'; // Ocultar buscador en sistema
+                    document.getElementById('admin-pagination').innerHTML = ''; // Sin paginación
+                    window.renderTabSistema();
                 }
             };
-
 
             window.realizarBusquedaAdmin = function() {
                 const texto = document.getElementById('inputBuscadorAdmin').value.trim();
                 window.busquedaActual = texto;
+                if (window.tabActual === 'usuarios') window.cargarAdminUsuarios(1);
+                else if (window.tabActual === 'posts') window.cargarAdminPosts(1);
+            };
 
-                if (window.tabActual === 'usuarios') {
-                    window.cargarAdminUsuarios(1);
-                } else {
-                    window.cargarAdminPosts(1);
+            // --- 2. RENDERIZADO DE TAB SISTEMA (GIT PULL) ---
+            window.renderTabSistema = function() {
+                const div = document.getElementById('admin-view-content');
+                div.innerHTML = `
+                    <div style="text-align:center; padding:40px;">
+                        <h2 style="margin-bottom:20px; color:var(--text);">⚙️ Mantenimiento del Servidor</h2>
+                        <p style="color:var(--muted); margin-bottom:30px;">
+                            Utiliza estas herramientas con precaución. Las acciones afectan al servidor en tiempo real.
+                        </p>
+                        
+                        <div style="display:inline-block; border:1px solid var(--border); padding:30px; border-radius:15px; background:var(--card2);">
+                            <div style="font-size:3rem; margin-bottom:15px;">🚀</div>
+                            <h3 style="margin-bottom:10px;">Actualizar Código (Git Pull)</h3>
+                            <p style="font-size:0.9rem; color:var(--muted); margin-bottom:20px;">
+                                Descarga los últimos cambios del repositorio 'main'.
+                            </p>
+                            <button id="btnGitAction" onclick="window.ejecutarGitPull()" class="boton-registrarse" 
+                                    style="background:#2ed573; color:white; width:100%; border:none;">
+                                Ejecutar Git Pull
+                            </button>
+                        </div>
+
+                        <div id="git-output-console" style="display:none; margin-top:30px; text-align:left;">
+                            <label style="font-weight:bold; color:var(--text);">Salida de la terminal:</label>
+                            <pre id="git-output-text" style="background:#1e272e; color:#00d2d3; padding:15px; border-radius:8px; overflow-x:auto; margin-top:10px; font-family:monospace;"></pre>
+                        </div>
+                    </div>
+                `;
+            };
+
+            window.ejecutarGitPull = async function() {
+                if (!confirm("⚠️ ¿Estás seguro de ejecutar GIT PULL en producción?")) return;
+
+                const btn = document.getElementById('btnGitAction');
+                const consoleDiv = document.getElementById('git-output-console');
+                const consoleText = document.getElementById('git-output-text');
+                
+                const txtOriginal = btn.innerHTML;
+                btn.innerHTML = '⏳ Ejecutando...';
+                btn.disabled = true;
+                consoleDiv.style.display = 'none';
+
+                try {
+                    // LLAMADA AL ARCHIVO PHP (Asegúrate de crearlo)
+                    const res = await fetch('git_pull.php');
+                    const data = await res.json();
+
+                    consoleDiv.style.display = 'block';
+                    if (data.ok) {
+                        consoleText.style.color = '#2ed573'; // Verde
+                        consoleText.textContent = "✅ ÉXITO:\n" + data.output;
+                    } else {
+                        consoleText.style.color = '#ff4757'; // Rojo
+                        consoleText.textContent = "❌ ERROR:\n" + (data.msg || data.output || 'Error desconocido');
+                    }
+
+                } catch (err) {
+                    consoleDiv.style.display = 'block';
+                    consoleText.style.color = '#ff4757';
+                    consoleText.textContent = "❌ ERROR DE CONEXIÓN: " + err.message;
+                } finally {
+                    btn.innerHTML = txtOriginal;
+                    btn.disabled = false;
                 }
             };
 
-
+            // --- 3. CARGA DE USUARIOS ---
             window.cargarAdminUsuarios = async function(pagina = 1) {
                 window.paginaUsuariosActual = pagina;
                 const div = document.getElementById('admin-view-content');
                 const pagDiv = document.getElementById('admin-pagination');
-
                 div.innerHTML = '<div style="text-align:center; padding:20px;">Cargando usuarios...</div>';
                 pagDiv.innerHTML = '';
 
                 try {
-
                     const searchParam = window.busquedaActual ? `&busqueda=${encodeURIComponent(window.busquedaActual)}` : '';
                     const res = await fetch(`api_admin.php?accion=listar_usuarios&pagina=${pagina}${searchParam}`);
                     const data = await res.json();
@@ -136,7 +223,8 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                         const badge = esAdmin ?
                             '<span style="color:#ff4757; font-weight:bold;">ADMIN</span>' :
                             '<span style="color:var(--muted);">Usuario</span>';
-
+                        
+                        // Botón borrar (solo si no es admin)
                         const btnBorrar = esAdmin ? '' : `
                             <button onclick="event.stopPropagation(); window.borrarUsuario(${u.id_usuario})" 
                                     style="background:transparent; border:1px solid #ff4757; color:#ff4757; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.8rem;">
@@ -159,7 +247,6 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                     });
                     html += '</tbody></table>';
                     div.innerHTML = html;
-
                     renderPagination(data.paginaActual, data.totalPaginas, 'usuarios');
 
                 } catch (e) {
@@ -168,12 +255,11 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 }
             };
 
-
+            // --- 4. CARGA DE POSTS ---
             window.cargarAdminPosts = async function(pagina = 1) {
                 window.paginaPostsActual = pagina;
                 const div = document.getElementById('admin-view-content');
                 const pagDiv = document.getElementById('admin-pagination');
-
                 div.innerHTML = '<div style="text-align:center; padding:20px;">Cargando posts...</div>';
                 pagDiv.innerHTML = '';
 
@@ -189,9 +275,7 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
 
                     let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
                     data.items.forEach(p => {
-
                         let textoPost = p.texto;
-
                         html += `
                         <div onclick="window.cargarVistaPublicacion(${p.id_publicacion})"
                              style="display:flex; justify-content:space-between; align-items:flex-start; padding:15px; background:var(--card2); border-radius:8px; cursor:pointer; transition:transform 0.1s;"
@@ -210,7 +294,6 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                     });
                     html += '</div>';
                     div.innerHTML = html;
-
                     renderPagination(data.paginaActual, data.totalPaginas, 'posts');
 
                 } catch (e) {
@@ -218,16 +301,14 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 }
             };
 
-
+            // --- 5. FUNCIONES AUXILIARES ---
             function renderPagination(actual, total, tipo) {
                 if (total <= 1) return;
-
                 const pagDiv = document.getElementById('admin-pagination');
                 const fn = tipo === 'usuarios' ? 'window.cargarAdminUsuarios' : 'window.cargarAdminPosts';
-
                 let html = '';
                 if (actual > 1) {
-                    html += `<button onclick="${fn}(${actual - 1})" class="boton-registrarse" style="padding:50px 150px; font-size:0.9rem;">« Anterior</button>`;
+                    html += `<button onclick="${fn}(${actual - 1})" class="boton-registrarse" style="padding:5px 15px; font-size:0.9rem;">« Anterior</button>`;
                 } else {
                     html += `<button disabled class="boton-registrarse" style="padding:5px 15px; font-size:0.9rem; opacity:0.5; cursor:not-allowed;">« Anterior</button>`;
                 }
@@ -240,15 +321,11 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 pagDiv.innerHTML = html;
             }
 
-
             window.borrarUsuario = async function(id) {
                 if (!confirm('¿Eliminar usuario y TODOS sus datos?')) return;
                 const fd = new URLSearchParams();
                 fd.append('id', id);
-                await fetch('api_admin.php?accion=borrar_usuario', {
-                    method: 'POST',
-                    body: fd
-                });
+                await fetch('api_admin.php?accion=borrar_usuario', { method: 'POST', body: fd });
                 window.cargarAdminUsuarios(window.paginaUsuariosActual);
             };
 
@@ -256,14 +333,11 @@ if (!isset($_SESSION['id_rol']) || (int)$_SESSION['id_rol'] !== 2) {
                 if (!confirm('¿Eliminar post?')) return;
                 const fd = new URLSearchParams();
                 fd.append('id', id);
-                await fetch('api_admin.php?accion=borrar_post', {
-                    method: 'POST',
-                    body: fd
-                });
+                await fetch('api_admin.php?accion=borrar_post', { method: 'POST', body: fd });
                 window.cargarAdminPosts(window.paginaPostsActual);
             };
 
-
+            // Inicializar en Usuarios
             window.cargarAdminUsuarios(1);
         </script>
     </main>

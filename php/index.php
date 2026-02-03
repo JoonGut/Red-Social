@@ -765,7 +765,47 @@ require __DIR__ . '/db.php';
       const modal = document.getElementById('modalListaUsuarios');
       if (e.target === modal) cerrarModalUsuarios();
     });
+window.ejecutarGitPull = async function() {
+    if (!confirm("⚠️ ¿Estás seguro de ejecutar GIT PULL en el servidor?")) return;
 
+    const btn = document.getElementById('btnGitAction');
+    const consoleDiv = document.getElementById('git-output-console');
+    const consoleText = document.getElementById('git-output-text');
+    
+    // Estado de carga
+    const txtOriginal = btn.innerText;
+    btn.innerText = '⏳ Ejecutando...';
+    btn.disabled = true;
+    consoleDiv.style.display = 'none';
+    consoleText.innerText = '';
+
+    try {
+        const res = await fetch('git_pull.php');
+        
+        // Verificamos que sea un JSON válido
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        
+        const data = await res.json();
+
+        consoleDiv.style.display = 'block';
+        
+        if (data.ok) {
+            consoleText.style.color = '#2ed573'; // Verde Matrix
+            consoleText.innerText = "✅ REPORTE GIT:\n\n" + data.output;
+        } else {
+            consoleText.style.color = '#ff4757'; // Rojo error
+            consoleText.innerText = "❌ ERROR:\n" + data.msg + "\n\n" + (data.output || '');
+        }
+
+    } catch (err) {
+        consoleDiv.style.display = 'block';
+        consoleText.style.color = '#ff4757';
+        consoleText.innerText = "❌ ERROR DE CONEXIÓN O JSON:\n" + err.message;
+    } finally {
+        btn.innerText = txtOriginal;
+        btn.disabled = false;
+    }
+};
     // --- 7. HISTORIAL NAVEGADOR ---
     window.addEventListener('popstate', (e) => {
       const s = e.state;
