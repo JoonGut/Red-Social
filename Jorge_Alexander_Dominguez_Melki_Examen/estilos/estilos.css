@@ -1,0 +1,9 @@
+img {
+    height: 10em;
+}
+
+#tablero-juego {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+

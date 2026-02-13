@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <title>Ampliación del reto - Jorge Alexander Dominguez Melki</title>
+        <link rel="stylesheet" href="estilos/estilos.css">
+    </head>
+    <body>
+
+        <h1>Ampliación del reto - Quién es quién</h1>
+    <!-- En esta sección se muestra el personaje secreto que el jugador debe adivinar -->
+    <section id="zona-adivinar">
+        <h2>Personaje a adivinar:</h2>
+
+        <!--Aqui se cargará la imagen del personaje secreto-->
+        <div id="personaje-secreto">
+            </div>
+    </section>
+    
+    <!-- Aqui creamos el tablero del juego, que se llenará con las cartas de los personajes -->
+    <main id="tablero-juego" class="grid-container">
+        </main>
+
+    <br>
+    <button id="btn-reset">Resetear Juego</button>
+    <!-- Y por último el footer donde se cargará la información de GitHub -->
+    <footer id="github-info">
+        </footer>
+
+    <script src="js/conseguirImagenes.js"></script>
+    <script src="js/generarImagenes.js"></script>
+    <script src="js/generarAdivinar.js"></script>
+    <script src="js/resetearJuego.js"></script>
+    <script src="js/apiGithub.js"></script>
+
+    </body>
+</html>
