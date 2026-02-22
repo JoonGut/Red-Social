@@ -1,10 +1,10 @@
 <?php
 // Evita cualquier espacio en blanco antes de la etiqueta <?php
-$host = '18.208.57.228'; // Cambia a 127.0.0.1 si estás en local
-$db   = 'bd_social';
-$user = 'usuario';
-$pass = 'usuario';
-$port = 3306;
+$host = 'YOUR_IP'; // Cambia a 127.0.0.1 si estás en local
+$db   = 'YOUR BD_NAME';
+$user = 'YOUR_USER';
+$pass = 'YOUR_PASSWROD';
+$port = 'YOUR BD_PORT';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 try {
